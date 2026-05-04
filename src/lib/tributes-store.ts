@@ -60,6 +60,8 @@ type GalleryItemRow = {
 export type TributeBuilderInput = {
   slug: string;
   name: string;
+  honorificTitle?: string;
+  positionTitle?: string;
   years: string;
   tagline: string;
   organizer: string;
@@ -174,6 +176,8 @@ function extractUrlsFromText(value: string | null) {
 }
 
 type SupportNoteMetadata = {
+  honorificTitle?: string;
+  positionTitle?: string;
   showGallerySection?: boolean;
   showVideoSection?: boolean;
   showLivestreamSection?: boolean;
@@ -227,6 +231,14 @@ function parseSupportNoteMetadata(value: string | null) {
   try {
     const parsed = JSON.parse(payload) as SupportNoteMetadata;
     return {
+      honorificTitle:
+        typeof parsed.honorificTitle === "string"
+          ? parsed.honorificTitle.trim() || undefined
+          : undefined,
+      positionTitle:
+        typeof parsed.positionTitle === "string"
+          ? parsed.positionTitle.trim() || undefined
+          : undefined,
       showGallerySection: parsed.showGallerySection,
       showVideoSection: parsed.showVideoSection,
       showLivestreamSection: parsed.showLivestreamSection,
@@ -327,6 +339,8 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
   return {
     slug: tributeRow.slug,
     name: tributeRow.name,
+    honorificTitle: supportNoteMetadata?.honorificTitle ?? fallback?.honorificTitle,
+    positionTitle: supportNoteMetadata?.positionTitle ?? fallback?.positionTitle,
     years: tributeRow.years,
     tagline: tributeRow.tagline,
     organizer: tributeRow.organizer,
@@ -434,6 +448,8 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
   }
 
   const supportNoteMetadata: SupportNoteMetadata = {
+    honorificTitle: input.honorificTitle?.trim() || undefined,
+    positionTitle: input.positionTitle?.trim() || undefined,
     showGallerySection: input.showGallerySection ?? true,
     showVideoSection: input.showVideoSection ?? true,
     showLivestreamSection: input.showLivestreamSection ?? true,

@@ -43,6 +43,8 @@ export type TributeThemePreset = {
 export type TributeRecord = {
   slug: string;
   name: string;
+  honorificTitle?: string;
+  positionTitle?: string;
   years: string;
   tagline: string;
   organizer: string;

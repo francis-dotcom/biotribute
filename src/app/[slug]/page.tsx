@@ -96,7 +96,13 @@ export default async function TributePage({ params }: PageProps) {
             <i />
             <span />
           </div>
+          {tribute.honorificTitle?.trim() ? (
+            <p className="hero-honorific">{tribute.honorificTitle}</p>
+          ) : null}
           <h1>{tribute.name}</h1>
+          {tribute.positionTitle?.trim() ? (
+            <p className="hero-position">{tribute.positionTitle}</p>
+          ) : null}
           <p className="hero-dates">{tribute.years}</p>
           <p className="hero-tagline">{tribute.tagline}</p>
           <div className="hero-theme-indicator" aria-label="Selected theme colors">

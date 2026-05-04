@@ -23,6 +23,8 @@ const supportAmountSchema = z.object({
 const tributeSchema = z.object({
   slug: z.string().trim().min(1),
   name: z.string().trim().min(1),
+  honorificTitle: z.string().trim().optional(),
+  positionTitle: z.string().trim().optional(),
   years: z.string().trim().min(1),
   tagline: z.string().trim().min(1),
   organizer: z.string().trim().min(1),

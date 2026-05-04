@@ -49,6 +49,8 @@ export function TributeBuilderForm({
     const payload = {
       slug: tribute.slug,
       name: String(formData.get("name") ?? ""),
+      honorificTitle: String(formData.get("honorificTitle") ?? ""),
+      positionTitle: String(formData.get("positionTitle") ?? ""),
       years: String(formData.get("years") ?? ""),
       tagline: String(formData.get("tagline") ?? ""),
       organizer: String(formData.get("organizer") ?? ""),
@@ -129,10 +131,28 @@ export function TributeBuilderForm({
       <div className="builder-grid">
         <article className="form-card">
           <p className="card-label">Core Identity</p>
-          <h3>Name, years, and tribute line</h3>
+          <h3>Name, title, position, and tribute line</h3>
           <label className="field-block">
             <span>Name</span>
             <input name="name" type="text" defaultValue={tribute.name} />
+          </label>
+          <label className="field-block">
+            <span>Title</span>
+            <input
+              name="honorificTitle"
+              type="text"
+              defaultValue={tribute.honorificTitle ?? ""}
+              placeholder="Chief, Dr., Pastor, Sir..."
+            />
+          </label>
+          <label className="field-block">
+            <span>Position</span>
+            <input
+              name="positionTitle"
+              type="text"
+              defaultValue={tribute.positionTitle ?? ""}
+              placeholder="Chairman, Elder, Community Leader..."
+            />
           </label>
           <label className="field-block">
             <span>Years</span>
