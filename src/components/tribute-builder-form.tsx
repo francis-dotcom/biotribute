@@ -192,7 +192,7 @@ export function TributeBuilderForm({
             </div>
           </div>
           <div className="builder-actions">
-            <button className="button-primary" type="submit" disabled={pending}>
+            <button className="button-primary button-save-draft" type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save Draft"}
             </button>
             <a
