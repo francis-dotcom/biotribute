@@ -148,7 +148,9 @@ export function TributeBuilderForm({
     setPending(true);
     setStatus(null);
 
-    const livestreamValue = livestreamUrl.trim();
+    const rawLivestreamValue = livestreamUrl.trim();
+    const livestreamValue =
+      livestreamDisplayMode === "video" ? rawLivestreamValue : "";
     const livestreamThumbnailUrl =
       livestreamThumbnailMode === "upload"
         ? uploadedLivestreamThumbnailUrl.trim()
