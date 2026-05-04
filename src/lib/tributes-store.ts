@@ -81,6 +81,10 @@ export type TributeBuilderInput = {
   contributors: TributeContributor[];
   supportAmounts: TributeSupportAmount[];
   contactEmail?: string;
+  donationAccountName?: string;
+  donationAccountNumber?: string;
+  donationBankName?: string;
+  donationPhone?: string;
 };
 
 export function isTributeStoreConfigured() {
@@ -179,6 +183,10 @@ type SupportNoteMetadata = {
   livestreamUrl?: string;
   livestreamNote?: string;
   contactEmail?: string;
+  donationAccountName?: string;
+  donationAccountNumber?: string;
+  donationBankName?: string;
+  donationPhone?: string;
 };
 
 const VISIBILITY_MARKER = "<!--biotribute:visibility:";
@@ -234,6 +242,22 @@ function parseSupportNoteMetadata(value: string | null) {
         typeof parsed.livestreamNote === "string" ? parsed.livestreamNote : undefined,
       contactEmail:
         typeof parsed.contactEmail === "string" ? parsed.contactEmail.trim() || undefined : undefined,
+      donationAccountName:
+        typeof parsed.donationAccountName === "string"
+          ? parsed.donationAccountName.trim() || undefined
+          : undefined,
+      donationAccountNumber:
+        typeof parsed.donationAccountNumber === "string"
+          ? parsed.donationAccountNumber.trim() || undefined
+          : undefined,
+      donationBankName:
+        typeof parsed.donationBankName === "string"
+          ? parsed.donationBankName.trim() || undefined
+          : undefined,
+      donationPhone:
+        typeof parsed.donationPhone === "string"
+          ? parsed.donationPhone.trim() || undefined
+          : undefined,
     };
   } catch {
     return null;
@@ -369,6 +393,14 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
       supportNoteMetadata?.contactEmail ??
       supportNoteEmailMatch?.[0] ??
       fallback?.contactEmail,
+    donationAccountName:
+      supportNoteMetadata?.donationAccountName ?? fallback?.donationAccountName,
+    donationAccountNumber:
+      supportNoteMetadata?.donationAccountNumber ?? fallback?.donationAccountNumber,
+    donationBankName:
+      supportNoteMetadata?.donationBankName ?? fallback?.donationBankName,
+    donationPhone:
+      supportNoteMetadata?.donationPhone ?? fallback?.donationPhone,
     supportNote:
       tributeRow.support_note === null
         ? fallback?.supportNote
@@ -411,6 +443,10 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     livestreamUrl: input.livestreamUrl?.trim() || undefined,
     livestreamNote: input.livestreamNote?.trim() || undefined,
     contactEmail: input.contactEmail?.trim().toLowerCase() || undefined,
+    donationAccountName: input.donationAccountName?.trim() || undefined,
+    donationAccountNumber: input.donationAccountNumber?.trim() || undefined,
+    donationBankName: input.donationBankName?.trim() || undefined,
+    donationPhone: input.donationPhone?.trim() || undefined,
   };
 
   const supportNoteWithVisibility = withVisibilityInSupportNote(input.supportNote, supportNoteMetadata);

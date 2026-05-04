@@ -59,6 +59,10 @@ export function TributeBuilderForm({
       lifeStory: String(formData.get("lifeStory") ?? ""),
       supportNote: String(formData.get("supportNote") ?? ""),
       contactEmail: String(formData.get("contactEmail") ?? ""),
+      donationAccountName: String(formData.get("donationAccountName") ?? ""),
+      donationAccountNumber: String(formData.get("donationAccountNumber") ?? ""),
+      donationBankName: String(formData.get("donationBankName") ?? ""),
+      donationPhone: String(formData.get("donationPhone") ?? ""),
       videoUrls: videoUrls.map((value) => value.trim()).filter(Boolean),
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
       videoNote: videoNote.trim(),
@@ -557,6 +561,42 @@ export function TributeBuilderForm({
             type="email"
             defaultValue={tribute.contactEmail ?? ""}
             placeholder="family@example.com"
+          />
+        </label>
+        <label className="field-block">
+          <span>Donation account name</span>
+          <input
+            name="donationAccountName"
+            type="text"
+            defaultValue={tribute.donationAccountName ?? ""}
+            placeholder="Account holder name"
+          />
+        </label>
+        <label className="field-block">
+          <span>Donation account number</span>
+          <input
+            name="donationAccountNumber"
+            type="text"
+            defaultValue={tribute.donationAccountNumber ?? ""}
+            placeholder="Account number"
+          />
+        </label>
+        <label className="field-block">
+          <span>Donation bank</span>
+          <input
+            name="donationBankName"
+            type="text"
+            defaultValue={tribute.donationBankName ?? ""}
+            placeholder="Bank name"
+          />
+        </label>
+        <label className="field-block">
+          <span>Donation phone / text line</span>
+          <input
+            name="donationPhone"
+            type="text"
+            defaultValue={tribute.donationPhone ?? ""}
+            placeholder="+1 555 000 0000"
           />
         </label>
       </article>

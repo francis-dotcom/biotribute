@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
+import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
@@ -82,7 +83,7 @@ export default async function TributePage({ params }: PageProps) {
               aria-hidden="true"
             />
             <a className="hero-donation-badge" href="#support-section">
-              Donation
+              Donate
             </a>
           </div>
           <div className="hero-divider" aria-hidden="true">
@@ -206,9 +207,12 @@ export default async function TributePage({ params }: PageProps) {
                 <button className="support-action-pill" type="button">
                   Card
                 </button>
-                <button className="support-action-pill support-action-pill-accent" type="button">
-                  Donations
-                </button>
+                <DonationDetailsModal
+                  accountName={tribute.donationAccountName}
+                  accountNumber={tribute.donationAccountNumber}
+                  bankName={tribute.donationBankName}
+                  phone={tribute.donationPhone}
+                />
                 <FamilyMessageModal
                   recipientEmail={familyEmail}
                   tributeName={tribute.name}

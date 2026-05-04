@@ -65,6 +65,10 @@ export type TributeRecord = {
   messages: TributeMessage[];
   supportAmounts: TributeSupportAmount[];
   contactEmail?: string;
+  donationAccountName?: string;
+  donationAccountNumber?: string;
+  donationBankName?: string;
+  donationPhone?: string;
   supportNote?: string;
 };
 
@@ -172,6 +176,10 @@ export const tributes: TributeRecord[] = [
       { label: "Custom Tribute" }
     ],
     contactEmail: "",
+    donationAccountName: "",
+    donationAccountNumber: "",
+    donationBankName: "",
+    donationPhone: "",
     supportNote:
       "Choose a paid tribute card tier and include a personal sympathy message for the family."
   }
