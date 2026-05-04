@@ -41,6 +41,8 @@ const tributeSchema = z.object({
   donationPhone: z.string().trim().optional(),
   videoUrls: z.array(z.string().trim().min(1)).optional(),
   videoDescriptions: z.array(z.string().trim()).optional(),
+  videoThumbnailUrls: z.array(z.string().trim()).optional(),
+  activeVideoIndex: z.number().int().min(0).max(2).optional(),
   videoNote: z.string().trim().optional(),
   livestreamUrl: z.string().trim().optional(),
   livestreamThumbnailUrl: z.string().trim().optional(),

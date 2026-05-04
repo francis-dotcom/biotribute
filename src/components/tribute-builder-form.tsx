@@ -60,7 +60,15 @@ export function TributeBuilderForm({
     tribute.videoDescriptions[1] ?? "",
     tribute.videoDescriptions[2] ?? "",
   ]);
+  const [videoThumbnailUrls, setVideoThumbnailUrls] = useState([
+    tribute.videoThumbnailUrls[0] ?? "",
+    tribute.videoThumbnailUrls[1] ?? "",
+    tribute.videoThumbnailUrls[2] ?? "",
+  ]);
+  const [activeVideoIndex, setActiveVideoIndex] = useState(tribute.activeVideoIndex ?? 0);
   const [videoNote, setVideoNote] = useState(tribute.videoNote ?? "");
+  const [uploadingVideoThumbIndex, setUploadingVideoThumbIndex] = useState<number | null>(null);
+  const videoThumbInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [livestreamUrl, setLivestreamUrl] = useState(tribute.livestreamUrl ?? "");
   const [livestreamDisplayMode, setLivestreamDisplayMode] = useState<
     "video" | "image-url" | "uploaded-image"
@@ -177,6 +185,8 @@ export function TributeBuilderForm({
       donationPhone: String(formData.get("donationPhone") ?? ""),
       videoUrls: videoUrls.map((value) => value.trim()).filter(Boolean),
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
+      videoThumbnailUrls: videoThumbnailUrls.map((value) => value.trim()),
+      activeVideoIndex,
       videoNote: videoNote.trim(),
       livestreamUrl: livestreamValue,
       livestreamThumbnailUrl:
@@ -269,6 +279,46 @@ export function TributeBuilderForm({
 
     setStatus(data.message ?? "Thumbnail uploaded. Click Save Draft to apply it.");
     setUploadingLivestreamThumb(false);
+  }
+
+  async function uploadVideoThumbnail(index: number, files: FileList | null) {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setUploadingVideoThumbIndex(index);
+    setStatus(null);
+
+    const formData = new FormData();
+    formData.append("kind", "video-thumb");
+    formData.append("files", files[0]);
+
+    const response = await fetch(`/api/tributes/${tribute.slug}/images`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+      uploads?: { imageUrl: string }[];
+    };
+
+    if (!response.ok) {
+      setStatus(data.error ?? "Unable to upload video placeholder image.");
+      setUploadingVideoThumbIndex(null);
+      return;
+    }
+
+    const uploadedUrl = data.uploads?.[0]?.imageUrl ?? "";
+    if (uploadedUrl) {
+      setVideoThumbnailUrls((current) =>
+        current.map((value, currentIndex) => (currentIndex === index ? uploadedUrl : value))
+      );
+    }
+
+    setStatus(data.message ?? "Video placeholder uploaded. Click Save Draft to apply it.");
+    setUploadingVideoThumbIndex(null);
   }
 
   return (
@@ -602,6 +652,46 @@ export function TributeBuilderForm({
             placeholder="Short description for video 1"
           />
         </label>
+        <div className="field-block">
+          <span>Upload Video 1 placeholder image</span>
+          <input
+            ref={(node) => {
+              videoThumbInputRefs.current[0] = node;
+            }}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/avif"
+            onChange={(event) => {
+              void uploadVideoThumbnail(0, event.currentTarget.files);
+            }}
+          />
+          <p className="subtle-note">
+            {uploadingVideoThumbIndex === 0
+              ? "Uploading video placeholder..."
+              : videoThumbnailUrls[0]?.trim()
+                ? "Video 1 placeholder saved. Save Draft to apply it."
+                : "Upload an image to use as the Video 1 placeholder."}
+          </p>
+        </div>
+        {videoUrls[0].trim() ? (
+          <label className="field-block builder-checkbox">
+            <input
+              type="checkbox"
+              checked={activeVideoIndex === 0}
+              onChange={() => setActiveVideoIndex(0)}
+            />
+            <span>Display Video 1 on the public page</span>
+          </label>
+        ) : null}
+        {videoThumbnailUrls[0]?.trim() ? (
+          <div className="field-block">
+            <span>Saved Video 1 placeholder</span>
+            <img
+              src={videoThumbnailUrls[0].trim()}
+              alt="Video 1 placeholder preview"
+              className="builder-livestream-preview"
+            />
+          </div>
+        ) : null}
         <div className="builder-inline-actions">
           <button
             className="button-secondary dashboard-danger-button"
@@ -609,6 +699,13 @@ export function TributeBuilderForm({
             onClick={() => {
               setVideoUrls((current) => ["", current[1], current[2]]);
               setVideoDescriptions((current) => ["", current[1], current[2]]);
+              setVideoThumbnailUrls((current) => ["", current[1], current[2]]);
+              if (activeVideoIndex === 0) {
+                setActiveVideoIndex(1);
+              }
+              if (videoThumbInputRefs.current[0]) {
+                videoThumbInputRefs.current[0].value = "";
+              }
             }}
           >
             Delete Video 1
@@ -638,6 +735,46 @@ export function TributeBuilderForm({
             placeholder="Short description for video 2"
           />
         </label>
+        <div className="field-block">
+          <span>Upload Video 2 placeholder image</span>
+          <input
+            ref={(node) => {
+              videoThumbInputRefs.current[1] = node;
+            }}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/avif"
+            onChange={(event) => {
+              void uploadVideoThumbnail(1, event.currentTarget.files);
+            }}
+          />
+          <p className="subtle-note">
+            {uploadingVideoThumbIndex === 1
+              ? "Uploading video placeholder..."
+              : videoThumbnailUrls[1]?.trim()
+                ? "Video 2 placeholder saved. Save Draft to apply it."
+                : "Upload an image to use as the Video 2 placeholder."}
+          </p>
+        </div>
+        {videoUrls[1].trim() ? (
+          <label className="field-block builder-checkbox">
+            <input
+              type="checkbox"
+              checked={activeVideoIndex === 1}
+              onChange={() => setActiveVideoIndex(1)}
+            />
+            <span>Display Video 2 on the public page</span>
+          </label>
+        ) : null}
+        {videoThumbnailUrls[1]?.trim() ? (
+          <div className="field-block">
+            <span>Saved Video 2 placeholder</span>
+            <img
+              src={videoThumbnailUrls[1].trim()}
+              alt="Video 2 placeholder preview"
+              className="builder-livestream-preview"
+            />
+          </div>
+        ) : null}
         <div className="builder-inline-actions">
           <button
             className="button-secondary dashboard-danger-button"
@@ -645,6 +782,13 @@ export function TributeBuilderForm({
             onClick={() => {
               setVideoUrls((current) => [current[0], "", current[2]]);
               setVideoDescriptions((current) => [current[0], "", current[2]]);
+              setVideoThumbnailUrls((current) => [current[0], "", current[2]]);
+              if (activeVideoIndex === 1) {
+                setActiveVideoIndex(0);
+              }
+              if (videoThumbInputRefs.current[1]) {
+                videoThumbInputRefs.current[1].value = "";
+              }
             }}
           >
             Delete Video 2
@@ -674,6 +818,46 @@ export function TributeBuilderForm({
             placeholder="Short description for video 3"
           />
         </label>
+        <div className="field-block">
+          <span>Upload Video 3 placeholder image</span>
+          <input
+            ref={(node) => {
+              videoThumbInputRefs.current[2] = node;
+            }}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/avif"
+            onChange={(event) => {
+              void uploadVideoThumbnail(2, event.currentTarget.files);
+            }}
+          />
+          <p className="subtle-note">
+            {uploadingVideoThumbIndex === 2
+              ? "Uploading video placeholder..."
+              : videoThumbnailUrls[2]?.trim()
+                ? "Video 3 placeholder saved. Save Draft to apply it."
+                : "Upload an image to use as the Video 3 placeholder."}
+          </p>
+        </div>
+        {videoUrls[2].trim() ? (
+          <label className="field-block builder-checkbox">
+            <input
+              type="checkbox"
+              checked={activeVideoIndex === 2}
+              onChange={() => setActiveVideoIndex(2)}
+            />
+            <span>Display Video 3 on the public page</span>
+          </label>
+        ) : null}
+        {videoThumbnailUrls[2]?.trim() ? (
+          <div className="field-block">
+            <span>Saved Video 3 placeholder</span>
+            <img
+              src={videoThumbnailUrls[2].trim()}
+              alt="Video 3 placeholder preview"
+              className="builder-livestream-preview"
+            />
+          </div>
+        ) : null}
         <div className="builder-inline-actions">
           <button
             className="button-secondary dashboard-danger-button"
@@ -681,6 +865,13 @@ export function TributeBuilderForm({
             onClick={() => {
               setVideoUrls((current) => [current[0], current[1], ""]);
               setVideoDescriptions((current) => [current[0], current[1], ""]);
+              setVideoThumbnailUrls((current) => [current[0], current[1], ""]);
+              if (activeVideoIndex === 2) {
+                setActiveVideoIndex(0);
+              }
+              if (videoThumbInputRefs.current[2]) {
+                videoThumbInputRefs.current[2].value = "";
+              }
             }}
           >
             Delete Video 3

@@ -6,6 +6,8 @@ import type { TributeRecord } from "@/data/tributes";
 type TributeMediaSectionProps = {
   videoUrls: TributeRecord["videoUrls"];
   videoDescriptions: TributeRecord["videoDescriptions"];
+  videoThumbnailUrls: TributeRecord["videoThumbnailUrls"];
+  activeVideoIndex?: TributeRecord["activeVideoIndex"];
   videoNote?: string;
   livestreamUrl?: string;
   livestreamThumbnailUrl?: string;
@@ -164,6 +166,8 @@ function renderMedia(embed: MediaEmbed, title: string) {
 export function TributeMediaSection({
   videoUrls,
   videoDescriptions,
+  videoThumbnailUrls,
+  activeVideoIndex,
   videoNote,
   livestreamUrl,
   livestreamThumbnailUrl,
@@ -173,6 +177,12 @@ export function TributeMediaSection({
   showLivestreamSection,
 }: TributeMediaSectionProps) {
   const [activeEmbed, setActiveEmbed] = useState<MediaEmbed | null>(null);
+  const livestreamNoteText = livestreamNote?.trim();
+  const highlightFinalJourneyNote = Boolean(
+    livestreamNoteText &&
+      /final journey/i.test(livestreamNoteText) &&
+      /streamed live/i.test(livestreamNoteText),
+  );
 
   const mediaEmbeds = useMemo(
     () =>
@@ -182,12 +192,19 @@ export function TributeMediaSection({
           if (!embed) return null;
           return {
             ...embed,
+            thumbnail: videoThumbnailUrls[index]?.trim() || embed.thumbnail,
             description: videoDescriptions[index]?.trim() || undefined,
+            label: videoDescriptions[index]?.trim() || embed.label,
           } as MediaEmbed;
         })
         .filter(Boolean) as MediaEmbed[],
-    [videoUrls, videoDescriptions]
+    [videoUrls, videoDescriptions, videoThumbnailUrls]
   );
+
+  const activeVideoEmbed =
+    typeof activeVideoIndex === "number" && mediaEmbeds[activeVideoIndex]
+      ? mediaEmbeds[activeVideoIndex]
+      : mediaEmbeds[0] ?? null;
 
   const streamEmbed = useMemo(() => toEmbedUrl(livestreamUrl ?? "", 0), [livestreamUrl]);
   const activeLivestreamDisplayMode =
@@ -204,32 +221,26 @@ export function TributeMediaSection({
       <h2>Video Memories</h2>
       <span className="section-accent" />
 
-      {mediaEmbeds.length > 0 ? (
-        <div
-          className={`tribute-media-grid tribute-media-grid-count-${Math.min(
-            mediaEmbeds.length,
-            3,
-          )}`}
+      {activeVideoEmbed ? (
+        <button
+          className="tribute-media-thumb tribute-media-thumb-single"
+          type="button"
+          onClick={() => setActiveEmbed(activeVideoEmbed)}
         >
-          {mediaEmbeds.map((embed, index) => (
-            <button
-              className="tribute-media-thumb"
-              key={`${embed.src}-${index}`}
-              type="button"
-              onClick={() => setActiveEmbed(embed)}
-            >
-              <div
-                className={`tribute-media-thumb-image${embed.thumbnail ? " has-image" : ""}`}
-                style={embed.thumbnail ? { backgroundImage: `url("${embed.thumbnail}")` } : undefined}
-              >
-                <span className="tribute-media-play">Play</span>
-              </div>
-              <div className="tribute-media-thumb-copy">
-                <p>{embed.description ?? "Tap to watch this tribute memory."}</p>
-              </div>
-            </button>
-          ))}
-        </div>
+          <div
+            className={`tribute-media-thumb-image${activeVideoEmbed.thumbnail ? " has-image" : ""}`}
+            style={
+              activeVideoEmbed.thumbnail
+                ? { backgroundImage: `url("${activeVideoEmbed.thumbnail}")` }
+                : undefined
+            }
+          >
+            <span className="tribute-media-play">Play</span>
+          </div>
+          <div className="tribute-media-thumb-copy">
+            <p>{activeVideoEmbed.description ?? "Tap to watch this tribute memory."}</p>
+          </div>
+        </button>
       ) : (
         <article className="form-card tribute-media-empty">
           <h3>Video memories coming soon</h3>
@@ -278,7 +289,11 @@ export function TributeMediaSection({
               </a>
             )
           ) : null}
-          {livestreamNote?.trim() ? <p className="subtle-note">{livestreamNote}</p> : null}
+          {livestreamNoteText ? (
+            <p className="subtle-note">
+              {highlightFinalJourneyNote ? <strong>{livestreamNoteText}</strong> : livestreamNoteText}
+            </p>
+          ) : null}
         </div>
       ) : (
         <article className="form-card tribute-media-empty">

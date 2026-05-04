@@ -60,6 +60,8 @@ export type TributeRecord = {
   showGallerySection: boolean;
   videoUrls: string[];
   videoDescriptions: string[];
+  videoThumbnailUrls: string[];
+  activeVideoIndex?: number;
   videoNote?: string;
   showVideoSection: boolean;
   livestreamUrl?: string;
@@ -132,6 +134,8 @@ export const tributes: TributeRecord[] = [
     showGallerySection: true,
     videoUrls: [],
     videoDescriptions: [],
+    videoThumbnailUrls: [],
+    activeVideoIndex: 0,
     videoNote:
       "Add video memories from family and friends. Use direct MP4 links or YouTube/Vimeo links for playback.",
     showVideoSection: true,

@@ -74,6 +74,8 @@ export type TributeBuilderInput = {
   supportNote?: string;
   videoUrls?: string[];
   videoDescriptions?: string[];
+  videoThumbnailUrls?: string[];
+  activeVideoIndex?: number;
   videoNote?: string;
   livestreamUrl?: string;
   livestreamThumbnailUrl?: string;
@@ -186,6 +188,8 @@ type SupportNoteMetadata = {
   showLivestreamSection?: boolean;
   videoUrls?: string[];
   videoDescriptions?: string[];
+  videoThumbnailUrls?: string[];
+  activeVideoIndex?: number;
   videoNote?: string;
   livestreamUrl?: string;
   livestreamThumbnailUrl?: string;
@@ -253,6 +257,13 @@ function parseSupportNoteMetadata(value: string | null) {
       videoDescriptions: Array.isArray(parsed.videoDescriptions)
         ? parsed.videoDescriptions.filter((value): value is string => typeof value === "string")
         : undefined,
+      videoThumbnailUrls: Array.isArray(parsed.videoThumbnailUrls)
+        ? parsed.videoThumbnailUrls.filter((value): value is string => typeof value === "string")
+        : undefined,
+      activeVideoIndex:
+        typeof parsed.activeVideoIndex === "number" && Number.isInteger(parsed.activeVideoIndex)
+          ? parsed.activeVideoIndex
+          : undefined,
       videoNote: typeof parsed.videoNote === "string" ? parsed.videoNote : undefined,
       livestreamUrl: typeof parsed.livestreamUrl === "string" ? parsed.livestreamUrl : undefined,
       livestreamThumbnailUrl:
@@ -394,6 +405,10 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
         null
     ),
     videoDescriptions: supportNoteMetadata?.videoDescriptions ?? fallback?.videoDescriptions ?? [],
+    videoThumbnailUrls:
+      supportNoteMetadata?.videoThumbnailUrls ?? fallback?.videoThumbnailUrls ?? [],
+    activeVideoIndex:
+      supportNoteMetadata?.activeVideoIndex ?? fallback?.activeVideoIndex ?? 0,
     videoNote: tributeRow.video_note ?? supportNoteMetadata?.videoNote ?? fallback?.videoNote,
     showVideoSection:
       tributeRow.show_video_section ??
@@ -478,6 +493,8 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     showLivestreamSection: input.showLivestreamSection ?? true,
     videoUrls: (input.videoUrls ?? []).map((item) => item.trim()).filter(Boolean),
     videoDescriptions: (input.videoDescriptions ?? []).map((item) => item.trim()),
+    videoThumbnailUrls: (input.videoThumbnailUrls ?? []).map((item) => item.trim()),
+    activeVideoIndex: input.activeVideoIndex,
     videoNote: input.videoNote?.trim() || undefined,
     livestreamUrl: input.livestreamUrl?.trim() || undefined,
     livestreamThumbnailUrl: input.livestreamThumbnailUrl?.trim() || undefined,

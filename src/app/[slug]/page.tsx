@@ -72,6 +72,12 @@ export default async function TributePage({ params }: PageProps) {
         ? `url("${tribute.heroImageUrl}")`
         : "none",
   } as CSSProperties;
+  const supportNoteText = tribute.supportNote?.trim();
+  const highlightFinalJourneyNote = Boolean(
+    supportNoteText &&
+      /final journey/i.test(supportNoteText) &&
+      /streamed live/i.test(supportNoteText),
+  );
 
   return (
     <main className="page-shell tribute-page-shell" style={pageStyle}>
@@ -173,6 +179,8 @@ export default async function TributePage({ params }: PageProps) {
         <TributeMediaSection
           videoUrls={tribute.videoUrls}
           videoDescriptions={tribute.videoDescriptions}
+          videoThumbnailUrls={tribute.videoThumbnailUrls}
+          activeVideoIndex={tribute.activeVideoIndex}
           videoNote={tribute.videoNote}
           livestreamUrl={tribute.livestreamUrl}
           livestreamThumbnailUrl={tribute.livestreamThumbnailUrl}
@@ -242,8 +250,10 @@ export default async function TributePage({ params }: PageProps) {
             <article className="form-card">
               <h3>Note from the Fanmily</h3>
               <p>
-                {tribute.supportNote?.trim()
-                  ? tribute.supportNote
+                {supportNoteText
+                  ? highlightFinalJourneyNote
+                    ? <strong>{supportNoteText}</strong>
+                    : supportNoteText
                   : "Use this section to explain tribute card options, family support contributions, or any other memorial giving details."}
               </p>
             </article>
