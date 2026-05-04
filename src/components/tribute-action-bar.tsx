@@ -16,6 +16,39 @@ const actions: TributeAction[] = [
   { key: "support", label: "Support Family", targetId: "support-section" },
 ];
 
+function ActionIcon({ actionKey }: { actionKey: ActionKey }) {
+  if (actionKey === "share") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+        <path
+          d="M15 8a3 3 0 1 0-2.82-4H12a3 3 0 0 0 .18 1.02L8.91 6.96a3 3 0 0 0-1.91-.69 3 3 0 1 0 1.91 5.31l3.27 1.94A3 3 0 0 0 12 14a3 3 0 1 0 .18 4.98H12a3 3 0 0 0 2.82-4 2.98 2.98 0 0 0-.18-1.02l-3.27-1.94c.08-.32.13-.66.13-1.02s-.05-.7-.13-1.02l3.27-1.94c.32.12.66.18 1.02.18Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  if (actionKey === "message") {
+    return (
+      <svg aria-hidden="true" viewBox="0 0 24 24">
+        <path
+          d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v8A2.5 2.5 0 0 1 17.5 16H9l-4.29 3.22c-.66.5-1.6.03-1.6-.79V5.5Zm3.5 1a1 1 0 1 0 0 2h9a1 1 0 1 0 0-2h-9Zm0 4a1 1 0 1 0 0 2h6a1 1 0 1 0 0-2h-6Z"
+          fill="currentColor"
+        />
+      </svg>
+    );
+  }
+
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24">
+      <path
+        d="M12 21s-6.72-4.35-9.33-8.37C.93 9.92 1.8 6.3 4.85 4.66c2.01-1.08 4.47-.63 6.15 1.09 1.68-1.72 4.14-2.17 6.15-1.09 3.05 1.64 3.92 5.26 2.18 7.97C18.72 16.65 12 21 12 21Z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
 export function TributeActionBar() {
   const [selectedAction, setSelectedAction] = useState<ActionKey | null>(null);
   const [shareStatus, setShareStatus] = useState<{ tone: "success" | "error"; message: string } | null>(
@@ -109,13 +142,15 @@ export function TributeActionBar() {
         return (
           <button
             key={action.key}
-            className={isSelected ? "button-primary" : "button-secondary"}
+            className={`tribute-action-pill ${isSelected ? "button-primary" : "button-secondary"}`}
             type="button"
             aria-pressed={isSelected}
             aria-controls={action.targetId}
+            aria-label={action.label}
+            title={action.label}
             onClick={() => handleActionClick(action)}
           >
-            {action.label}
+            <ActionIcon actionKey={action.key} />
           </button>
         );
       })}

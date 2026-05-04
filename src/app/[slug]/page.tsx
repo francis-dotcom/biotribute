@@ -6,6 +6,7 @@ import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
+import { ShareTributeIconButton } from "@/components/share-tribute-icon-button";
 import { TimelineSection } from "@/components/timeline-section";
 import { TributeActionBar } from "@/components/tribute-action-bar";
 import { TributeMediaSection } from "@/components/tribute-media-section";
@@ -90,6 +91,7 @@ export default async function TributePage({ params }: PageProps) {
               triggerClassName="hero-donation-badge"
               triggerLabel="Donate"
             />
+            <ShareTributeIconButton className="hero-share-icon" />
           </div>
           <div className="hero-divider" aria-hidden="true">
             <span />
