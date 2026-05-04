@@ -18,6 +18,19 @@ type MediaEmbed =
   | { type: "iframe"; src: string; thumbnail?: string | null; label: string; description?: string }
   | { type: "link"; src: string; thumbnail?: string | null; label: string; description?: string };
 
+function shouldPrioritizeLivestream(date: Date) {
+  const formatter = new Intl.DateTimeFormat("en-US", {
+    month: "numeric",
+    day: "numeric",
+    timeZone: "America/New_York",
+  });
+  const parts = formatter.formatToParts(date);
+  const month = Number(parts.find((part) => part.type === "month")?.value ?? 0);
+  const day = Number(parts.find((part) => part.type === "day")?.value ?? 0);
+
+  return month === 6 && (day === 10 || day === 11);
+}
+
 function extractYouTubeId(parsed: URL) {
   const host = parsed.hostname.toLowerCase();
   const parts = parsed.pathname.split("/").filter(Boolean);
@@ -173,98 +186,102 @@ export function TributeMediaSection({
   );
 
   const streamEmbed = useMemo(() => toEmbedUrl(livestreamUrl ?? "", 0), [livestreamUrl]);
+  const showLivestreamFirst = useMemo(() => shouldPrioritizeLivestream(new Date()), []);
 
   if (!showVideoSection && !showLivestreamSection) {
     return null;
   }
 
+  const videoSection = showVideoSection ? (
+    <section className="content-section content-section-soft">
+      <p className="section-kicker">Videos</p>
+      <h2>Video Memories</h2>
+      <span className="section-accent" />
+
+      {mediaEmbeds.length > 0 ? (
+        <div
+          className={`tribute-media-grid tribute-media-grid-count-${Math.min(
+            mediaEmbeds.length,
+            3,
+          )}`}
+        >
+          {mediaEmbeds.map((embed, index) => (
+            <button
+              className="tribute-media-thumb"
+              key={`${embed.src}-${index}`}
+              type="button"
+              onClick={() => setActiveEmbed(embed)}
+            >
+              <div
+                className={`tribute-media-thumb-image${embed.thumbnail ? " has-image" : ""}`}
+                style={embed.thumbnail ? { backgroundImage: `url("${embed.thumbnail}")` } : undefined}
+              >
+                <span className="tribute-media-play">Play</span>
+              </div>
+              <div className="tribute-media-thumb-copy">
+                <p>{embed.description ?? "Tap to watch this tribute memory."}</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : (
+        <article className="form-card tribute-media-empty">
+          <h3>Video memories coming soon</h3>
+          <p>
+            Add video links from the console builder to create a dedicated memory reel for
+            family and friends.
+          </p>
+        </article>
+      )}
+
+      {videoNote?.trim() ? <p className="subtle-note">{videoNote}</p> : null}
+    </section>
+  ) : null;
+
+  const livestreamSection = showLivestreamSection ? (
+    <section className="content-section">
+      <p className="section-kicker">Live Memorial</p>
+      <h2>Live Stream</h2>
+      <span className="section-accent" />
+
+      {streamEmbed ? (
+        <div className="tribute-stream-card">
+          {streamEmbed.type === "iframe" ? (
+            <iframe
+              className="tribute-stream-frame"
+              src={streamEmbed.src}
+              title="Memorial livestream"
+              loading="lazy"
+              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+              allowFullScreen
+            />
+          ) : streamEmbed.type === "video" ? (
+            <video className="tribute-stream-frame" controls preload="metadata">
+              <source src={streamEmbed.src} />
+            </video>
+          ) : (
+            <a className="button-primary" href={streamEmbed.src} target="_blank" rel="noreferrer">
+              Open livestream
+            </a>
+          )}
+          {livestreamNote?.trim() ? <p className="subtle-note">{livestreamNote}</p> : null}
+        </div>
+      ) : (
+        <article className="form-card tribute-media-empty">
+          <h3>Live stream link not set</h3>
+          <p>
+            Add a YouTube or Vimeo live stream URL in the console when streaming is
+            scheduled.
+          </p>
+        </article>
+      )}
+    </section>
+  ) : null;
+
   return (
     <>
-      {showVideoSection ? (
-        <section className="content-section content-section-soft">
-          <p className="section-kicker">Videos</p>
-          <h2>Video Memories</h2>
-          <span className="section-accent" />
-
-          {mediaEmbeds.length > 0 ? (
-            <div
-              className={`tribute-media-grid tribute-media-grid-count-${Math.min(
-                mediaEmbeds.length,
-                3,
-              )}`}
-            >
-              {mediaEmbeds.map((embed, index) => (
-                <button
-                  className="tribute-media-thumb"
-                  key={`${embed.src}-${index}`}
-                  type="button"
-                  onClick={() => setActiveEmbed(embed)}
-                >
-                  <div
-                    className={`tribute-media-thumb-image${embed.thumbnail ? " has-image" : ""}`}
-                    style={embed.thumbnail ? { backgroundImage: `url("${embed.thumbnail}")` } : undefined}
-                  >
-                    <span className="tribute-media-play">Play</span>
-                  </div>
-                  <div className="tribute-media-thumb-copy">
-                    <p>{embed.description ?? "Tap to watch this tribute memory."}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          ) : (
-            <article className="form-card tribute-media-empty">
-              <h3>Video memories coming soon</h3>
-              <p>
-                Add video links from the console builder to create a dedicated memory reel for
-                family and friends.
-              </p>
-            </article>
-          )}
-
-          {videoNote?.trim() ? <p className="subtle-note">{videoNote}</p> : null}
-        </section>
-      ) : null}
-
-      {showLivestreamSection ? (
-        <section className="content-section">
-          <p className="section-kicker">Live Memorial</p>
-          <h2>Live Stream</h2>
-          <span className="section-accent" />
-
-          {streamEmbed ? (
-            <div className="tribute-stream-card">
-              {streamEmbed.type === "iframe" ? (
-                <iframe
-                  className="tribute-stream-frame"
-                  src={streamEmbed.src}
-                  title="Memorial livestream"
-                  loading="lazy"
-                  allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-                  allowFullScreen
-                />
-              ) : streamEmbed.type === "video" ? (
-                <video className="tribute-stream-frame" controls preload="metadata">
-                  <source src={streamEmbed.src} />
-                </video>
-              ) : (
-                <a className="button-primary" href={streamEmbed.src} target="_blank" rel="noreferrer">
-                  Open livestream
-                </a>
-              )}
-              {livestreamNote?.trim() ? <p className="subtle-note">{livestreamNote}</p> : null}
-            </div>
-          ) : (
-            <article className="form-card tribute-media-empty">
-              <h3>Live stream link not set</h3>
-              <p>
-                Add a YouTube or Vimeo live stream URL in the console when streaming is
-                scheduled.
-              </p>
-            </article>
-          )}
-        </section>
-      ) : null}
+      {showLivestreamFirst ? livestreamSection : videoSection}
+      {showLivestreamFirst ? videoSection : livestreamSection}
 
       {activeEmbed ? (
         <div
