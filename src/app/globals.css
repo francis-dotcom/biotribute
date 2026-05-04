@@ -1740,6 +1740,15 @@ textarea {
   font-weight: 500;
 }
 
+.builder-livestream-preview {
+  display: block;
+  width: min(100%, 360px);
+  border-radius: 18px;
+  border: 1px solid var(--line);
+  margin-top: 10px;
+  object-fit: cover;
+}
+
 .builder-visibility-chips {
   margin: 8px 0 14px;
 }

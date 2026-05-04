@@ -710,72 +710,91 @@ export function TributeBuilderForm({
           />
         </label>
         <div className="field-block">
-          <span>What should be displayed in Live Stream?</span>
-          <div className="builder-inline-actions">
-            <button
-              className="button-secondary"
-              type="button"
-              aria-pressed={livestreamDisplayMode === "video"}
-              onClick={() => setLivestreamDisplayMode("video")}
-            >
-              Show video URL
-            </button>
-            <button
-              className="button-secondary"
-              type="button"
-              aria-pressed={livestreamDisplayMode === "image-url"}
-              onClick={() => {
-                setLivestreamDisplayMode("image-url");
-                setLivestreamThumbnailMode("url");
-              }}
-            >
-              Show image URL
-            </button>
-            <button
-              className="button-secondary"
-              type="button"
-              aria-pressed={livestreamDisplayMode === "uploaded-image"}
-              onClick={() => {
-                setLivestreamDisplayMode("uploaded-image");
-                setLivestreamThumbnailMode("upload");
-              }}
-            >
-              Show uploaded image
-            </button>
-          </div>
-          <p className="subtle-note">Only one live stream item can be displayed at a time.</p>
+          <span>Saved video URL</span>
+          {livestreamUrl.trim() ? (
+            <label className="builder-checkbox">
+              <input
+                type="checkbox"
+                checked={livestreamDisplayMode === "video"}
+                onChange={() => setLivestreamDisplayMode("video")}
+              />
+              <span>Display this video URL on the tribute page</span>
+            </label>
+          ) : (
+            <p className="subtle-note">Paste a livestream URL above, then save it and select it here.</p>
+          )}
+          {livestreamUrl.trim() ? <p className="subtle-note">{livestreamUrl.trim()}</p> : null}
         </div>
-        {livestreamDisplayMode === "video" ? null : livestreamThumbnailMode === "url" ? (
-          <label className="field-block">
-            <span>Livestream thumbnail image URL (optional)</span>
-            <input
-              name="livestreamThumbnailUrl"
-              type="url"
-              value={livestreamThumbnailUrlInput}
-              onChange={(event) => setLivestreamThumbnailUrlInput(event.currentTarget.value)}
-              placeholder="https://example.com/livestream-thumbnail.jpg"
-            />
-          </label>
-        ) : (
+        <label className="field-block">
+          <span>Livestream thumbnail image URL (optional)</span>
+          <input
+            name="livestreamThumbnailUrl"
+            type="url"
+            value={livestreamThumbnailUrlInput}
+            onChange={(event) => {
+              setLivestreamThumbnailUrlInput(event.currentTarget.value);
+              setLivestreamThumbnailMode("url");
+            }}
+            placeholder="https://example.com/livestream-thumbnail.jpg"
+          />
+        </label>
+        {livestreamThumbnailUrlInput.trim() ? (
           <div className="field-block">
-            <span>Upload livestream thumbnail image</span>
-            <input
-              ref={livestreamThumbInputRef}
-              type="file"
-              accept="image/png,image/jpeg,image/webp,image/avif"
-              onChange={(event) => {
-                void uploadLivestreamThumbnail(event.currentTarget.files);
-              }}
-            />
-            <p className="subtle-note">
-              {uploadingLivestreamThumb
-              ? "Uploading livestream thumbnail..."
-                : uploadedLivestreamThumbnailUrl
-                  ? "Uploaded image selected. Save Draft to apply it."
-                  : "Upload one image to use as the livestream thumbnail."}
-            </p>
+            <span>Saved image URL</span>
+            <label className="builder-checkbox">
+              <input
+                type="checkbox"
+                checked={livestreamDisplayMode === "image-url"}
+                onChange={() => {
+                  setLivestreamDisplayMode("image-url");
+                  setLivestreamThumbnailMode("url");
+                }}
+              />
+              <span>Display this image URL on the tribute page</span>
+            </label>
+            <p className="subtle-note">{livestreamThumbnailUrlInput.trim()}</p>
           </div>
-        )}
+        ) : null}
+        <div className="field-block">
+          <span>Upload livestream thumbnail image</span>
+          <input
+            ref={livestreamThumbInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/avif"
+            onChange={(event) => {
+              void uploadLivestreamThumbnail(event.currentTarget.files);
+            }}
+          />
+          <p className="subtle-note">
+            {uploadingLivestreamThumb
+              ? "Uploading livestream thumbnail..."
+              : uploadedLivestreamThumbnailUrl
+                ? "Uploaded image saved. Select it below if you want to display it."
+                : "Upload one image, then save it and select it below."}
+          </p>
+        </div>
+        {uploadedLivestreamThumbnailUrl.trim() ? (
+          <div className="field-block">
+            <span>Saved uploaded image</span>
+            <label className="builder-checkbox">
+              <input
+                type="checkbox"
+                checked={livestreamDisplayMode === "uploaded-image"}
+                onChange={() => {
+                  setLivestreamDisplayMode("uploaded-image");
+                  setLivestreamThumbnailMode("upload");
+                }}
+              />
+              <span>Display this uploaded image on the tribute page</span>
+            </label>
+            <img
+              src={uploadedLivestreamThumbnailUrl.trim()}
+              alt="Uploaded livestream thumbnail preview"
+              className="builder-livestream-preview"
+            />
+          </div>
+        ) : null}
+        <p className="subtle-note">Only one checkbox can control what is displayed at a time.</p>
         <label className="field-block">
           <span>Livestream note</span>
           <input
