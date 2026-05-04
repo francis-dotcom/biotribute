@@ -176,6 +176,7 @@ export default async function TributePage({ params }: PageProps) {
           videoNote={tribute.videoNote}
           livestreamUrl={tribute.livestreamUrl}
           livestreamThumbnailUrl={tribute.livestreamThumbnailUrl}
+          livestreamDisplayMode={tribute.livestreamDisplayMode}
           livestreamNote={tribute.livestreamNote}
           showVideoSection={tribute.showVideoSection}
           showLivestreamSection={tribute.showLivestreamSection}

@@ -9,6 +9,7 @@ type TributeMediaSectionProps = {
   videoNote?: string;
   livestreamUrl?: string;
   livestreamThumbnailUrl?: string;
+  livestreamDisplayMode?: TributeRecord["livestreamDisplayMode"];
   livestreamNote?: string;
   showVideoSection: boolean;
   showLivestreamSection: boolean;
@@ -166,6 +167,7 @@ export function TributeMediaSection({
   videoNote,
   livestreamUrl,
   livestreamThumbnailUrl,
+  livestreamDisplayMode,
   livestreamNote,
   showVideoSection,
   showLivestreamSection,
@@ -188,6 +190,8 @@ export function TributeMediaSection({
   );
 
   const streamEmbed = useMemo(() => toEmbedUrl(livestreamUrl ?? "", 0), [livestreamUrl]);
+  const activeLivestreamDisplayMode =
+    livestreamDisplayMode ?? (livestreamThumbnailUrl?.trim() ? "image-url" : "video");
   const showLivestreamFirst = useMemo(() => shouldPrioritizeLivestream(new Date()), []);
 
   if (!showVideoSection && !showLivestreamSection) {
@@ -246,15 +250,15 @@ export function TributeMediaSection({
       <h2>Live Stream</h2>
       <span className="section-accent" />
 
-      {streamEmbed || livestreamThumbnailUrl?.trim() ? (
+      {(activeLivestreamDisplayMode === "video" ? streamEmbed : livestreamThumbnailUrl?.trim()) ? (
         <div className="tribute-stream-card">
-          {livestreamThumbnailUrl?.trim() ? (
+          {activeLivestreamDisplayMode !== "video" && livestreamThumbnailUrl?.trim() ? (
             <div
               className="tribute-stream-thumbnail"
               style={{ backgroundImage: `url("${livestreamThumbnailUrl}")` }}
             />
           ) : null}
-          {streamEmbed ? (
+          {activeLivestreamDisplayMode === "video" && streamEmbed ? (
             streamEmbed.type === "iframe" ? (
               <iframe
                 className="tribute-stream-frame"

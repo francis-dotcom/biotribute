@@ -32,6 +32,7 @@ export type TributeGalleryItem = {
 };
 
 export type TributeTheme = "ivory" | "sage" | "sky";
+export type TributeLivestreamDisplayMode = "video" | "image-url" | "uploaded-image";
 
 export type TributeThemePreset = {
   id: TributeTheme;
@@ -63,6 +64,7 @@ export type TributeRecord = {
   showVideoSection: boolean;
   livestreamUrl?: string;
   livestreamThumbnailUrl?: string;
+  livestreamDisplayMode?: TributeLivestreamDisplayMode;
   livestreamNote?: string;
   showLivestreamSection: boolean;
   messages: TributeMessage[];
@@ -135,6 +137,7 @@ export const tributes: TributeRecord[] = [
     showVideoSection: true,
     livestreamUrl: "",
     livestreamThumbnailUrl: "",
+    livestreamDisplayMode: "video",
     livestreamNote:
       "If you are running a memorial live stream, paste the YouTube/Vimeo stream link in the console.",
     showLivestreamSection: true,

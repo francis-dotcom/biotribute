@@ -39,13 +39,21 @@ export function TributeBuilderForm({
   ]);
   const [videoNote, setVideoNote] = useState(tribute.videoNote ?? "");
   const [livestreamUrl, setLivestreamUrl] = useState(tribute.livestreamUrl ?? "");
+  const [livestreamDisplayMode, setLivestreamDisplayMode] = useState<
+    "video" | "image-url" | "uploaded-image"
+  >(
+    tribute.livestreamDisplayMode ??
+      (tribute.livestreamThumbnailUrl ? "image-url" : "video")
+  );
   const [livestreamThumbnailMode, setLivestreamThumbnailMode] = useState<"url" | "upload">(
-    "url"
+    tribute.livestreamDisplayMode === "uploaded-image" ? "upload" : "url"
   );
   const [livestreamThumbnailUrlInput, setLivestreamThumbnailUrlInput] = useState(
     tribute.livestreamThumbnailUrl ?? ""
   );
-  const [uploadedLivestreamThumbnailUrl, setUploadedLivestreamThumbnailUrl] = useState("");
+  const [uploadedLivestreamThumbnailUrl, setUploadedLivestreamThumbnailUrl] = useState(
+    tribute.livestreamDisplayMode === "uploaded-image" ? tribute.livestreamThumbnailUrl ?? "" : ""
+  );
   const [livestreamNote, setLivestreamNote] = useState(tribute.livestreamNote ?? "");
   const [uploadingLivestreamThumb, setUploadingLivestreamThumb] = useState(false);
   const livestreamThumbInputRef = useRef<HTMLInputElement | null>(null);
@@ -122,7 +130,13 @@ export function TributeBuilderForm({
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
       videoNote: videoNote.trim(),
       livestreamUrl: livestreamValue,
-      livestreamThumbnailUrl,
+      livestreamThumbnailUrl:
+        livestreamDisplayMode === "video"
+          ? livestreamThumbnailUrl
+          : livestreamDisplayMode === "uploaded-image"
+            ? uploadedLivestreamThumbnailUrl.trim()
+            : livestreamThumbnailUrlInput.trim(),
+      livestreamDisplayMode,
       livestreamNote: livestreamNote.trim(),
       showGallerySection,
       showVideoSection,
@@ -197,6 +211,7 @@ export function TributeBuilderForm({
     const uploadedUrl = data.uploads?.[0]?.imageUrl ?? "";
     if (uploadedUrl) {
       setUploadedLivestreamThumbnailUrl(uploadedUrl);
+      setLivestreamDisplayMode("uploaded-image");
       setLivestreamThumbnailMode("upload");
     }
 
@@ -601,28 +616,42 @@ export function TributeBuilderForm({
           />
         </label>
         <div className="field-block">
-          <span>Livestream thumbnail source</span>
+          <span>What should be displayed in Live Stream?</span>
           <div className="builder-inline-actions">
             <button
               className="button-secondary"
               type="button"
-              aria-pressed={livestreamThumbnailMode === "url"}
-              onClick={() => setLivestreamThumbnailMode("url")}
+              aria-pressed={livestreamDisplayMode === "video"}
+              onClick={() => setLivestreamDisplayMode("video")}
             >
-              Use image URL
+              Show video URL
             </button>
             <button
               className="button-secondary"
               type="button"
-              aria-pressed={livestreamThumbnailMode === "upload"}
-              onClick={() => setLivestreamThumbnailMode("upload")}
+              aria-pressed={livestreamDisplayMode === "image-url"}
+              onClick={() => {
+                setLivestreamDisplayMode("image-url");
+                setLivestreamThumbnailMode("url");
+              }}
             >
-              Upload image
+              Show image URL
+            </button>
+            <button
+              className="button-secondary"
+              type="button"
+              aria-pressed={livestreamDisplayMode === "uploaded-image"}
+              onClick={() => {
+                setLivestreamDisplayMode("uploaded-image");
+                setLivestreamThumbnailMode("upload");
+              }}
+            >
+              Show uploaded image
             </button>
           </div>
-          <p className="subtle-note">Only one thumbnail image can be active at a time.</p>
+          <p className="subtle-note">Only one live stream item can be displayed at a time.</p>
         </div>
-        {livestreamThumbnailMode === "url" ? (
+        {livestreamDisplayMode === "video" ? null : livestreamThumbnailMode === "url" ? (
           <label className="field-block">
             <span>Livestream thumbnail image URL (optional)</span>
             <input
@@ -646,7 +675,7 @@ export function TributeBuilderForm({
             />
             <p className="subtle-note">
               {uploadingLivestreamThumb
-                ? "Uploading livestream thumbnail..."
+              ? "Uploading livestream thumbnail..."
                 : uploadedLivestreamThumbnailUrl
                   ? "Uploaded image selected. Save Draft to apply it."
                   : "Upload one image to use as the livestream thumbnail."}
@@ -671,6 +700,7 @@ export function TributeBuilderForm({
               setLivestreamUrl("");
               setLivestreamThumbnailUrlInput("");
               setUploadedLivestreamThumbnailUrl("");
+              setLivestreamDisplayMode("video");
               setLivestreamThumbnailMode("url");
               setLivestreamNote("");
               if (livestreamThumbInputRef.current) {

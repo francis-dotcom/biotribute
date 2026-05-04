@@ -44,6 +44,7 @@ const tributeSchema = z.object({
   videoNote: z.string().trim().optional(),
   livestreamUrl: z.string().trim().optional(),
   livestreamThumbnailUrl: z.string().trim().optional(),
+  livestreamDisplayMode: z.enum(["video", "image-url", "uploaded-image"]).optional(),
   livestreamNote: z.string().trim().optional(),
   showGallerySection: z.boolean().optional(),
   showVideoSection: z.boolean().optional(),

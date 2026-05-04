@@ -31,7 +31,22 @@ export default async function ConsolePage({
     messages = [];
   }
   const approved = messages.filter((message) => message.status === "approved").length;
-  const pending = messages.filter((message) => message.status.startsWith("pending")).length;
+  const latestByEmail = new Map<typeof messages[number]["email"], typeof messages[number]>();
+  for (const message of messages) {
+    const email = message.email.trim().toLowerCase();
+    const existing = latestByEmail.get(email);
+    if (!existing) {
+      latestByEmail.set(email, message);
+      continue;
+    }
+
+    if (new Date(message.created_at).getTime() > new Date(existing.created_at).getTime()) {
+      latestByEmail.set(email, message);
+    }
+  }
+  const pending = Array.from(latestByEmail.values()).filter((message) =>
+    message.status.startsWith("pending"),
+  ).length;
   const activeTheme = getTributeThemePreset(tribute.theme);
   const storeConfigured = isTributeStoreConfigured();
   const shellStyle = {
