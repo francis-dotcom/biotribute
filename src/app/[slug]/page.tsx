@@ -207,7 +207,6 @@ export default async function TributePage({ params }: PageProps) {
           <span className="section-accent" />
           <div className="support-grid">
             <article className="form-card support-actions-card">
-              <h3>Support options</h3>
               <div className="support-action-list">
                 <button className="support-action-pill" type="button">
                   Card

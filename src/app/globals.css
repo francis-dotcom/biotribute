@@ -1148,9 +1148,9 @@ textarea {
 }
 
 .support-action-pill-accent {
-  border-color: rgba(149, 111, 17, 0.35);
-  background: linear-gradient(180deg, #f8de79 0%, #efc94f 100%);
-  color: #5c4205;
+  border-color: rgba(166, 118, 6, 0.42);
+  background: linear-gradient(180deg, #ffe27a 0%, #f4bf18 100%);
+  color: #4d3600;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
