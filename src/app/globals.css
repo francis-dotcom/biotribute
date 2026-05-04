@@ -267,16 +267,59 @@ textarea {
   text-transform: uppercase;
 }
 
+.hero-avatar-wrap {
+  width: fit-content;
+  margin: 0 auto 24px;
+  position: relative;
+}
+
 .avatar-placeholder {
   width: 168px;
   height: 168px;
-  margin: 0 auto 24px;
+  margin: 0;
   border-radius: 999px;
   background: linear-gradient(135deg, #d9d9dc 0%, #f3f3f5 100%);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.9),
     0 18px 40px rgba(28, 28, 30, 0.08);
   position: relative;
+}
+
+.hero-donation-badge {
+  position: absolute;
+  top: 2px;
+  right: -108px;
+  min-width: 96px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(149, 111, 17, 0.35);
+  background: linear-gradient(180deg, #f8de79 0%, #efc94f 100%);
+  color: #5c4205;
+  font: 700 0.79rem/1.2 var(--font-sans);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow:
+    0 8px 16px rgba(149, 111, 17, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.hero-donation-badge:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.02);
+  box-shadow:
+    0 10px 18px rgba(149, 111, 17, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
+}
+
+.hero-donation-badge:active {
+  transform: translateY(0);
+}
+
+.hero-donation-badge:focus-visible {
+  outline: 2px solid rgba(149, 111, 17, 0.42);
+  outline-offset: 2px;
 }
 
 .avatar-placeholder::before {
@@ -2089,6 +2132,25 @@ textarea {
   .hero-divider {
     margin-bottom: 18px;
     width: min(180px, 100%);
+  }
+
+  .hero-donation-badge {
+    top: auto;
+    right: 50%;
+    bottom: -44px;
+    transform: translateX(50%);
+  }
+
+  .hero-avatar-wrap {
+    margin-bottom: 58px;
+  }
+
+  .hero-donation-badge:hover {
+    transform: translateX(50%) translateY(-1px);
+  }
+
+  .hero-donation-badge:active {
+    transform: translateX(50%);
   }
 
   .content-section h2 {

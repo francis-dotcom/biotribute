@@ -76,10 +76,15 @@ export default async function TributePage({ params }: PageProps) {
       <div className="tribute-page">
         <section className="hero-section" id="tribute-top">
           <p className="hero-kicker">In Loving Memory</p>
-          <div
-            className={tribute.heroImageUrl ? "avatar-placeholder has-image" : "avatar-placeholder"}
-            aria-hidden="true"
-          />
+          <div className="hero-avatar-wrap">
+            <div
+              className={tribute.heroImageUrl ? "avatar-placeholder has-image" : "avatar-placeholder"}
+              aria-hidden="true"
+            />
+            <a className="hero-donation-badge" href="#support-section">
+              Donation
+            </a>
+          </div>
           <div className="hero-divider" aria-hidden="true">
             <span />
             <i />
