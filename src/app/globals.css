@@ -2053,6 +2053,15 @@ textarea {
   gap: 18px;
 }
 
+.tribute-media-grid-count-1 {
+  grid-template-columns: minmax(0, min(720px, 100%));
+  justify-content: center;
+}
+
+.tribute-media-grid-count-2 {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .tribute-media-frame,
 .tribute-stream-frame {
   width: 100%;
@@ -2098,6 +2107,14 @@ textarea {
   background:
     linear-gradient(135deg, rgba(235, 236, 240, 0.95), rgba(249, 249, 251, 0.95)),
     #fff;
+}
+
+.tribute-media-grid-count-1 .tribute-media-thumb-image {
+  aspect-ratio: 16 / 9;
+}
+
+.tribute-media-grid-count-2 .tribute-media-thumb-image {
+  aspect-ratio: 16 / 9;
 }
 
 .tribute-media-thumb-image.has-image {
@@ -2156,6 +2173,10 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .tribute-media-grid-count-2 {
+    grid-template-columns: 1fr;
+  }
+
   .tribute-media-frame {
     min-height: 180px;
   }

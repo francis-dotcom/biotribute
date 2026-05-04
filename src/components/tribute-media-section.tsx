@@ -187,7 +187,12 @@ export function TributeMediaSection({
           <span className="section-accent" />
 
           {mediaEmbeds.length > 0 ? (
-            <div className="tribute-media-grid">
+            <div
+              className={`tribute-media-grid tribute-media-grid-count-${Math.min(
+                mediaEmbeds.length,
+                3,
+              )}`}
+            >
               {mediaEmbeds.map((embed, index) => (
                 <button
                   className="tribute-media-thumb"
