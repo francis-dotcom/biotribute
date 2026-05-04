@@ -75,9 +75,6 @@ export function DonationDetailsModal({
                       </div>
                     ) : null}
                   </div>
-                  <p className="subtle-note">
-                    After donating, please text the donation details to the phone number above so the family can reconcile support properly.
-                  </p>
                 </>
               ) : (
                 <p className="subtle-note">
