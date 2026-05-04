@@ -58,12 +58,47 @@ textarea {
   padding: 24px 16px 56px;
 }
 
+.tribute-page-shell {
+  position: relative;
+  border-radius: 28px;
+  padding: 18px 14px 48px;
+  background:
+    radial-gradient(circle at 6% 6%, color-mix(in srgb, var(--gold) 20%, transparent), transparent 28%),
+    radial-gradient(circle at 94% 8%, color-mix(in srgb, var(--violet-deep) 12%, transparent), transparent 30%),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--gold-soft) 42%, white) 0%,
+      color-mix(in srgb, var(--violet-soft) 46%, white) 100%
+    );
+}
+
+.tribute-page-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 28px;
+  border: 1px solid color-mix(in srgb, var(--gold) 24%, white);
+  pointer-events: none;
+}
+
+.tribute-page-shell > * {
+  position: relative;
+  z-index: 1;
+}
+
 .landing-hero,
 .tribute-page {
   border: 1px solid rgba(229, 229, 234, 0.9);
   border-radius: var(--radius-xl);
   background: var(--panel);
   box-shadow: var(--shadow-lg);
+}
+
+.tribute-page-shell .tribute-page {
+  border-color: color-mix(in srgb, var(--gold) 14%, var(--line));
+  box-shadow:
+    0 16px 34px rgba(47, 58, 49, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.92) inset;
 }
 
 .landing-hero {
@@ -253,6 +288,22 @@ textarea {
     radial-gradient(circle at 92% 8%, var(--violet-soft), transparent 30%),
     radial-gradient(circle at 92% 92%, var(--gold-soft), transparent 28%);
   opacity: 0.18;
+}
+
+.tribute-page-shell .soft-card,
+.tribute-page-shell .gallery-card,
+.tribute-page-shell .form-card,
+.tribute-page-shell .message-mini-card,
+.tribute-page-shell .timeline-item {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.97),
+    color-mix(in srgb, var(--gold-soft) 18%, white)
+  );
+  border-color: color-mix(in srgb, var(--gold) 14%, var(--line));
+  box-shadow:
+    0 10px 24px rgba(47, 58, 49, 0.06),
+    0 1px 0 rgba(255, 255, 255, 0.85) inset;
 }
 
 .hero-section,
@@ -509,6 +560,19 @@ textarea {
     var(--panel-solid);
   border-bottom: 1px solid var(--line);
   box-shadow: 0 10px 24px rgba(28, 28, 30, 0.07);
+}
+
+.tribute-action-pill {
+  width: 84px;
+  min-width: 84px;
+  min-height: 54px;
+  padding: 0;
+}
+
+.tribute-action-pill svg {
+  width: 24px;
+  height: 24px;
+  display: block;
 }
 
 .action-bar-share-status {
@@ -2223,6 +2287,15 @@ textarea {
   .page-shell {
     padding-top: 10px;
     padding-inline: 10px;
+  }
+
+  .tribute-page-shell {
+    padding: 10px 8px 32px;
+    border-radius: 22px;
+  }
+
+  .tribute-page-shell::before {
+    border-radius: 22px;
   }
 
   .landing-hero,
