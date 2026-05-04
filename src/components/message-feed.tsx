@@ -62,6 +62,11 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     });
   }
 
+  function jumpToDonate() {
+    const section = document.getElementById("support-section");
+    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   useEffect(() => {
     if (!isSearching) {
       return;
@@ -108,6 +113,9 @@ export function MessageFeed({ messages }: MessageFeedProps) {
           />
         </label>
         <div className="messages-scroll-actions" role="group" aria-label="Scroll messages">
+          <button className="messages-donate-button" type="button" onClick={jumpToDonate}>
+            Donate
+          </button>
           <button
             className="messages-library-button"
             type="button"
