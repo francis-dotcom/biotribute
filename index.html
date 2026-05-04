@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tributes Memorial Page</title>
+    <style>
+      :root {
+        --bg: #f9f9fb;
+        --panel: rgba(255, 255, 255, 0.78);
+        --panel-strong: #ffffff;
+        --text: #1c1c1e;
+        --muted: #666666;
+        --muted-2: #444444;
+        --muted-3: #7a7a83;
+        --line: #e5e5ea;
+        --gold: #c8a96a;
+        --gold-deep: #b29151;
+        --gold-soft: #f4ebda;
+        --rose: #f6f0ef;
+        --shadow: 0 18px 40px rgba(28, 28, 30, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        color: var(--text);
+        font-family: Georgia, "Times New Roman", serif;
+        background:
+          radial-gradient(circle at top, rgba(255, 255, 255, 0.92), transparent 28%),
+          linear-gradient(180deg, #fcfcfd 0%, var(--bg) 48%, #f4f4f7 100%);
+      }
+
+      .page {
+        width: min(860px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 24px 0 56px;
+      }
+
+      .shell {
+        overflow: hidden;
+        border: 1px solid rgba(229, 229, 234, 0.9);
+        border-radius: 30px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        backdrop-filter: blur(12px);
+      }
+
+      .hero,
+      .actions,
+      .section {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .hero {
+        text-align: center;
+        padding-top: 56px;
+        padding-bottom: 48px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .avatar {
+        width: 132px;
+        height: 132px;
+        margin: 0 auto 20px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #d9d9dc 0%, #f3f3f5 100%);
+        box-shadow:
+          inset 0 1px 0 rgba(255, 255, 255, 0.9),
+          0 10px 30px rgba(28, 28, 30, 0.08);
+      }
+
+      h1,
+      h2 {
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+
+      .name {
+        margin: 0;
+        font-size: clamp(2.2rem, 5vw, 3rem);
+      }
+
+      .dates {
+        margin: 10px 0 4px;
+        color: var(--muted);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.95rem;
+      }
+
+      .tagline,
+      .body,
+      .empty {
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      }
+
+      .tagline {
+        margin: 0;
+        color: var(--muted-2);
+        font-size: 1.05rem;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .btn {
+        border: 1px solid var(--line);
+        background: #ffffff;
+        color: var(--text);
+      }
+
+      .btn,
+      .btn-primary {
+        padding: 10px 16px;
+        border-radius: 999px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 140ms ease,
+          box-shadow 140ms ease,
+          background 140ms ease;
+      }
+
+      .btn:hover,
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(28, 28, 30, 0.08);
+      }
+
+      .btn-primary {
+        border: 1px solid var(--gold);
+        background: var(--gold);
+        color: #ffffff;
+      }
+
+      .btn-primary:hover {
+        background: var(--gold-deep);
+      }
+
+      .section {
+        padding-top: 28px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .section-soft {
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.8) 0%, rgba(249, 249, 251, 0.7) 100%);
+      }
+
+      .section-title {
+        margin: 0 0 12px;
+        font-size: clamp(1.9rem, 4vw, 2.3rem);
+      }
+
+      .body,
+      .empty {
+        margin: 0;
+        color: var(--text);
+        line-height: 1.7;
+        font-size: 1rem;
+      }
+
+      .empty {
+        color: var(--muted);
+      }
+
+      .subtle-note {
+        margin: 10px 0 0;
+        color: var(--muted-3);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.92rem;
+        line-height: 1.6;
+      }
+
+      .contributors {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+      }
+
+      .contributor-card,
+      .privacy-card,
+      .support-card,
+      .gallery-card,
+      .message-card {
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 10px 24px rgba(28, 28, 30, 0.04);
+      }
+
+      .contributor-card {
+        padding: 18px;
+      }
+
+      .card-label {
+        margin: 0 0 6px;
+        color: var(--muted-3);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .card-title {
+        margin: 0 0 8px;
+        font-size: 1.12rem;
+      }
+
+      .card-copy,
+      .timeline-copy,
+      .message-copy {
+        margin: 0;
+        color: var(--muted-2);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        line-height: 1.7;
+      }
+
+      .gallery-card {
+        padding: 22px;
+        background:
+          linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(246, 240, 239, 0.7)),
+          var(--panel-strong);
+      }
+
+      .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 14px;
+        margin-top: 18px;
+      }
+
+      .gallery-item {
+        aspect-ratio: 4 / 3;
+        border-radius: 18px;
+        border: 1px solid rgba(229, 229, 234, 0.9);
+        background:
+          linear-gradient(135deg, rgba(235, 236, 240, 0.95), rgba(249, 249, 251, 0.95)),
+          #ffffff;
+      }
+
+      .story {
+        display: grid;
+        gap: 18px;
+      }
+
+      .timeline {
+        position: relative;
+        display: grid;
+        gap: 18px;
+        margin-top: 6px;
+      }
+
+      .timeline::before {
+        content: "";
+        position: absolute;
+        left: 9px;
+        top: 6px;
+        bottom: 6px;
+        width: 1px;
+        background: var(--line);
+      }
+
+      .timeline-item {
+        position: relative;
+        padding-left: 36px;
+      }
+
+      .timeline-item::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 7px;
+        width: 18px;
+        height: 18px;
+        border-radius: 999px;
+        background: #ffffff;
+        border: 4px solid var(--gold);
+        box-shadow: 0 0 0 4px rgba(200, 169, 106, 0.12);
+      }
+
+      .timeline-year {
+        margin: 0 0 6px;
+        color: var(--gold-deep);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.84rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .timeline-title {
+        margin: 0 0 6px;
+        font-size: 1.08rem;
+      }
+
+      .messages-layout,
+      .support-layout,
+      .privacy-layout {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 18px;
+      }
+
+      .message-stack {
+        display: grid;
+        gap: 14px;
+        overflow: hidden;
+      }
+
+      .message-card {
+        min-height: 132px;
+        padding: 16px;
+      }
+
+      .message-marquee {
+        display: flex;
+        gap: 14px;
+        width: max-content;
+        animation: tribute-scroll 28s linear infinite;
+      }
+
+      .message-stack:hover .message-marquee {
+        animation-play-state: paused;
+      }
+
+      .mini-message {
+        width: 232px;
+        min-height: 132px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .message-type-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        margin-bottom: 10px;
+      }
+
+      .message-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--gold-soft);
+        color: #7d602a;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+      }
+
+      .message-chip.timeline {
+        background: #f2f0f6;
+        color: #60557c;
+      }
+
+      .message-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 8px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      }
+
+      .message-name {
+        font-weight: 700;
+      }
+
+      .message-date {
+        color: var(--muted-3);
+        font-size: 0.9rem;
+      }
+
+      .message-copy.compact {
+        display: -webkit-box;
+        margin-bottom: 12px;
+        overflow: hidden;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+      }
+
+      .message-more {
+        display: inline-flex;
+        align-self: flex-start;
+        color: #7d602a;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 700;
+        text-decoration: none;
+      }
+
+      .message-more:hover {
+        text-decoration: underline;
+      }
+
+      .form-card {
+        border: 1px solid var(--line);
+        border-radius: 22px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.9);
+      }
+
+      .form-grid {
+        display: grid;
+        gap: 12px;
+      }
+
+      .field-label {
+        display: block;
+        margin-bottom: 6px;
+        color: var(--muted-2);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+
+      .input,
+      .textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: #ffffff;
+        color: var(--text);
+        font: inherit;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        padding: 12px 14px;
+      }
+
+      .textarea {
+        min-height: 140px;
+        resize: vertical;
+      }
+
+      .support-card,
+      .privacy-card {
+        padding: 20px;
+      }
+
+      .chip-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 16px 0 18px;
+      }
+
+      .chip {
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        color: var(--text);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.92rem;
+        font-weight: 600;
+      }
+
+      .chip-active {
+        border-color: rgba(200, 169, 106, 0.35);
+        background: var(--gold-soft);
+        color: #7d602a;
+      }
+
+      .chip-selectable {
+        cursor: pointer;
+      }
+
+      .privacy-options {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .privacy-option {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        padding: 14px;
+        border: 1px solid var(--line);
+        border-radius: 18px;
+        background: #ffffff;
+      }
+
+      .privacy-dot {
+        width: 14px;
+        height: 14px;
+        margin-top: 4px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: #ffffff;
+        flex: 0 0 auto;
+      }
+
+      .privacy-dot.active {
+        border-color: var(--gold);
+        background: radial-gradient(circle, var(--gold) 0 52%, transparent 56%);
+      }
+
+      .privacy-option-title {
+        margin: 0 0 4px;
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.98rem;
+        font-weight: 700;
+      }
+
+      .privacy-option-copy {
+        margin: 0;
+        color: var(--muted-2);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.94rem;
+        line-height: 1.6;
+      }
+
+      .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 20px 24px 24px;
+        color: var(--muted);
+        font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+        font-size: 0.92rem;
+      }
+
+      .footer-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 14px;
+      }
+
+      .footer a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .footer a:hover {
+        text-decoration: underline;
+      }
+
+      @keyframes tribute-scroll {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(calc(-50% - 7px));
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page {
+          width: min(100%, calc(100% - 20px));
+          padding-top: 10px;
+        }
+
+        .shell {
+          border-radius: 22px;
+        }
+
+        .hero,
+        .actions,
+        .section {
+          padding-left: 16px;
+          padding-right: 16px;
+        }
+
+        .hero {
+          padding-top: 40px;
+          padding-bottom: 36px;
+        }
+
+        .footer {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page">
+      <div class="shell">
+        <section class="hero">
+          <div class="avatar" aria-hidden="true"></div>
+          <h1 class="name">John Michael Doe</h1>
+          <p class="dates">1965 – 2024</p>
+          <p class="tagline">Beloved Father, Mentor, and Friend</p>
+        </section>
+
+        <section class="actions">
+          <button class="btn" type="button">Share Tribute</button>
+          <button class="btn" type="button">Leave a Message</button>
+          <button class="btn-primary" type="button">Support Family</button>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Family &amp; Contributors</h2>
+          <div class="contributors">
+            <article class="contributor-card">
+              <p class="card-label">Family Organizer</p>
+              <h3 class="card-title">Sarah Doe</h3>
+              <p class="card-copy">
+                Daughter and page steward, gathering memories, photos, and support
+                from friends and family.
+              </p>
+            </article>
+            <article class="contributor-card">
+              <p class="card-label">Contributor</p>
+              <h3 class="card-title">Michael Doe Jr.</h3>
+              <p class="card-copy">
+                Adding milestone stories, family history, and notes from those who
+                worked alongside John.
+              </p>
+            </article>
+            <article class="contributor-card">
+              <p class="card-label">Community</p>
+              <h3 class="card-title">Friends &amp; Colleagues</h3>
+              <p class="card-copy">
+                Guests can leave messages, submit memories, and contribute support as
+                the page grows.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section section-soft">
+          <h2 class="section-title">Photo Memory Gallery</h2>
+          <div class="gallery-card">
+            <p class="body">
+              A gentle space for family photos, celebration moments, and the scenes
+              that made his life recognizable to everyone who loved him.
+            </p>
+            <div class="gallery-grid" aria-hidden="true">
+              <div class="gallery-item"></div>
+              <div class="gallery-item"></div>
+              <div class="gallery-item"></div>
+            </div>
+            <p class="subtle-note">
+              No photos have been added yet. Family members and invited contributors
+              will be able to upload memories here.
+            </p>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Life Story</h2>
+          <div class="story">
+            <p class="body">
+              John was known for kindness, wisdom, and steady presence. He built a
+              life of service, family, and quiet leadership, shaping every room not
+              by volume but by steadiness.
+            </p>
+            <p class="body">
+              He believed in showing up for people. Whether he was guiding his
+              children, mentoring younger colleagues, or helping a neighbor solve an
+              ordinary problem, his instinct was always to make life gentler for
+              someone else.
+            </p>
+            <p class="body">
+              Those who knew him remember a patient listener, a thoughtful teacher,
+              and a man whose values were visible in daily practice. This tribute is
+              a place to hold those memories with care.
+            </p>
+          </div>
+        </section>
+
+        <section class="section section-soft">
+          <h2 class="section-title">Timeline</h2>
+          <div class="timeline">
+            <article class="timeline-item">
+              <p class="timeline-year">1965</p>
+              <h3 class="timeline-title">A Beginning Rooted in Family</h3>
+              <p class="timeline-copy">
+                Born into a close-knit family, John carried those early values of
+                generosity and responsibility throughout his life.
+              </p>
+            </article>
+            <article class="timeline-item">
+              <p class="timeline-year">1990s</p>
+              <h3 class="timeline-title">Building a Life of Work and Service</h3>
+              <p class="timeline-copy">
+                He became known as a dependable presence at work and a trusted source
+                of calm guidance for those around him.
+              </p>
+            </article>
+            <article class="timeline-item">
+              <p class="timeline-year">2000s-2024</p>
+              <h3 class="timeline-title">Mentor, Father, and Friend</h3>
+              <p class="timeline-copy">
+                His later years were defined by family, mentorship, and a quiet
+                legacy of care that continues through the people he shaped.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <section class="section">
+          <h2 class="section-title">Messages &amp; Memories</h2>
+          <div class="messages-layout">
+            <div class="message-stack">
+              <div class="message-marquee">
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip">Feed</span>
+                      <span class="message-date">April 18, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Grace A.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      John had a way of making people feel steady. Even brief
+                      conversations with him left you clearer and calmer than before.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip timeline">Timeline</span>
+                      <span class="message-date">April 21, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Daniel K.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      He led with kindness and patience. I still use lessons he taught
+                      me years ago, and I think many of us do without even realizing
+                      it.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip">Feed</span>
+                      <span class="message-date">April 24, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Maria S.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      He remembered details about people. That kind of care stays with
+                      you for years after the conversation is over.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip timeline">Timeline</span>
+                      <span class="message-date">April 28, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Samuel T.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      One story deserves a place in the life timeline, because it says
+                      so much about the kind of father and mentor he was.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip">Feed</span>
+                      <span class="message-date">April 18, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Grace A.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      John had a way of making people feel steady. Even brief
+                      conversations with him left you clearer and calmer than before.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip timeline">Timeline</span>
+                      <span class="message-date">April 21, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Daniel K.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      He led with kindness and patience. I still use lessons he taught
+                      me years ago, and I think many of us do without even realizing
+                      it.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip">Feed</span>
+                      <span class="message-date">April 24, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Maria S.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      He remembered details about people. That kind of care stays with
+                      you for years after the conversation is over.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+                <article class="message-card mini-message">
+                  <div>
+                    <div class="message-type-row">
+                      <span class="message-chip timeline">Timeline</span>
+                      <span class="message-date">April 28, 2026</span>
+                    </div>
+                    <div class="message-head">
+                      <span class="message-name">Samuel T.</span>
+                    </div>
+                    <p class="message-copy compact">
+                      One story deserves a place in the life timeline, because it says
+                      so much about the kind of father and mentor he was.
+                    </p>
+                  </div>
+                  <a class="message-more" href="#">See more</a>
+                </article>
+              </div>
+              <p class="subtle-note">
+                Short memory cards glide through the tribute feed. Hover to pause, or
+                open a card to read the full message.
+              </p>
+            </div>
+
+            <form class="form-card">
+              <h3 class="card-title">Leave a Message</h3>
+              <p class="subtle-note">
+                Guests can share condolences, short memories, or a note of support.
+              </p>
+              <div class="form-grid">
+                <div>
+                  <label class="field-label" for="guest-name">Your name</label>
+                  <input class="input" id="guest-name" type="text" placeholder="Enter your name" />
+                </div>
+                <div>
+                  <span class="field-label">Show this memory in</span>
+                  <div class="chip-row">
+                    <button class="chip chip-selectable chip-active" type="button">Feed</button>
+                    <button class="chip chip-selectable" type="button">Timeline</button>
+                  </div>
+                </div>
+                <div>
+                  <label class="field-label" for="guest-message">Your memory</label>
+                  <textarea class="textarea" id="guest-message" placeholder="Write a memory, prayer, or note of support"></textarea>
+                </div>
+                <button class="btn-primary" type="submit">Submit Message</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <section class="section section-soft">
+          <h2 class="section-title">Support the Family</h2>
+          <div class="support-layout">
+            <div class="support-card">
+              <h3 class="card-title">Choose an amount</h3>
+              <p class="card-copy">
+                Contributions can help with memorial costs, family support, or any
+                purpose the page owner defines.
+              </p>
+              <div class="chip-row">
+                <span class="chip">$25</span>
+                <span class="chip chip-active">$50</span>
+                <span class="chip">$100</span>
+                <span class="chip">$250</span>
+                <span class="chip">Custom</span>
+              </div>
+              <button class="btn-primary" type="button">Contribute Now</button>
+            </div>
+            <div class="support-card">
+              <h3 class="card-title">Support note</h3>
+              <p class="card-copy">
+                Payments can later connect to Stripe or another processor. For now,
+                the layout establishes the contribution pattern and emotional tone of
+                the page.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <footer class="footer">
+          <div class="footer-links">
+            <a href="#">About</a>
+            <a href="#">Support</a>
+            <a href="#">Privacy</a>
+            <a href="#">Contact</a>
+          </div>
+          <div>Powered by Tributes</div>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>
