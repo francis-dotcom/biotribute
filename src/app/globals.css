@@ -2633,11 +2633,13 @@ textarea {
 
 .tribute-stream-thumbnail {
   min-height: 220px;
+  aspect-ratio: 16 / 9;
   border: 1px solid rgba(229, 229, 234, 0.9);
   border-radius: var(--radius-md);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover;
+  background-size: contain;
+  background-color: rgba(244, 235, 218, 0.35);
   box-shadow: var(--shadow-xs);
 }
 
