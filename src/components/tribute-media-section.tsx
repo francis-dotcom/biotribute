@@ -22,6 +22,28 @@ type MediaEmbed =
   | { type: "iframe"; src: string; thumbnail?: string | null; label: string; description?: string }
   | { type: "link"; src: string; thumbnail?: string | null; label: string; description?: string };
 
+const FINAL_JOURNEY_NOTE =
+  "Date and Time of His Final Journey will be announced and streamed live by his family";
+
+function renderFinalJourneyNoteWithBold(note: string) {
+  const lowerNote = note.toLowerCase();
+  const lowerTarget = FINAL_JOURNEY_NOTE.toLowerCase();
+  const start = lowerNote.indexOf(lowerTarget);
+
+  if (start === -1) {
+    return note;
+  }
+
+  const end = start + FINAL_JOURNEY_NOTE.length;
+  return (
+    <>
+      {note.slice(0, start)}
+      <strong>{note.slice(start, end)}</strong>
+      {note.slice(end)}
+    </>
+  );
+}
+
 function shouldPrioritizeLivestream(date: Date) {
   const formatter = new Intl.DateTimeFormat("en-US", {
     month: "numeric",
@@ -178,11 +200,6 @@ export function TributeMediaSection({
 }: TributeMediaSectionProps) {
   const [activeEmbed, setActiveEmbed] = useState<MediaEmbed | null>(null);
   const livestreamNoteText = livestreamNote?.trim();
-  const highlightFinalJourneyNote = Boolean(
-    livestreamNoteText &&
-      /final journey/i.test(livestreamNoteText) &&
-      /streamed live/i.test(livestreamNoteText),
-  );
 
   const mediaEmbeds = useMemo(
     () =>
@@ -291,7 +308,7 @@ export function TributeMediaSection({
           ) : null}
           {livestreamNoteText ? (
             <p className="subtle-note">
-              {highlightFinalJourneyNote ? <strong>{livestreamNoteText}</strong> : livestreamNoteText}
+              {renderFinalJourneyNoteWithBold(livestreamNoteText)}
             </p>
           ) : null}
         </div>

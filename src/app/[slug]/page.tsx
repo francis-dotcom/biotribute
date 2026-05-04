@@ -73,11 +73,6 @@ export default async function TributePage({ params }: PageProps) {
         : "none",
   } as CSSProperties;
   const supportNoteText = tribute.supportNote?.trim();
-  const highlightFinalJourneyNote = Boolean(
-    supportNoteText &&
-      /final journey/i.test(supportNoteText) &&
-      /streamed live/i.test(supportNoteText),
-  );
 
   return (
     <main className="page-shell tribute-page-shell" style={pageStyle}>
@@ -251,9 +246,7 @@ export default async function TributePage({ params }: PageProps) {
               <h3>Note from the Fanmily</h3>
               <p>
                 {supportNoteText
-                  ? highlightFinalJourneyNote
-                    ? <strong>{supportNoteText}</strong>
-                    : supportNoteText
+                  ? <strong>{supportNoteText}</strong>
                   : "Use this section to explain tribute card options, family support contributions, or any other memorial giving details."}
               </p>
             </article>
