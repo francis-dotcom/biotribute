@@ -15,6 +15,12 @@ type TimelineDraft = {
   copy: string;
 };
 
+type ContributorDraft = {
+  label: string;
+  name: string;
+  copy: string;
+};
+
 function hasStructuredTimeline(entries: TimelineDraft[]) {
   return entries.some((entry) => entry.year.trim() || entry.title.trim());
 }
@@ -36,6 +42,18 @@ function parseTimelineText(text: string): TimelineDraft[] {
       title: "",
       copy,
     }));
+}
+
+function countConfiguredVideos(
+  videoUrls: string[],
+  videoDescriptions: string[],
+  videoThumbnailUrls: string[],
+) {
+  return [0, 1, 2].reduce((count, index) => {
+    return videoUrls[index]?.trim() || videoDescriptions[index]?.trim() || videoThumbnailUrls[index]?.trim()
+      ? count + 1
+      : count;
+  }, 0);
 }
 
 export function TributeBuilderForm({
@@ -65,6 +83,21 @@ export function TributeBuilderForm({
     tribute.videoThumbnailUrls[1] ?? "",
     tribute.videoThumbnailUrls[2] ?? "",
   ]);
+  const [visibleVideoCount, setVisibleVideoCount] = useState(() =>
+    Math.max(1, countConfiguredVideos(
+      [tribute.videoUrls[0] ?? "", tribute.videoUrls[1] ?? "", tribute.videoUrls[2] ?? ""],
+      [
+        tribute.videoDescriptions[0] ?? "",
+        tribute.videoDescriptions[1] ?? "",
+        tribute.videoDescriptions[2] ?? "",
+      ],
+      [
+        tribute.videoThumbnailUrls[0] ?? "",
+        tribute.videoThumbnailUrls[1] ?? "",
+        tribute.videoThumbnailUrls[2] ?? "",
+      ],
+    ))
+  );
   const [activeVideoIndex, setActiveVideoIndex] = useState(tribute.activeVideoIndex ?? 0);
   const [videoNote, setVideoNote] = useState(tribute.videoNote ?? "");
   const [uploadingVideoThumbIndex, setUploadingVideoThumbIndex] = useState<number | null>(null);
@@ -121,6 +154,17 @@ export function TributeBuilderForm({
         : [],
     ),
   );
+  const [contributorEntries, setContributorEntries] = useState<ContributorDraft[]>(() => {
+    const seeded = tribute.contributors.map((contributor) => ({
+      label: contributor.label,
+      name: contributor.name,
+      copy: contributor.copy,
+    }));
+    while (seeded.length < 8) {
+      seeded.push({ label: "", name: "", copy: "" });
+    }
+    return seeded.slice(0, 8);
+  });
 
   function updateTimelineEntry(
     index: number,
@@ -145,6 +189,18 @@ export function TributeBuilderForm({
       }
       return current.filter((_, entryIndex) => entryIndex !== index);
     });
+  }
+
+  function updateContributorEntry(
+    index: number,
+    field: keyof ContributorDraft,
+    value: string
+  ) {
+    setContributorEntries((current) =>
+      current.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [field]: value } : entry
+      )
+    );
   }
 
   async function handleSubmit(formData: FormData) {
@@ -210,11 +266,18 @@ export function TributeBuilderForm({
                 copy: entry.copy.trim(),
               }))
               .filter((entry) => entry.year || entry.title || entry.copy),
-      contributors: tribute.contributors.map((_, index) => ({
-        label: String(formData.get(`contributorLabel-${index}`) ?? ""),
-        name: String(formData.get(`contributorName-${index}`) ?? ""),
-        copy: String(formData.get(`contributorCopy-${index}`) ?? ""),
-      })),
+      contributors: contributorEntries
+        .map((entry) => ({
+          label: entry.label.trim(),
+          name: entry.name.trim(),
+          copy: entry.copy.trim(),
+        }))
+        .filter((entry) => entry.label || entry.name || entry.copy)
+        .map((entry) => ({
+          label: entry.label || "Loved One",
+          name: entry.name || "Family Member",
+          copy: entry.copy || "Shared in loving memory.",
+        })),
       supportAmounts: tribute.supportAmounts.map((amount, index) => ({
         label: String(formData.get(`supportLabel-${index}`) ?? amount.label),
         featured: formData.get(`supportFeatured-${index}`) === "on",
@@ -628,255 +691,130 @@ export function TributeBuilderForm({
         <h3>Video uploads and playback</h3>
         <p className="subtle-note">Add up to 3 video links for Video Memories.</p>
         <p className="subtle-note">After deleting a video link, click Save Draft to publish the removal.</p>
-        <label className="field-block">
-          <span>Video 1 URL</span>
-          <input
-            name="videoUrl-0"
-            type="url"
-            value={videoUrls[0]}
-            onChange={(event) =>
-              setVideoUrls((current) => [event.currentTarget.value, current[1], current[2]])
-            }
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-        </label>
-        <label className="field-block">
-          <span>Video 1 Description</span>
-          <input
-            name="videoDescription-0"
-            type="text"
-            value={videoDescriptions[0]}
-            onChange={(event) =>
-              setVideoDescriptions((current) => [event.currentTarget.value, current[1], current[2]])
-            }
-            placeholder="Short description for video 1"
-          />
-        </label>
-        <div className="field-block">
-          <span>Upload Video 1 placeholder image</span>
-          <input
-            ref={(node) => {
-              videoThumbInputRefs.current[0] = node;
-            }}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/avif"
-            onChange={(event) => {
-              void uploadVideoThumbnail(0, event.currentTarget.files);
-            }}
-          />
-          <p className="subtle-note">
-            {uploadingVideoThumbIndex === 0
-              ? "Uploading video placeholder..."
-              : videoThumbnailUrls[0]?.trim()
-                ? "Video 1 placeholder saved. Save Draft to apply it."
-                : "Upload an image to use as the Video 1 placeholder."}
-          </p>
+        <div className="builder-repeat-grid">
+          {[0, 1, 2].slice(0, visibleVideoCount).map((index) => (
+            <div className="builder-repeat-card" key={`video-memory-${index}`}>
+              <label className="field-block">
+                <span>{`Video ${index + 1} URL`}</span>
+                <input
+                  name={`videoUrl-${index}`}
+                  type="url"
+                  value={videoUrls[index]}
+                  onChange={(event) =>
+                    setVideoUrls((current) =>
+                      current.map((value, currentIndex) =>
+                        currentIndex === index ? event.currentTarget.value : value
+                      )
+                    )
+                  }
+                  placeholder="https://www.youtube.com/watch?v=..."
+                />
+              </label>
+              <label className="field-block">
+                <span>{`Video ${index + 1} Description`}</span>
+                <input
+                  name={`videoDescription-${index}`}
+                  type="text"
+                  value={videoDescriptions[index]}
+                  onChange={(event) =>
+                    setVideoDescriptions((current) =>
+                      current.map((value, currentIndex) =>
+                        currentIndex === index ? event.currentTarget.value : value
+                      )
+                    )
+                  }
+                  placeholder={`Short description for video ${index + 1}`}
+                />
+              </label>
+              <div className="field-block">
+                <span>{`Upload Video ${index + 1} placeholder image`}</span>
+                <input
+                  ref={(node) => {
+                    videoThumbInputRefs.current[index] = node;
+                  }}
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/avif"
+                  onChange={(event) => {
+                    void uploadVideoThumbnail(index, event.currentTarget.files);
+                  }}
+                />
+                <p className="subtle-note">
+                  {uploadingVideoThumbIndex === index
+                    ? "Uploading video placeholder..."
+                    : videoThumbnailUrls[index]?.trim()
+                      ? `Video ${index + 1} placeholder saved. Save Draft to apply it.`
+                      : `Upload an image to use as the Video ${index + 1} placeholder.`}
+                </p>
+              </div>
+              {videoUrls[index].trim() ? (
+                <label className="field-block builder-checkbox">
+                  <input
+                    type="checkbox"
+                    checked={activeVideoIndex === index}
+                    onChange={() => setActiveVideoIndex(index)}
+                  />
+                  <span>{`Display Video ${index + 1} on the public page`}</span>
+                </label>
+              ) : null}
+              {videoThumbnailUrls[index]?.trim() ? (
+                <div className="field-block">
+                  <span>{`Saved Video ${index + 1} placeholder`}</span>
+                  <img
+                    src={videoThumbnailUrls[index].trim()}
+                    alt={`Video ${index + 1} placeholder preview`}
+                    className="builder-livestream-preview"
+                  />
+                </div>
+              ) : null}
+              <div className="builder-inline-actions">
+                <button
+                  className="button-secondary dashboard-danger-button"
+                  type="button"
+                  onClick={() => {
+                    setVideoUrls((current) =>
+                      current.map((value, currentIndex) => (currentIndex === index ? "" : value))
+                    );
+                    setVideoDescriptions((current) =>
+                      current.map((value, currentIndex) => (currentIndex === index ? "" : value))
+                    );
+                    setVideoThumbnailUrls((current) =>
+                      current.map((value, currentIndex) => (currentIndex === index ? "" : value))
+                    );
+                    if (activeVideoIndex === index) {
+                      setActiveVideoIndex(0);
+                    }
+                    if (videoThumbInputRefs.current[index]) {
+                      videoThumbInputRefs.current[index].value = "";
+                    }
+                    const remainingConfiguredCount = countConfiguredVideos(
+                      videoUrls.map((value, currentIndex) => (currentIndex === index ? "" : value)),
+                      videoDescriptions.map((value, currentIndex) =>
+                        currentIndex === index ? "" : value
+                      ),
+                      videoThumbnailUrls.map((value, currentIndex) =>
+                        currentIndex === index ? "" : value
+                      ),
+                    );
+                    setVisibleVideoCount(Math.max(1, Math.min(visibleVideoCount, remainingConfiguredCount + 1)));
+                  }}
+                >
+                  {`Delete Video ${index + 1}`}
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-        {videoUrls[0].trim() ? (
-          <label className="field-block builder-checkbox">
-            <input
-              type="checkbox"
-              checked={activeVideoIndex === 0}
-              onChange={() => setActiveVideoIndex(0)}
-            />
-            <span>Display Video 1 on the public page</span>
-          </label>
-        ) : null}
-        {videoThumbnailUrls[0]?.trim() ? (
-          <div className="field-block">
-            <span>Saved Video 1 placeholder</span>
-            <img
-              src={videoThumbnailUrls[0].trim()}
-              alt="Video 1 placeholder preview"
-              className="builder-livestream-preview"
-            />
+        {visibleVideoCount < 3 ? (
+          <div className="builder-inline-actions">
+            <button
+              className="button-secondary"
+              type="button"
+              onClick={() => setVisibleVideoCount((current) => Math.min(current + 1, 3))}
+            >
+              {`Add Video ${visibleVideoCount + 1}`}
+            </button>
           </div>
         ) : null}
-        <div className="builder-inline-actions">
-          <button
-            className="button-secondary dashboard-danger-button"
-            type="button"
-            onClick={() => {
-              setVideoUrls((current) => ["", current[1], current[2]]);
-              setVideoDescriptions((current) => ["", current[1], current[2]]);
-              setVideoThumbnailUrls((current) => ["", current[1], current[2]]);
-              if (activeVideoIndex === 0) {
-                setActiveVideoIndex(1);
-              }
-              if (videoThumbInputRefs.current[0]) {
-                videoThumbInputRefs.current[0].value = "";
-              }
-            }}
-          >
-            Delete Video 1
-          </button>
-        </div>
-        <label className="field-block">
-          <span>Video 2 URL</span>
-          <input
-            name="videoUrl-1"
-            type="url"
-            value={videoUrls[1]}
-            onChange={(event) =>
-              setVideoUrls((current) => [current[0], event.currentTarget.value, current[2]])
-            }
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-        </label>
-        <label className="field-block">
-          <span>Video 2 Description</span>
-          <input
-            name="videoDescription-1"
-            type="text"
-            value={videoDescriptions[1]}
-            onChange={(event) =>
-              setVideoDescriptions((current) => [current[0], event.currentTarget.value, current[2]])
-            }
-            placeholder="Short description for video 2"
-          />
-        </label>
-        <div className="field-block">
-          <span>Upload Video 2 placeholder image</span>
-          <input
-            ref={(node) => {
-              videoThumbInputRefs.current[1] = node;
-            }}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/avif"
-            onChange={(event) => {
-              void uploadVideoThumbnail(1, event.currentTarget.files);
-            }}
-          />
-          <p className="subtle-note">
-            {uploadingVideoThumbIndex === 1
-              ? "Uploading video placeholder..."
-              : videoThumbnailUrls[1]?.trim()
-                ? "Video 2 placeholder saved. Save Draft to apply it."
-                : "Upload an image to use as the Video 2 placeholder."}
-          </p>
-        </div>
-        {videoUrls[1].trim() ? (
-          <label className="field-block builder-checkbox">
-            <input
-              type="checkbox"
-              checked={activeVideoIndex === 1}
-              onChange={() => setActiveVideoIndex(1)}
-            />
-            <span>Display Video 2 on the public page</span>
-          </label>
-        ) : null}
-        {videoThumbnailUrls[1]?.trim() ? (
-          <div className="field-block">
-            <span>Saved Video 2 placeholder</span>
-            <img
-              src={videoThumbnailUrls[1].trim()}
-              alt="Video 2 placeholder preview"
-              className="builder-livestream-preview"
-            />
-          </div>
-        ) : null}
-        <div className="builder-inline-actions">
-          <button
-            className="button-secondary dashboard-danger-button"
-            type="button"
-            onClick={() => {
-              setVideoUrls((current) => [current[0], "", current[2]]);
-              setVideoDescriptions((current) => [current[0], "", current[2]]);
-              setVideoThumbnailUrls((current) => [current[0], "", current[2]]);
-              if (activeVideoIndex === 1) {
-                setActiveVideoIndex(0);
-              }
-              if (videoThumbInputRefs.current[1]) {
-                videoThumbInputRefs.current[1].value = "";
-              }
-            }}
-          >
-            Delete Video 2
-          </button>
-        </div>
-        <label className="field-block">
-          <span>Video 3 URL</span>
-          <input
-            name="videoUrl-2"
-            type="url"
-            value={videoUrls[2]}
-            onChange={(event) =>
-              setVideoUrls((current) => [current[0], current[1], event.currentTarget.value])
-            }
-            placeholder="https://www.youtube.com/watch?v=..."
-          />
-        </label>
-        <label className="field-block">
-          <span>Video 3 Description</span>
-          <input
-            name="videoDescription-2"
-            type="text"
-            value={videoDescriptions[2]}
-            onChange={(event) =>
-              setVideoDescriptions((current) => [current[0], current[1], event.currentTarget.value])
-            }
-            placeholder="Short description for video 3"
-          />
-        </label>
-        <div className="field-block">
-          <span>Upload Video 3 placeholder image</span>
-          <input
-            ref={(node) => {
-              videoThumbInputRefs.current[2] = node;
-            }}
-            type="file"
-            accept="image/png,image/jpeg,image/webp,image/avif"
-            onChange={(event) => {
-              void uploadVideoThumbnail(2, event.currentTarget.files);
-            }}
-          />
-          <p className="subtle-note">
-            {uploadingVideoThumbIndex === 2
-              ? "Uploading video placeholder..."
-              : videoThumbnailUrls[2]?.trim()
-                ? "Video 3 placeholder saved. Save Draft to apply it."
-                : "Upload an image to use as the Video 3 placeholder."}
-          </p>
-        </div>
-        {videoUrls[2].trim() ? (
-          <label className="field-block builder-checkbox">
-            <input
-              type="checkbox"
-              checked={activeVideoIndex === 2}
-              onChange={() => setActiveVideoIndex(2)}
-            />
-            <span>Display Video 3 on the public page</span>
-          </label>
-        ) : null}
-        {videoThumbnailUrls[2]?.trim() ? (
-          <div className="field-block">
-            <span>Saved Video 3 placeholder</span>
-            <img
-              src={videoThumbnailUrls[2].trim()}
-              alt="Video 3 placeholder preview"
-              className="builder-livestream-preview"
-            />
-          </div>
-        ) : null}
-        <div className="builder-inline-actions">
-          <button
-            className="button-secondary dashboard-danger-button"
-            type="button"
-            onClick={() => {
-              setVideoUrls((current) => [current[0], current[1], ""]);
-              setVideoDescriptions((current) => [current[0], current[1], ""]);
-              setVideoThumbnailUrls((current) => [current[0], current[1], ""]);
-              if (activeVideoIndex === 2) {
-                setActiveVideoIndex(0);
-              }
-              if (videoThumbInputRefs.current[2]) {
-                videoThumbInputRefs.current[2].value = "";
-              }
-            }}
-          >
-            Delete Video 3
-          </button>
-        </div>
         <label className="field-block">
           <span>Video section note</span>
           <textarea
@@ -1020,17 +958,24 @@ export function TributeBuilderForm({
       </article>
 
       <article className="form-card">
-        <p className="card-label">Contributors</p>
-        <h3>Family and community cards</h3>
+        <p className="card-label">Special Tributes</p>
+        <h3>8 featured messages from family and loved ones</h3>
+        <p className="subtle-note">
+          Add up to 8 visible tribute cards. Fill any card with label, name, and message.
+        </p>
         <div className="builder-repeat-grid">
-          {tribute.contributors.map((contributor, index) => (
-            <div className="builder-repeat-card" key={contributor.name}>
+          {contributorEntries.map((contributor, index) => (
+            <div className="builder-repeat-card" key={`contributor-card-${index}`}>
               <label className="field-block">
                 <span>Label</span>
                 <input
                   name={`contributorLabel-${index}`}
                   type="text"
-                  defaultValue={contributor.label}
+                  value={contributor.label}
+                  onChange={(event) =>
+                    updateContributorEntry(index, "label", event.currentTarget.value)
+                  }
+                  placeholder="Family Representative"
                 />
               </label>
               <label className="field-block">
@@ -1038,14 +983,22 @@ export function TributeBuilderForm({
                 <input
                   name={`contributorName-${index}`}
                   type="text"
-                  defaultValue={contributor.name}
+                  value={contributor.name}
+                  onChange={(event) =>
+                    updateContributorEntry(index, "name", event.currentTarget.value)
+                  }
+                  placeholder="Name"
                 />
               </label>
               <label className="field-block">
-                <span>Description</span>
+                <span>Message</span>
                 <textarea
                   name={`contributorCopy-${index}`}
-                  defaultValue={contributor.copy}
+                  value={contributor.copy}
+                  onChange={(event) =>
+                    updateContributorEntry(index, "copy", event.currentTarget.value)
+                  }
+                  placeholder="Write a tribute message from this loved one..."
                 />
               </label>
             </div>
