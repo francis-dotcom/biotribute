@@ -75,6 +75,7 @@ export function DonationDetailsModal({
                       </div>
                     ) : null}
                   </div>
+                  <p className="donation-gratitude">Thank you as you give.</p>
                 </>
               ) : (
                 <p className="subtle-note">
