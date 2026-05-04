@@ -75,30 +75,6 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     trackRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   }, [isSearching]);
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track || isSearching || isInteracting || filteredMessages.length === 0) {
-      return;
-    }
-
-    const loopPoint = track.scrollWidth / 2;
-    if (loopPoint <= 0) {
-      return;
-    }
-
-    const timerId = window.setInterval(() => {
-      track.scrollLeft += 1;
-
-      if (track.scrollLeft >= loopPoint) {
-        track.scrollLeft -= loopPoint;
-      }
-    }, 28);
-
-    return () => {
-      window.clearInterval(timerId);
-    };
-  }, [filteredMessages.length, isInteracting, isSearching, visibleMessages.length]);
-
   return (
     <>
       <div className="messages-toolbar">
@@ -146,6 +122,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
       <div
         className="messages-stream"
+        ref={trackRef}
         onMouseEnter={() => setIsInteracting(true)}
         onMouseLeave={() => setIsInteracting(false)}
         onTouchStart={() => setIsInteracting(true)}
@@ -153,8 +130,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
         onTouchCancel={() => setIsInteracting(false)}
       >
         <div
-          className={`messages-track${isSearching ? " is-searching" : ""}`}
-          ref={trackRef}
+          className={`messages-track${isSearching ? " is-searching" : " is-auto-scrolling"}${isInteracting ? " is-paused" : ""}`}
         >
           {visibleMessages.map((message, index) => (
             <article className="message-mini-card" key={`${message.id}-${index}`}>

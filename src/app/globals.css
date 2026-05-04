@@ -851,7 +851,7 @@ textarea {
 }
 
 .messages-stream {
-  overflow: visible;
+  overflow: hidden;
 }
 
 .messages-toolbar {
@@ -953,16 +953,23 @@ textarea {
 .messages-track {
   display: flex;
   gap: 14px;
-  width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
-  scrollbar-width: thin;
+  width: max-content;
+  min-width: 100%;
   scroll-padding-inline: 8px;
   padding: 0 8px 8px;
 }
 
+.messages-track.is-auto-scrolling {
+  animation: tribute-scroll 34s linear infinite;
+}
+
+.messages-track.is-paused {
+  animation-play-state: paused;
+}
+
 .messages-track.is-searching {
-  overflow-x: hidden;
+  width: 100%;
+  animation: none;
 }
 
 .messages-library-modal {
@@ -2365,17 +2372,18 @@ textarea {
   .hero-share-icon {
     display: inline-flex;
     position: absolute;
-    bottom: -43px;
-    right: 50%;
-    transform: translateX(62px);
+    top: 4px;
+    right: -8px;
+    bottom: auto;
+    transform: none;
   }
 
   .hero-share-icon:hover {
-    transform: translateX(62px) translateY(-1px);
+    transform: translateY(-1px);
   }
 
   .hero-share-icon:active {
-    transform: translateX(62px);
+    transform: translateY(0);
   }
 
   .hero-donation-badge:hover {
