@@ -236,8 +236,8 @@ textarea {
 }
 
 .hero-section {
-  padding-top: 64px;
-  padding-bottom: 54px;
+  padding-top: 56px;
+  padding-bottom: 46px;
   text-align: center;
   border-bottom: 1px solid var(--line);
   position: relative;
@@ -312,7 +312,9 @@ textarea {
 
 .hero-section h1 {
   font-size: clamp(2.15rem, 5.2vw, 3.05rem);
-  line-height: 1.02;
+  line-height: 1.06;
+  max-width: min(100%, 18ch);
+  margin-inline: auto;
 }
 
 .hero-dates,
@@ -333,9 +335,10 @@ textarea {
 }
 
 .hero-tagline {
-  margin: 0;
+  margin: 2px auto 0;
   color: var(--muted-2);
   font-size: 1.08rem;
+  max-width: 34ch;
 }
 
 
@@ -382,8 +385,8 @@ textarea {
 }
 
 .content-section {
-  padding-top: 34px;
-  padding-bottom: 34px;
+  padding-top: 40px;
+  padding-bottom: 40px;
   border-bottom: 1px solid var(--line);
   position: relative;
 }
@@ -393,10 +396,10 @@ textarea {
 }
 
 .content-section h2 {
-  margin-bottom: 28px;
+  margin-bottom: 24px;
   font-size: clamp(2rem, 4vw, 2.45rem);
   position: relative;
-  padding-bottom: 16px;
+  padding-bottom: 14px;
 }
 
 .content-section h2::after {
@@ -430,7 +433,7 @@ textarea {
 
 .messages-section-stack {
   display: grid;
-  gap: 18px;
+  gap: 22px;
 }
 
 .soft-card,
@@ -1034,6 +1037,7 @@ textarea {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
+  margin-top: 4px;
 }
 
 .support-action-pill {
@@ -1041,14 +1045,15 @@ textarea {
   align-items: center;
   justify-content: center;
   width: 100%;
-  min-height: 40px;
-  padding: 9px 14px;
+  min-height: 44px;
+  padding: 9px 16px;
   border-radius: 999px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.94);
   color: var(--text);
   text-decoration: none;
-  font: 600 0.92rem var(--font-sans);
+  font: 700 0.98rem var(--font-sans);
+  letter-spacing: 0.01em;
   cursor: pointer;
   transition:
     transform 140ms ease,
@@ -1067,7 +1072,6 @@ textarea {
   border-color: rgba(200, 169, 106, 0.34);
   background: var(--gold-soft);
   color: #7d602a;
-  min-width: 126px;
 }
 
 .support-primary-pill {
@@ -1985,8 +1989,8 @@ textarea {
   }
 
   .hero-section {
-    padding-top: 46px;
-    padding-bottom: 40px;
+    padding-top: 38px;
+    padding-bottom: 32px;
   }
 
   .hero-kicker {
@@ -2002,6 +2006,11 @@ textarea {
   .content-section h2 {
     margin-bottom: 24px;
     padding-bottom: 14px;
+  }
+
+  .content-section {
+    padding-top: 28px;
+    padding-bottom: 28px;
   }
 
   .content-section h2::after {
@@ -2041,6 +2050,12 @@ textarea {
 
   .support-action-list {
     grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .support-action-pill {
+    min-height: 42px;
+    font-size: 0.95rem;
   }
 
 }
