@@ -4,6 +4,7 @@ import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
 import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
+import { MarkdownText } from "@/components/markdown-text";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
 import { ShareTributeIconButton } from "@/components/share-tribute-icon-button";
@@ -208,7 +209,7 @@ export default async function TributePage({ params }: PageProps) {
               <article className="soft-card" key={contributor.name}>
                 <p className="card-label">{contributor.label}</p>
                 <h3>{contributor.name}</h3>
-                <p>{contributor.copy}</p>
+                <MarkdownText content={contributor.copy} />
               </article>
             ))}
           </div>
@@ -244,11 +245,13 @@ export default async function TributePage({ params }: PageProps) {
             </article>
             <article className="form-card">
               <h3>Note from the Fanmily</h3>
-              <p>
-                {supportNoteText
-                  ? <strong>{supportNoteText}</strong>
-                  : "Use this section to explain tribute card options, family support contributions, or any other memorial giving details."}
-              </p>
+              <MarkdownText
+                content={
+                  supportNoteText
+                    ? supportNoteText
+                    : "Use this section to explain tribute card options, family support contributions, or any other memorial giving details."
+                }
+              />
             </article>
           </div>
         </section>
@@ -259,8 +262,8 @@ export default async function TributePage({ params }: PageProps) {
             <a href="#support-section">Support</a>
             <a href="#messages-section">Contact</a>
           </div>
-          <div>
-            Organized by <strong>{tribute.organizer}</strong> · Powered by Ogigrid
+          <div className="footer-credit">
+            Organized by <strong>Ogini's Family</strong> · Powered by Ogigrid
           </div>
         </footer>
       </div>

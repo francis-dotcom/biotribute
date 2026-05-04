@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { MarkdownText } from "@/components/markdown-text";
 import type { TributeRecord } from "@/data/tributes";
 
 type TributeMediaSectionProps = {
@@ -233,7 +234,9 @@ export function TributeMediaSection({
             <span className="tribute-media-play">Play</span>
           </div>
           <div className="tribute-media-thumb-copy">
-            <p>{activeVideoEmbed.description ?? "Tap to watch this tribute memory."}</p>
+            <MarkdownText
+              content={activeVideoEmbed.description ?? "Tap to watch this tribute memory."}
+            />
           </div>
         </button>
       ) : (
@@ -246,7 +249,7 @@ export function TributeMediaSection({
         </article>
       )}
 
-      {videoNote?.trim() ? <p className="subtle-note">{videoNote}</p> : null}
+      {videoNote?.trim() ? <MarkdownText content={videoNote} className="subtle-note" /> : null}
     </section>
   ) : null;
 
@@ -285,9 +288,7 @@ export function TributeMediaSection({
             )
           ) : null}
           {livestreamNoteText ? (
-            <p className="subtle-note">
-              <strong>{livestreamNoteText}</strong>
-            </p>
+            <MarkdownText content={livestreamNoteText} className="subtle-note" />
           ) : null}
         </div>
       ) : (

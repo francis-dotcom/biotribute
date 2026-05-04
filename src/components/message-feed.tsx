@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { MarkdownText } from "@/components/markdown-text";
 import type { TributeMessage } from "@/data/tributes";
 
 type MessageFeedProps = {
@@ -148,7 +149,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                   <span className="message-date">{message.date}</span>
                 </div>
                 <p className="message-author">{message.author}</p>
-                <p className="message-excerpt">{message.excerpt}</p>
+                <MarkdownText content={message.excerpt} className="message-excerpt" />
               </div>
               <button
                 className="message-more-button"
@@ -191,7 +192,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                 ×
               </button>
             </div>
-            <p className="message-modal-copy">{activeMessage.full}</p>
+            <MarkdownText content={activeMessage.full} className="message-modal-copy" />
           </div>
         </div>
       ) : null}
@@ -257,7 +258,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                       <span className="message-date">{message.date}</span>
                     </div>
                     <p className="message-author">{message.author}</p>
-                    <p className="message-excerpt">{message.excerpt}</p>
+                    <MarkdownText content={message.excerpt} className="message-excerpt" />
                   </button>
                 ))}
                 {filteredMessages.length === 0 ? (

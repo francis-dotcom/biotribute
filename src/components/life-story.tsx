@@ -1,5 +1,7 @@
 "use client";
 
+import { MarkdownText } from "@/components/markdown-text";
+
 type LifeStoryProps = {
   paragraphs: string[];
 };
@@ -12,7 +14,7 @@ export function LifeStory({ paragraphs }: LifeStoryProps) {
     <>
       <div className="story-stack">
         {preview.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
+          <MarkdownText key={paragraph} content={paragraph} />
         ))}
       </div>
 
@@ -41,7 +43,7 @@ export function LifeStory({ paragraphs }: LifeStoryProps) {
               </div>
               <div className="story-stack story-modal-copy">
                 {paragraphs.map((paragraph) => (
-                  <p key={paragraph}>{paragraph}</p>
+                  <MarkdownText key={paragraph} content={paragraph} />
                 ))}
               </div>
             </div>

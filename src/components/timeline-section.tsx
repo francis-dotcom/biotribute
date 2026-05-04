@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MarkdownText } from "@/components/markdown-text";
 import type { TributeTimelineEntry } from "@/data/tributes";
 
 type TimelineSectionProps = {
@@ -39,8 +40,8 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
         {visibleEntries.map((entry, index) => (
           <article className="timeline-item" key={`${entry.year}-${entry.title}-${index}`}>
             {entry.year.trim() ? <p className="timeline-year">{entry.year}</p> : null}
-            {entry.title.trim() ? <h3>{entry.title}</h3> : null}
-            <p>{entry.copy}</p>
+              {entry.title.trim() ? <h3>{entry.title}</h3> : null}
+              <MarkdownText content={entry.copy} />
             <button
               className="timeline-read-more"
               type="button"
@@ -91,7 +92,7 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
                 ×
               </button>
             </div>
-            <p className="message-modal-copy">{activeEntry.copy}</p>
+            <MarkdownText content={activeEntry.copy} className="message-modal-copy" />
           </div>
         </div>
       ) : null}

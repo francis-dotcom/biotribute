@@ -155,15 +155,18 @@ export function TributeBuilderForm({
     ),
   );
   const [contributorEntries, setContributorEntries] = useState<ContributorDraft[]>(() => {
-    const seeded = tribute.contributors.map((contributor) => ({
-      label: contributor.label,
-      name: contributor.name,
-      copy: contributor.copy,
-    }));
-    if (seeded.length === 0) {
-      seeded.push({ label: "", name: "", copy: "" });
+    const firstContributor = tribute.contributors[0];
+    if (!firstContributor) {
+      return [{ label: "", name: "", copy: "" }];
     }
-    return seeded.slice(0, 8);
+
+    return [
+      {
+        label: firstContributor.label,
+        name: firstContributor.name,
+        copy: firstContributor.copy,
+      },
+    ];
   });
 
   function updateTimelineEntry(
