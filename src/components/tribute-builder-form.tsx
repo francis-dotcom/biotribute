@@ -15,6 +15,29 @@ type TimelineDraft = {
   copy: string;
 };
 
+function hasStructuredTimeline(entries: TimelineDraft[]) {
+  return entries.some((entry) => entry.year.trim() || entry.title.trim());
+}
+
+function toTimelineText(entries: TimelineDraft[]) {
+  return entries
+    .map((entry) => entry.copy.trim())
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+function parseTimelineText(text: string): TimelineDraft[] {
+  return text
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .map((copy) => ({
+      year: "",
+      title: "",
+      copy,
+    }));
+}
+
 export function TributeBuilderForm({
   tribute,
   storeConfigured,
@@ -65,6 +88,30 @@ export function TributeBuilderForm({
           copy: entry.copy,
         }))
       : [{ year: "", title: "", copy: "" }]
+  );
+  const [timelineMode, setTimelineMode] = useState<"milestones" | "text">(
+    hasStructuredTimeline(
+      tribute.timeline.length > 0
+        ? tribute.timeline.map((entry) => ({
+            year: entry.year,
+            title: entry.title,
+            copy: entry.copy,
+          }))
+        : [{ year: "", title: "", copy: "" }],
+    )
+      ? "milestones"
+      : "text",
+  );
+  const [timelineText, setTimelineText] = useState(
+    toTimelineText(
+      tribute.timeline.length > 0
+        ? tribute.timeline.map((entry) => ({
+            year: entry.year,
+            title: entry.title,
+            copy: entry.copy,
+          }))
+        : [],
+    ),
   );
 
   function updateTimelineEntry(
@@ -141,13 +188,16 @@ export function TributeBuilderForm({
       showGallerySection,
       showVideoSection,
       showLivestreamSection,
-      timeline: timelineEntries
-        .map((entry) => ({
-          year: entry.year.trim(),
-          title: entry.title.trim(),
-          copy: entry.copy.trim(),
-        }))
-        .filter((entry) => entry.year || entry.title || entry.copy),
+      timeline:
+        timelineMode === "text"
+          ? parseTimelineText(timelineText)
+          : timelineEntries
+              .map((entry) => ({
+                year: entry.year.trim(),
+                title: entry.title.trim(),
+                copy: entry.copy.trim(),
+              }))
+              .filter((entry) => entry.year || entry.title || entry.copy),
       contributors: tribute.contributors.map((_, index) => ({
         label: String(formData.get(`contributorLabel-${index}`) ?? ""),
         name: String(formData.get(`contributorName-${index}`) ?? ""),
@@ -365,58 +415,102 @@ export function TributeBuilderForm({
       <article className="form-card">
         <p className="card-label">Timeline</p>
         <h3>Milestones and key memories</h3>
-        <div className="builder-repeat-grid">
-          {timelineEntries.map((entry, index) => (
-            <div className="builder-repeat-card" key={`timeline-entry-${index}`}>
-              <label className="field-block">
-                <span>Year {index + 1}</span>
-                <input
-                  name={`timelineYear-${index}`}
-                  type="text"
-                  value={entry.year}
-                  onChange={(event) =>
-                    updateTimelineEntry(index, "year", event.currentTarget.value)
-                  }
-                />
-              </label>
-              <label className="field-block">
-                <span>Title</span>
-                <input
-                  name={`timelineTitle-${index}`}
-                  type="text"
-                  value={entry.title}
-                  onChange={(event) =>
-                    updateTimelineEntry(index, "title", event.currentTarget.value)
-                  }
-                />
-              </label>
-              <label className="field-block">
-                <span>Story</span>
-                <textarea
-                  name={`timelineCopy-${index}`}
-                  value={entry.copy}
-                  onChange={(event) =>
-                    updateTimelineEntry(index, "copy", event.currentTarget.value)
-                  }
-                />
-              </label>
-              <div className="builder-inline-actions">
-                <button
-                  className="button-secondary dashboard-danger-button"
-                  type="button"
-                  onClick={() => removeTimelineEntry(index)}
-                >
-                  Remove milestone
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
         <div className="builder-inline-actions">
-          <button className="button-secondary" type="button" onClick={addTimelineEntry}>
-            Add milestone
+          <button
+            className="button-secondary"
+            type="button"
+            aria-pressed={timelineMode === "text"}
+            onClick={() => {
+              setTimelineMode("text");
+              setTimelineText((current) => current || toTimelineText(timelineEntries));
+            }}
+          >
+            Simple text mode
+          </button>
+          <button
+            className="button-secondary"
+            type="button"
+            aria-pressed={timelineMode === "milestones"}
+            onClick={() => {
+              setTimelineMode("milestones");
+              setTimelineEntries((current) => {
+                if (current.some((entry) => entry.year || entry.title || entry.copy)) {
+                  return current;
+                }
+                const parsed = parseTimelineText(timelineText);
+                return parsed.length > 0 ? parsed : [{ year: "", title: "", copy: "" }];
+              });
+            }}
+          >
+            Milestone mode
           </button>
         </div>
+        {timelineMode === "text" ? (
+          <label className="field-block">
+            <span>Timeline text</span>
+            <textarea
+              name="timelineText"
+              value={timelineText}
+              onChange={(event) => setTimelineText(event.currentTarget.value)}
+              placeholder="Write memories freely. Separate entries with a blank line."
+            />
+          </label>
+        ) : (
+          <>
+            <div className="builder-repeat-grid">
+              {timelineEntries.map((entry, index) => (
+                <div className="builder-repeat-card" key={`timeline-entry-${index}`}>
+                  <label className="field-block">
+                    <span>Year {index + 1}</span>
+                    <input
+                      name={`timelineYear-${index}`}
+                      type="text"
+                      value={entry.year}
+                      onChange={(event) =>
+                        updateTimelineEntry(index, "year", event.currentTarget.value)
+                      }
+                    />
+                  </label>
+                  <label className="field-block">
+                    <span>Title</span>
+                    <input
+                      name={`timelineTitle-${index}`}
+                      type="text"
+                      value={entry.title}
+                      onChange={(event) =>
+                        updateTimelineEntry(index, "title", event.currentTarget.value)
+                      }
+                    />
+                  </label>
+                  <label className="field-block">
+                    <span>Story</span>
+                    <textarea
+                      name={`timelineCopy-${index}`}
+                      value={entry.copy}
+                      onChange={(event) =>
+                        updateTimelineEntry(index, "copy", event.currentTarget.value)
+                      }
+                    />
+                  </label>
+                  <div className="builder-inline-actions">
+                    <button
+                      className="button-secondary dashboard-danger-button"
+                      type="button"
+                      onClick={() => removeTimelineEntry(index)}
+                    >
+                      Remove milestone
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="builder-inline-actions">
+              <button className="button-secondary" type="button" onClick={addTimelineEntry}>
+                Add milestone
+              </button>
+            </div>
+          </>
+        )}
       </article>
 
       <article className="form-card">

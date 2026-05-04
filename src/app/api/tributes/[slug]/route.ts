@@ -4,8 +4,8 @@ import { z } from "zod";
 import { saveTributeRecord } from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
-  year: z.string().trim().min(1),
-  title: z.string().trim().min(1),
+  year: z.string().trim(),
+  title: z.string().trim(),
   copy: z.string().trim().min(1),
 });
 

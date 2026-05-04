@@ -13,10 +13,10 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
   return (
     <>
       <div className="timeline-list">
-        {entries.map((entry) => (
-          <article className="timeline-item" key={`${entry.year}-${entry.title}`}>
-            <p className="timeline-year">{entry.year}</p>
-            <h3>{entry.title}</h3>
+        {entries.map((entry, index) => (
+          <article className="timeline-item" key={`${entry.year}-${entry.title}-${index}`}>
+            {entry.year.trim() ? <p className="timeline-year">{entry.year}</p> : null}
+            {entry.title.trim() ? <h3>{entry.title}</h3> : null}
             <p>{entry.copy}</p>
             <button
               className="timeline-read-more"
@@ -41,8 +41,12 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
             <div className="message-modal-head">
               <div>
                 <p className="message-modal-kicker">Timeline Story</p>
-                <h3 id="timeline-modal-title">{activeEntry.title}</h3>
-                <p className="message-date">{activeEntry.year}</p>
+                <h3 id="timeline-modal-title">
+                  {activeEntry.title.trim() || "Memory"}
+                </h3>
+                {activeEntry.year.trim() ? (
+                  <p className="message-date">{activeEntry.year}</p>
+                ) : null}
               </div>
               <button
                 className="message-modal-close"
