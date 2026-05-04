@@ -160,7 +160,7 @@ export function TributeBuilderForm({
       name: contributor.name,
       copy: contributor.copy,
     }));
-    while (seeded.length < 8) {
+    if (seeded.length === 0) {
       seeded.push({ label: "", name: "", copy: "" });
     }
     return seeded.slice(0, 8);
@@ -201,6 +201,21 @@ export function TributeBuilderForm({
         entryIndex === index ? { ...entry, [field]: value } : entry
       )
     );
+  }
+
+  function addContributorEntry() {
+    setContributorEntries((current) =>
+      current.length >= 8 ? current : [...current, { label: "", name: "", copy: "" }]
+    );
+  }
+
+  function removeContributorEntry(index: number) {
+    setContributorEntries((current) => {
+      if (current.length <= 1) {
+        return [{ label: "", name: "", copy: "" }];
+      }
+      return current.filter((_, entryIndex) => entryIndex !== index);
+    });
   }
 
   async function handleSubmit(formData: FormData) {
@@ -961,7 +976,7 @@ export function TributeBuilderForm({
         <p className="card-label">Special Tributes</p>
         <h3>8 featured messages from family and loved ones</h3>
         <p className="subtle-note">
-          Add up to 8 visible tribute cards. Fill any card with label, name, and message.
+          Add as many as you need, then load more cards. Maximum: 8 cards.
         </p>
         <div className="builder-repeat-grid">
           {contributorEntries.map((contributor, index) => (
@@ -1001,8 +1016,28 @@ export function TributeBuilderForm({
                   placeholder="Write a tribute message from this loved one..."
                 />
               </label>
+              <div className="builder-inline-actions">
+                <button
+                  className="button-secondary dashboard-danger-button"
+                  type="button"
+                  onClick={() => removeContributorEntry(index)}
+                >
+                  Remove card
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+        <div className="builder-inline-actions">
+          <button
+            className="button-secondary"
+            type="button"
+            onClick={addContributorEntry}
+            disabled={contributorEntries.length >= 8}
+          >
+            {contributorEntries.length >= 8 ? "Maximum cards reached" : "Load more cards"}
+          </button>
+          <span className="subtle-note">{contributorEntries.length}/8 cards in use</span>
         </div>
       </article>
 
