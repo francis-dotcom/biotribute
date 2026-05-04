@@ -859,7 +859,7 @@ textarea {
   align-items: end;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
 }
 
 .messages-search {
@@ -958,7 +958,7 @@ textarea {
   overflow-y: hidden;
   scrollbar-width: thin;
   scroll-padding-inline: 8px;
-  padding: 4px 8px 10px;
+  padding: 0 8px 8px;
 }
 
 .messages-track.is-searching {
