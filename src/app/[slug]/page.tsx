@@ -199,7 +199,7 @@ export default async function TributePage({ params }: PageProps) {
               <h3>Support options</h3>
               <div className="support-action-list">
                 <button className="support-action-pill" type="button">
-                  <span aria-hidden="true">✉</span>&nbsp;Card
+                  Card
                 </button>
                 <button className="support-action-pill support-action-pill-accent" type="button">
                   Donations
