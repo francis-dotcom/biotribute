@@ -240,7 +240,7 @@ export default async function TributePage({ params }: PageProps) {
               </p>
             </article>
             <article className="form-card">
-              <h3>Support note</h3>
+              <h3>Note from the Fanmily</h3>
               <p>
                 {tribute.supportNote?.trim()
                   ? tribute.supportNote
