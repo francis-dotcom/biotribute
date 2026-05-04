@@ -176,10 +176,10 @@ export const tributes: TributeRecord[] = [
       { label: "Custom Tribute" }
     ],
     contactEmail: "",
-    donationAccountName: "",
-    donationAccountNumber: "",
-    donationBankName: "",
-    donationPhone: "",
+    donationAccountName: "DR IRENE OLUBUNMI MOJOYINOLA (NEE OGINI)",
+    donationAccountNumber: "11111111111111111111",
+    donationBankName: "ECO BANK",
+    donationPhone: "0803 835 5005",
     supportNote:
       "Choose a paid tribute card tier and include a personal sympathy message for the family."
   }
