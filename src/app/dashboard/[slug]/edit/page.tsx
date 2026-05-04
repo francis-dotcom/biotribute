@@ -1,16 +1,14 @@
 import { notFound } from "next/navigation";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminSession } from "@/lib/admin";
 import { getTributeRecord } from "@/lib/tributes-store";
 
 type EditTributePageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ token?: string }>;
 };
 
-export default async function EditTributePage({ params, searchParams }: EditTributePageProps) {
+export default async function EditTributePage({ params }: EditTributePageProps) {
   const { slug } = await params;
-  const { token } = await searchParams;
-  requireAdminToken(token, `/${slug}`);
+  await requireAdminSession(`/dashboard/${slug}/edit`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {

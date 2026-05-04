@@ -250,3 +250,8 @@ export function getTributeThemePreset(theme: TributeTheme) {
 export function getTributeBySlug(slug: string) {
   return tributes.find((tribute) => tribute.slug === slug);
 }
+
+export function getTributeBySlugInsensitive(slug: string) {
+  const normalized = slug.trim().toLowerCase();
+  return tributes.find((tribute) => tribute.slug.toLowerCase() === normalized);
+}

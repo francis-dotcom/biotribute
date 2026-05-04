@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { NoticeToast } from "@/components/notice-toast";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord } from "@/lib/tributes-store";
 
 type TributeMessagesPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ token?: string; notice?: string; tone?: "success" | "error" }>;
+  searchParams: Promise<{ notice?: string; tone?: "success" | "error" }>;
 };
 
 export default async function TributeMessagesPage({
@@ -15,8 +15,8 @@ export default async function TributeMessagesPage({
   searchParams,
 }: TributeMessagesPageProps) {
   const { slug } = await params;
-  const { token, notice, tone } = await searchParams;
-  requireAdminToken(token, `/${slug}`);
+  const { notice, tone } = await searchParams;
+  await requireAdminSession(`/dashboard/${slug}/messages`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {
@@ -24,7 +24,7 @@ export default async function TributeMessagesPage({
   }
 
   const messages = await getMessagesForAdmin(slug);
-  const redirectTo = `/dashboard/${slug}/messages?token=${encodeURIComponent(token ?? "")}`;
+  const redirectTo = `/dashboard/${slug}/messages`;
 
   return (
     <>
@@ -45,7 +45,7 @@ export default async function TributeMessagesPage({
             <p>No submissions have been stored for this tribute.</p>
           </article>
         ) : (
-          <ModerationQueue messages={messages} token={token} redirectTo={redirectTo} />
+          <ModerationQueue messages={messages} redirectTo={redirectTo} />
         )}
       </section>
     </>

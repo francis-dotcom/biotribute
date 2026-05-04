@@ -1,18 +1,15 @@
-import { redirect } from "next/navigation";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { NoticeToast } from "@/components/notice-toast";
+import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 
 type AdminPageProps = {
-  searchParams: Promise<{ token?: string; notice?: string; tone?: "success" | "error" }>;
+  searchParams: Promise<{ notice?: string; tone?: "success" | "error" }>;
 };
 
 export default async function AdminMessagesPage({ searchParams }: AdminPageProps) {
-  const { token, notice, tone } = await searchParams;
-
-  if (!process.env.BIOTRIBUTE_ADMIN_TOKEN || token !== process.env.BIOTRIBUTE_ADMIN_TOKEN) {
-    redirect("/");
-  }
+  const { notice, tone } = await searchParams;
+  await requireAdminSession("/admin/messages");
 
   const messages = await getMessagesForAdmin();
 
@@ -33,7 +30,7 @@ export default async function AdminMessagesPage({ searchParams }: AdminPageProps
           <p>No submissions have been stored.</p>
         </article>
       ) : (
-        <ModerationQueue messages={messages} token={token} />
+        <ModerationQueue messages={messages} />
       )}
     </main>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 type DashboardNavProps = {
   slug: string;
@@ -9,17 +9,14 @@ type DashboardNavProps = {
 
 export function DashboardNav({ slug }: DashboardNavProps) {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token") ?? "";
-  const tokenQuery = token ? `?token=${encodeURIComponent(token)}` : "";
 
   const links = [
-    { href: `/dashboard/${slug}${tokenQuery}`, label: "Overview" },
-    { href: `/dashboard/${slug}/builder${tokenQuery}`, label: "Page Builder" },
-    { href: `/dashboard/${slug}/edit${tokenQuery}`, label: "Edit Tribute" },
-    { href: `/dashboard/${slug}/theme${tokenQuery}`, label: "Theme" },
-    { href: `/dashboard/${slug}/gallery${tokenQuery}`, label: "Images" },
-    { href: `/dashboard/${slug}/messages${tokenQuery}`, label: "Messages" },
+    { href: `/dashboard/${slug}`, label: "Overview" },
+    { href: `/dashboard/${slug}/builder`, label: "Page Builder" },
+    { href: `/dashboard/${slug}/edit`, label: "Edit Tribute" },
+    { href: `/dashboard/${slug}/theme`, label: "Theme" },
+    { href: `/dashboard/${slug}/gallery`, label: "Images" },
+    { href: `/dashboard/${slug}/messages`, label: "Messages" },
     { href: `/${slug}`, label: "Public Tribute" },
   ];
 

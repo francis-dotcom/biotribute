@@ -4,23 +4,20 @@ import { notFound } from "next/navigation";
 import { GalleryDashboardManager } from "@/components/gallery-dashboard-manager";
 import { ThemeConsoleForm } from "@/components/theme-console-form";
 import { TributeBuilderForm } from "@/components/tribute-builder-form";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
 import { getTributeThemePreset, tributeThemePresets } from "@/data/tributes";
 
 type ConsolePageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ token?: string }>;
 };
 
 export default async function ConsolePage({
   params,
-  searchParams,
 }: ConsolePageProps) {
   const { slug } = await params;
-  const { token } = await searchParams;
-  requireAdminToken(token, `/${slug}`);
+  await requireAdminSession(`/console/${slug}`);
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {
@@ -37,7 +34,6 @@ export default async function ConsolePage({
   const pending = messages.filter((message) => message.status.startsWith("pending")).length;
   const activeTheme = getTributeThemePreset(tribute.theme);
   const storeConfigured = isTributeStoreConfigured();
-  const tokenQuery = `?token=${encodeURIComponent(token ?? "")}`;
   const shellStyle = {
     ...activeTheme.variables,
   } as CSSProperties;
@@ -47,7 +43,7 @@ export default async function ConsolePage({
       <section className="landing-hero admin-shell dashboard-hero">
         <Link
           className="console-alert-link"
-          href={`/console/${slug}/messages${tokenQuery}`}
+          href={`/console/${slug}/messages`}
           aria-label={`${pending} pending message${pending === 1 ? "" : "s"} awaiting review`}
         >
           <span className="console-alert-icon" aria-hidden="true">
@@ -65,9 +61,14 @@ export default async function ConsolePage({
           <a href="#details">Details</a>
           <a href="#images">Images</a>
           <a href="#theme">Theme</a>
-          <Link href={`/console/${slug}/messages${tokenQuery}`}>Approval Page</Link>
+          <Link href={`/console/${slug}/messages`}>Approval Page</Link>
           <a href="#media">Video & Live</a>
           <Link href={`/${tribute.slug}`}>View Public Page</Link>
+          <form action="/api/admin/logout" method="post">
+            <button className="button-secondary" type="submit">
+              Sign out
+            </button>
+          </form>
         </div>
       </section>
 
@@ -92,7 +93,7 @@ export default async function ConsolePage({
               launch.
             </p>
           </div>
-          <Link className="button-secondary" href={`/console/${slug}/messages${tokenQuery}`}>
+          <Link className="button-secondary" href={`/console/${slug}/messages`}>
             Open Approval Page
           </Link>
         </article>

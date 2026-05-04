@@ -4,13 +4,13 @@ import { notFound } from "next/navigation";
 import { NoticeToast } from "@/components/notice-toast";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { getTributeThemePreset } from "@/data/tributes";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord } from "@/lib/tributes-store";
 
 type ConsoleMessagesPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ token?: string; notice?: string; tone?: "success" | "error" }>;
+  searchParams: Promise<{ notice?: string; tone?: "success" | "error" }>;
 };
 
 export default async function ConsoleMessagesPage({
@@ -18,8 +18,8 @@ export default async function ConsoleMessagesPage({
   searchParams,
 }: ConsoleMessagesPageProps) {
   const { slug } = await params;
-  const { token, notice, tone } = await searchParams;
-  requireAdminToken(token, `/${slug}`);
+  const { notice, tone } = await searchParams;
+  await requireAdminSession(`/console/${slug}/messages`);
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {
@@ -34,8 +34,7 @@ export default async function ConsoleMessagesPage({
   } catch (error) {
     messagesError = error instanceof Error ? error.message : "Unable to load moderation data.";
   }
-  const tokenQuery = `?token=${encodeURIComponent(token ?? "")}`;
-  const redirectTo = `/console/${slug}/messages${tokenQuery}`;
+  const redirectTo = `/console/${slug}/messages`;
   const shellStyle = {
     ...themePreset.variables,
   } as CSSProperties;
@@ -51,8 +50,13 @@ export default async function ConsoleMessagesPage({
           tribute page.
         </p>
         <div className="console-quick-links">
-          <Link href={`/console/${slug}${tokenQuery}`}>Back to Console</Link>
+          <Link href={`/console/${slug}`}>Back to Console</Link>
           <Link href={`/${slug}`}>View Public Page</Link>
+          <form action="/api/admin/logout" method="post">
+            <button className="button-secondary" type="submit">
+              Sign out
+            </button>
+          </form>
         </div>
       </section>
 
@@ -83,7 +87,7 @@ export default async function ConsoleMessagesPage({
               <p>No submissions have been stored for this tribute.</p>
             </article>
           ) : (
-            <ModerationQueue messages={messages} token={token} redirectTo={redirectTo} />
+            <ModerationQueue messages={messages} redirectTo={redirectTo} />
           )
         ) : null}
       </section>

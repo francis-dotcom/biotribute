@@ -1,5 +1,6 @@
 import {
   getTributeBySlug,
+  getTributeBySlugInsensitive,
   type TributeContributor,
   type TributeGalleryItem,
   type TributeRecord,
@@ -92,6 +93,51 @@ function normalizeTributeName(value: string) {
 
 function fallbackTribute(slug: string) {
   return getTributeBySlug(slug) ?? null;
+}
+
+export async function resolveCanonicalTributeSlug(slug: string) {
+  const trimmedSlug = slug.trim();
+  if (!trimmedSlug) {
+    return null;
+  }
+
+  const exactFallback = getTributeBySlug(trimmedSlug);
+  if (exactFallback) {
+    return exactFallback.slug;
+  }
+
+  const fallbackMatch = getTributeBySlugInsensitive(trimmedSlug);
+  if (!isSupabaseConfigured()) {
+    return fallbackMatch?.slug ?? null;
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return fallbackMatch?.slug ?? null;
+  }
+
+  const { data: exactRow } = await supabase
+    .from("tributes")
+    .select("slug")
+    .eq("slug", trimmedSlug)
+    .maybeSingle();
+
+  if (exactRow?.slug) {
+    return String(exactRow.slug);
+  }
+
+  const { data: caseRow } = await supabase
+    .from("tributes")
+    .select("slug")
+    .ilike("slug", trimmedSlug)
+    .limit(1)
+    .maybeSingle();
+
+  if (caseRow?.slug) {
+    return String(caseRow.slug);
+  }
+
+  return fallbackMatch?.slug ?? null;
 }
 
 function parseParagraphs(lifeStory: string) {

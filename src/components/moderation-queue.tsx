@@ -5,7 +5,6 @@ import type { StoredMessageRow } from "@/lib/messages";
 
 type ModerationQueueProps = {
   messages: StoredMessageRow[];
-  token?: string;
   redirectTo?: string;
 };
 
@@ -20,7 +19,6 @@ function getMessagePreview(message: string) {
 
 export function ModerationQueue({
   messages,
-  token,
   redirectTo,
 }: ModerationQueueProps) {
   const [activeMessage, setActiveMessage] = useState<StoredMessageRow | null>(null);
@@ -75,7 +73,6 @@ export function ModerationQueue({
                 method="post"
                 className="admin-actions admin-actions-inline"
               >
-                <input type="hidden" name="token" value={token} />
                 {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
                 {message.status === "pending_unverified" ? (
                   <button

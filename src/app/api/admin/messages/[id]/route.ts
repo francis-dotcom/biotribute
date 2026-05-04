@@ -1,13 +1,10 @@
 import { redirect } from "next/navigation";
+import { isAdminAuthenticated } from "@/lib/admin";
 import { updateMessageStatus } from "@/lib/messages";
 
-function buildRedirectUrl(path: string, token: string, notice?: string, tone?: "success" | "error") {
+function buildRedirectUrl(path: string, notice?: string, tone?: "success" | "error") {
   const [pathname, queryString = ""] = path.split("?");
   const params = new URLSearchParams(queryString);
-
-  if (!params.get("token") && token) {
-    params.set("token", token);
-  }
 
   if (notice) {
     params.set("notice", notice);
@@ -26,13 +23,12 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const formData = await request.formData();
-  const token = String(formData.get("token") ?? "");
   const status = String(formData.get("status") ?? "");
   const redirectTo = String(formData.get("redirectTo") ?? "");
   const { id } = await params;
 
-  if (!process.env.BIOTRIBUTE_ADMIN_TOKEN || token !== process.env.BIOTRIBUTE_ADMIN_TOKEN) {
-    redirect("/");
+  if (!(await isAdminAuthenticated())) {
+    redirect("/console-login");
   }
 
   if (
@@ -43,7 +39,6 @@ export async function POST(
     redirect(
       buildRedirectUrl(
         redirectTo || "/admin/messages",
-        token,
         "Invalid moderation action.",
         "error"
       )
@@ -56,7 +51,6 @@ export async function POST(
     redirect(
       buildRedirectUrl(
         redirectTo || "/admin/messages",
-        token,
         "Unable to update message status.",
         "error"
       )
@@ -73,7 +67,6 @@ export async function POST(
   redirect(
     buildRedirectUrl(
       redirectTo || "/admin/messages",
-      token,
       successMessage,
       "success"
     )

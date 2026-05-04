@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { LifeStory } from "@/components/life-story";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { FamilyMessageModal } from "@/components/family-message-modal";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
@@ -10,7 +10,7 @@ import { TributeActionBar } from "@/components/tribute-action-bar";
 import { TributeMediaSection } from "@/components/tribute-media-section";
 import { getTributeThemePreset } from "@/data/tributes";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
-import { getTributeRecord } from "@/lib/tributes-store";
+import { getTributeRecord, resolveCanonicalTributeSlug } from "@/lib/tributes-store";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -20,7 +20,8 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tribute = await getTributeRecord(slug);
+  const canonicalSlug = await resolveCanonicalTributeSlug(slug);
+  const tribute = canonicalSlug ? await getTributeRecord(canonicalSlug) : null;
 
   if (!tribute) {
     return {
@@ -36,7 +37,16 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function TributePage({ params }: PageProps) {
   const { slug } = await params;
-  const tribute = await getTributeRecord(slug);
+  const canonicalSlug = await resolveCanonicalTributeSlug(slug);
+  if (!canonicalSlug) {
+    notFound();
+  }
+
+  if (canonicalSlug !== slug) {
+    redirect(`/${canonicalSlug}`);
+  }
+
+  const tribute = await getTributeRecord(canonicalSlug);
 
   if (!tribute) {
     notFound();

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { CSSProperties } from "react";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { notFound } from "next/navigation";
@@ -31,6 +32,14 @@ export default async function DashboardLayout({ children, params }: DashboardLay
           Manage this tribute page, review guest activity, and prepare the public page
           for launch.
         </p>
+        <div className="console-quick-links">
+          <Link href={`/${tribute.slug}`}>View Public Page</Link>
+          <form action="/api/admin/logout" method="post">
+            <button className="button-secondary" type="submit">
+              Sign out
+            </button>
+          </form>
+        </div>
       </section>
 
       <DashboardNav slug={slug} />

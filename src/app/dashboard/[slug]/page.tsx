@@ -1,18 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord } from "@/lib/tributes-store";
 
 type DashboardPageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ token?: string }>;
 };
 
-export default async function DashboardPage({ params, searchParams }: DashboardPageProps) {
+export default async function DashboardPage({ params }: DashboardPageProps) {
   const { slug } = await params;
-  const { token } = await searchParams;
-  requireAdminToken(token, `/${slug}`);
+  await requireAdminSession(`/dashboard/${slug}`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {
@@ -22,7 +20,6 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
   const messages = await getMessagesForAdmin(slug);
   const approved = messages.filter((message) => message.status === "approved").length;
   const pending = messages.filter((message) => message.status.startsWith("pending")).length;
-  const tokenQuery = `?token=${encodeURIComponent(token ?? "")}`;
 
   return (
     <section className="dashboard-grid">
@@ -46,7 +43,7 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
           Open one working page to manage biography, timeline, contributors, images,
           gallery, and launch actions together.
         </p>
-        <Link className="button-primary" href={`/dashboard/${slug}/builder${tokenQuery}`}>
+        <Link className="button-primary" href={`/dashboard/${slug}/builder`}>
           Open Builder
         </Link>
       </article>
@@ -58,7 +55,7 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
           {pending} pending and {approved} approved. Moderate guest submissions before
           they appear publicly.
         </p>
-        <Link className="button-primary" href={`/dashboard/${slug}/messages${tokenQuery}`}>
+        <Link className="button-primary" href={`/dashboard/${slug}/messages`}>
           Open Moderation
         </Link>
       </article>
@@ -70,7 +67,7 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
           Set a main portrait and a separate background image so the public tribute and
           story modals can carry the same visual identity.
         </p>
-        <Link className="button-secondary" href={`/dashboard/${slug}/gallery${tokenQuery}`}>
+        <Link className="button-secondary" href={`/dashboard/${slug}/gallery`}>
           Manage Images
         </Link>
       </article>

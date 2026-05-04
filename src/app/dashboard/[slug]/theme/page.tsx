@@ -3,21 +3,18 @@ import {
   getTributeThemePreset,
   tributeThemePresets,
 } from "@/data/tributes";
-import { requireAdminToken } from "@/lib/admin";
+import { requireAdminSession } from "@/lib/admin";
 import { getTributeRecord } from "@/lib/tributes-store";
 
 type TributeThemePageProps = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ token?: string }>;
 };
 
 export default async function TributeThemePage({
   params,
-  searchParams,
 }: TributeThemePageProps) {
   const { slug } = await params;
-  const { token } = await searchParams;
-  requireAdminToken(token, `/${slug}`);
+  await requireAdminSession(`/dashboard/${slug}/theme`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {
