@@ -2367,15 +2367,15 @@ textarea {
     position: absolute;
     bottom: -43px;
     right: 50%;
-    transform: translateX(-62px);
+    transform: translateX(62px);
   }
 
   .hero-share-icon:hover {
-    transform: translateX(-62px) translateY(-1px);
+    transform: translateX(62px) translateY(-1px);
   }
 
   .hero-share-icon:active {
-    transform: translateX(-62px);
+    transform: translateX(62px);
   }
 
   .hero-donation-badge:hover {
