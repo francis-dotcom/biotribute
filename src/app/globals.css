@@ -1128,6 +1128,32 @@ textarea {
   font: 0.95rem/1.6 var(--font-sans);
 }
 
+.form-status-inline {
+  margin: 8px 0 10px;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 10px 12px;
+  font-weight: 600;
+}
+
+.form-status.is-success {
+  color: #155239;
+}
+
+.form-status.is-error {
+  color: #7c2d2d;
+}
+
+.form-status-inline.is-success {
+  border-color: rgba(31, 122, 79, 0.2);
+  background: rgba(225, 244, 234, 0.9);
+}
+
+.form-status-inline.is-error {
+  border-color: rgba(171, 61, 61, 0.2);
+  background: rgba(251, 233, 233, 0.9);
+}
+
 .admin-shell {
   margin-bottom: 18px;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type MessageFormProps = {
   tributeSlug: string;
@@ -10,19 +10,32 @@ type MessageFormProps = {
 export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [placement, setPlacement] = useState<"feed" | "timeline">("feed");
-  const [status, setStatus] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
   const [pending, setPending] = useState(false);
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    if (!toast) {
+      return;
+    }
+
+    const timeout = window.setTimeout(() => setToast(null), 4500);
+    return () => window.clearTimeout(timeout);
+  }, [toast]);
+
+  function showToast(message: string, tone: "success" | "error") {
+    setToast({ message, tone });
+  }
+
   async function handleSubmit(formData: FormData) {
     if (!storeConfigured) {
-      setStatus("Posting is not configured yet. Add Supabase env vars before launch.");
+      const message = "Posting is not configured yet. Add Supabase env vars before launch.";
+      showToast(message, "error");
       setOpen(true);
       return;
     }
 
     setPending(true);
-    setStatus(null);
 
     const payload = {
       tributeSlug,
@@ -35,7 +48,8 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     };
 
     if (turnstileSiteKey && !payload.turnstileToken.trim()) {
-      setStatus("Please complete bot verification before submitting.");
+      const message = "Please complete bot verification before submitting.";
+      showToast(message, "error");
       setPending(false);
       return;
     }
@@ -51,15 +65,16 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     const data = (await response.json()) as { error?: string; message?: string };
 
     if (!response.ok) {
-      setStatus(data.error ?? "Unable to submit message.");
+      const message = data.error ?? "Unable to submit message.";
+      showToast(message, "error");
       setPending(false);
       return;
     }
 
-    setStatus(
+    const successMessage =
       data.message ??
         "Message submitted. Please verify your email from your inbox before your message can be reviewed and shown."
-    );
+    showToast(successMessage, "success");
     setPending(false);
     setOpen(true);
 
@@ -70,6 +85,24 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
   return (
     <>
+      {toast ? (
+        <div
+          className={`notice-toast ${toast.tone === "error" ? "is-error" : ""}`}
+          role="status"
+          aria-live="polite"
+        >
+          <p>{toast.message}</p>
+          <button
+            className="notice-toast-close"
+            type="button"
+            aria-label="Dismiss message"
+            onClick={() => setToast(null)}
+          >
+            ×
+          </button>
+        </div>
+      ) : null}
+
       <div className="message-trigger-card">
         <p className="card-label">Guestbook</p>
         <p className="subtle-note">
@@ -78,7 +111,6 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
         <button className="message-trigger-button" type="button" onClick={() => setOpen(true)}>
           Leave a Message
         </button>
-        {status ? <p className="form-status">{status}</p> : null}
       </div>
 
       {open ? (
