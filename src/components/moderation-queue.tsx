@@ -151,6 +151,17 @@ export function ModerationQueue({
                   <span aria-hidden="true">×</span>
                   <span className="sr-only">Reject message</span>
                 </button>
+                <button
+                  className="moderation-icon-button is-reject"
+                  type="submit"
+                  name="action"
+                  value="delete"
+                  aria-label="Delete message"
+                  title="Delete message"
+                >
+                  <span aria-hidden="true">🗑</span>
+                  <span className="sr-only">Delete message</span>
+                </button>
               </form>
             </div>
           </article>

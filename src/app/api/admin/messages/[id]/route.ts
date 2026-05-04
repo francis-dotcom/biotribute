@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin";
-import { updateMessageStatus } from "@/lib/messages";
+import { deleteMessage, updateMessageStatus } from "@/lib/messages";
 
 function buildRedirectUrl(path: string, notice?: string, tone?: "success" | "error") {
   const [pathname, queryString = ""] = path.split("?");
@@ -24,11 +24,34 @@ export async function POST(
 ) {
   const formData = await request.formData();
   const status = String(formData.get("status") ?? "");
+  const action = String(formData.get("action") ?? "");
   const redirectTo = String(formData.get("redirectTo") ?? "");
   const { id } = await params;
 
   if (!(await isAdminAuthenticated())) {
     redirect("/console-login");
+  }
+
+  if (action === "delete") {
+    try {
+      await deleteMessage(id);
+    } catch {
+      redirect(
+        buildRedirectUrl(
+          redirectTo || "/admin/messages",
+          "Unable to delete message.",
+          "error"
+        )
+      );
+    }
+
+    redirect(
+      buildRedirectUrl(
+        redirectTo || "/admin/messages",
+        "Message deleted.",
+        "success"
+      )
+    );
   }
 
   if (

@@ -408,6 +408,22 @@ export async function updateMessageStatus(id: string, status: StoredMessageStatu
   }
 }
 
+export async function deleteMessage(id: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    throw new Error("Message storage is not configured.");
+  }
+
+  const { error } = await supabase
+    .from("tribute_messages")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    throw new Error("Unable to delete message.");
+  }
+}
+
 export async function confirmMessageVerification(token: string): Promise<VerificationResult> {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
@@ -432,11 +448,7 @@ export async function confirmMessageVerification(token: string): Promise<Verific
   const row = data as StoredMessageRow;
 
   if (row.email_verified) {
-    return {
-      slug: row.tribute_slug,
-      author: row.author,
-      alreadyVerified: true,
-    };
+    throw new Error("This email verification link has already been used.");
   }
 
   const { error: updateError } = await supabase
