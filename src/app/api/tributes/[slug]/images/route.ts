@@ -5,7 +5,7 @@ import { getTributeBySlug } from "@/data/tributes";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 const BUCKET_NAME = "tribute-media";
-const ALLOWED_KINDS = new Set(["hero", "background", "gallery"]);
+const ALLOWED_KINDS = new Set(["hero", "background", "gallery", "livestream-thumb"]);
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -153,7 +153,7 @@ export async function POST(
       return NextResponse.json({ error: "Choose at least one image to upload." }, { status: 400 });
     }
 
-    if ((kind === "hero" || kind === "background") && files.length !== 1) {
+    if ((kind === "hero" || kind === "background" || kind === "livestream-thumb") && files.length !== 1) {
       return NextResponse.json({ error: "Upload exactly one image for this field." }, { status: 400 });
     }
 
@@ -246,6 +246,8 @@ export async function POST(
       message:
         kind === "gallery"
           ? "Gallery images uploaded."
+          : kind === "livestream-thumb"
+            ? "Thumbnail uploaded. Click Save Draft to apply it to the live stream."
           : "Image uploaded and applied to the tribute.",
       uploads,
     });

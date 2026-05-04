@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TributeRecord } from "@/data/tributes";
 
@@ -43,6 +43,8 @@ export function TributeBuilderForm({
     tribute.livestreamThumbnailUrl ?? ""
   );
   const [livestreamNote, setLivestreamNote] = useState(tribute.livestreamNote ?? "");
+  const [uploadingLivestreamThumb, setUploadingLivestreamThumb] = useState(false);
+  const livestreamThumbInputRef = useRef<HTMLInputElement | null>(null);
   const [timelineEntries, setTimelineEntries] = useState<TimelineDraft[]>(
     tribute.timeline.length > 0
       ? tribute.timeline.map((entry) => ({
@@ -153,6 +155,44 @@ export function TributeBuilderForm({
     if (response.ok) {
       router.refresh();
     }
+  }
+
+  async function uploadLivestreamThumbnail(files: FileList | null) {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setUploadingLivestreamThumb(true);
+    setStatus(null);
+
+    const formData = new FormData();
+    formData.append("kind", "livestream-thumb");
+    formData.append("files", files[0]);
+
+    const response = await fetch(`/api/tributes/${tribute.slug}/images`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+      uploads?: { imageUrl: string }[];
+    };
+
+    if (!response.ok) {
+      setStatus(data.error ?? "Unable to upload thumbnail image.");
+      setUploadingLivestreamThumb(false);
+      return;
+    }
+
+    const uploadedUrl = data.uploads?.[0]?.imageUrl ?? "";
+    if (uploadedUrl) {
+      setLivestreamThumbnailUrl(uploadedUrl);
+    }
+
+    setStatus(data.message ?? "Thumbnail uploaded. Click Save Draft to apply it.");
+    setUploadingLivestreamThumb(false);
   }
 
   return (
@@ -561,6 +601,22 @@ export function TributeBuilderForm({
             placeholder="https://example.com/livestream-thumbnail.jpg"
           />
         </label>
+        <div className="field-block">
+          <span>Upload livestream thumbnail image</span>
+          <input
+            ref={livestreamThumbInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/avif"
+            onChange={(event) => {
+              void uploadLivestreamThumbnail(event.currentTarget.files);
+            }}
+          />
+          <p className="subtle-note">
+            {uploadingLivestreamThumb
+              ? "Uploading livestream thumbnail..."
+              : "Upload here to fill the thumbnail URL automatically."}
+          </p>
+        </div>
         <label className="field-block">
           <span>Livestream note</span>
           <input
