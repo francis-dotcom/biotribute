@@ -866,6 +866,8 @@ textarea {
   display: grid;
   gap: 6px;
   width: min(100%, 420px);
+  max-width: 100%;
+  min-width: 0;
 }
 
 .messages-search span {
@@ -875,6 +877,8 @@ textarea {
 
 .messages-search input {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: #fff;

@@ -11,7 +11,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
   const [activeMessage, setActiveMessage] = useState<TributeMessage | null>(null);
   const [showLibrary, setShowLibrary] = useState(false);
   const [query, setQuery] = useState("");
-  const [isHovered, setIsHovered] = useState(false);
+  const [isInteracting, setIsInteracting] = useState(false);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const isSearching = query.trim().length > 0;
 
@@ -77,7 +77,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
   useEffect(() => {
     const track = trackRef.current;
-    if (!track || isSearching || isHovered || filteredMessages.length === 0) {
+    if (!track || isSearching || isInteracting || filteredMessages.length === 0) {
       return;
     }
 
@@ -97,7 +97,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     return () => {
       window.clearInterval(timerId);
     };
-  }, [filteredMessages.length, isHovered, isSearching, visibleMessages.length]);
+  }, [filteredMessages.length, isInteracting, isSearching, visibleMessages.length]);
 
   return (
     <>
@@ -146,8 +146,11 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
       <div
         className="messages-stream"
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
+        onMouseEnter={() => setIsInteracting(true)}
+        onMouseLeave={() => setIsInteracting(false)}
+        onTouchStart={() => setIsInteracting(true)}
+        onTouchEnd={() => setIsInteracting(false)}
+        onTouchCancel={() => setIsInteracting(false)}
       >
         <div
           className={`messages-track${isSearching ? " is-searching" : ""}`}
