@@ -1969,6 +1969,16 @@ textarea {
   gap: 12px;
 }
 
+.moderation-group {
+  display: grid;
+  gap: 16px;
+}
+
+.moderation-group-header {
+  display: grid;
+  gap: 6px;
+}
+
 .moderation-row {
   display: flex;
   align-items: center;
@@ -2142,6 +2152,14 @@ textarea {
   justify-content: space-between;
   gap: 10px;
   flex-wrap: wrap;
+}
+
+.moderation-history-actions {
+  margin-top: 4px;
+}
+
+.moderation-history-actions .admin-actions-inline {
+  justify-content: flex-start;
 }
 
 .notice-toast {
