@@ -26,6 +26,15 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     return () => window.clearTimeout(timeout);
   }, [toast]);
 
+  useEffect(() => {
+    function openFromActionBar() {
+      setOpen(true);
+    }
+
+    window.addEventListener("biotribute:open-message-form", openFromActionBar);
+    return () => window.removeEventListener("biotribute:open-message-form", openFromActionBar);
+  }, []);
+
   function showToast(message: string, tone: "success" | "error") {
     setToast({ message, tone });
   }

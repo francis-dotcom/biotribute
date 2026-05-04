@@ -117,6 +117,16 @@ export default async function TributePage({ params }: PageProps) {
 
         <TributeActionBar />
 
+        <section className="content-section" id="messages-section">
+          <p className="section-kicker">Messages & Memories</p>
+          <h2>Share a Memory</h2>
+          <span className="section-accent" />
+          <div className="messages-section-stack">
+            <MessageFeed messages={visibleMessages} />
+            <MessageForm tributeSlug={tribute.slug} storeConfigured={storeConfigured} />
+          </div>
+        </section>
+
         <section className="content-section">
           <p className="section-kicker">The Family</p>
           <h2>Family & Contributors</h2>
@@ -195,16 +205,6 @@ export default async function TributePage({ params }: PageProps) {
           <h2>A Journey Through Time</h2>
           <span className="section-accent" />
           <TimelineSection entries={tribute.timeline} />
-        </section>
-
-        <section className="content-section" id="messages-section">
-          <p className="section-kicker">Messages & Memories</p>
-          <h2>Share a Memory</h2>
-          <span className="section-accent" />
-          <div className="messages-section-stack">
-            <MessageFeed messages={visibleMessages} />
-            <MessageForm tributeSlug={tribute.slug} storeConfigured={storeConfigured} />
-          </div>
         </section>
 
         <section className="content-section content-section-dark" id="support-section">

@@ -32,7 +32,7 @@ export function TributeActionBar() {
   }, [shareStatus]);
 
   async function handleShareAction() {
-    const shareUrl = window.location.href;
+    const shareUrl = `${window.location.origin}${window.location.pathname}`;
     const shareTitle = document.title || "Tribute";
 
     if (navigator.share) {
@@ -85,6 +85,11 @@ export function TributeActionBar() {
 
     if (action.key === "share") {
       void handleShareAction();
+      return;
+    }
+
+    if (action.key === "message") {
+      window.dispatchEvent(new CustomEvent("biotribute:open-message-form"));
       return;
     }
 
