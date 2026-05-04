@@ -183,12 +183,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
         </div>
         {filteredMessages.length === 0 ? (
           <p className="subtle-note">No messages match your search yet.</p>
-        ) : (
-          <p className="subtle-note">
-            Messages auto-scroll by default. Start typing to pause movement and
-            filter results.
-          </p>
-        )}
+        ) : null}
       </div>
 
       {activeMessage ? (

@@ -2383,8 +2383,31 @@ textarea {
   }
 
   .content-section h2 {
+    font-size: clamp(1.58rem, 6vw, 1.92rem);
     margin-bottom: 24px;
     padding-bottom: 14px;
+  }
+
+  .section-kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+  }
+
+  .soft-card h3,
+  .form-card h3,
+  .timeline-item h3,
+  .message-trigger-card h3 {
+    font-size: 1rem;
+  }
+
+  .soft-card p,
+  .form-card p,
+  .story-stack p,
+  .timeline-item p,
+  .message-details p,
+  .subtle-note {
+    font-size: 0.92rem;
+    line-height: 1.58;
   }
 
   .content-section {
