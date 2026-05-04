@@ -7,10 +7,13 @@ type MessageFormProps = {
   storeConfigured: boolean;
 };
 
+type MessageFormField = "author" | "email" | "message";
+
 export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) {
   const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [placement, setPlacement] = useState<"feed" | "timeline">("feed");
   const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<MessageFormField, string>>>({});
   const [pending, setPending] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -27,6 +30,26 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     setToast({ message, tone });
   }
 
+  function focusFirstInvalidField(errors: Partial<Record<MessageFormField, string>>) {
+    const form = document.getElementById("tribute-message-form");
+    if (!(form instanceof HTMLFormElement)) {
+      return;
+    }
+
+    const fieldOrder: MessageFormField[] = ["author", "email", "message"];
+    const firstInvalidField = fieldOrder.find((field) => Boolean(errors[field]));
+    if (!firstInvalidField) {
+      return;
+    }
+
+    const selector = `[name="${firstInvalidField}"]`;
+    const target = form.querySelector(selector);
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) {
+      target.focus();
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
+
   async function handleSubmit(formData: FormData) {
     if (!storeConfigured) {
       const message = "Posting is not configured yet. Add Supabase env vars before launch.";
@@ -36,6 +59,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     }
 
     setPending(true);
+    setFieldErrors({});
 
     const payload = {
       tributeSlug,
@@ -62,9 +86,17 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
       body: JSON.stringify(payload),
     });
 
-    const data = (await response.json()) as { error?: string; message?: string };
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+      fieldErrors?: Partial<Record<MessageFormField, string>>;
+    };
 
     if (!response.ok) {
+      if (data.fieldErrors) {
+        setFieldErrors(data.fieldErrors);
+        window.setTimeout(() => focusFirstInvalidField(data.fieldErrors ?? {}), 0);
+      }
       const message = data.error ?? "Unable to submit message.";
       showToast(message, "error");
       setPending(false);
@@ -77,6 +109,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     showToast(successMessage, "success");
     setPending(false);
     setOpen(true);
+    setFieldErrors({});
 
     const form = document.getElementById("tribute-message-form") as HTMLFormElement | null;
     form?.reset();
@@ -143,14 +176,32 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
                 Messages are reviewed before they appear publicly.
               </p>
 
-              <label className="field-block">
+              <label className={`field-block ${fieldErrors.author ? "has-error" : ""}`}>
                 <span>Your name</span>
-                <input name="author" type="text" placeholder="Enter your name" required />
+                <input
+                  name="author"
+                  type="text"
+                  placeholder="Enter your name"
+                  required
+                  onChange={() =>
+                    setFieldErrors((current) => ({ ...current, author: undefined }))
+                  }
+                />
+                {fieldErrors.author ? <p className="field-error">{fieldErrors.author}</p> : null}
               </label>
 
-              <label className="field-block">
+              <label className={`field-block ${fieldErrors.email ? "has-error" : ""}`}>
                 <span>Email</span>
-                <input name="email" type="email" placeholder="Enter your email" required />
+                <input
+                  name="email"
+                  type="email"
+                  placeholder="Enter your email"
+                  required
+                  onChange={() =>
+                    setFieldErrors((current) => ({ ...current, email: undefined }))
+                  }
+                />
+                {fieldErrors.email ? <p className="field-error">{fieldErrors.email}</p> : null}
               </label>
 
               <div className="field-block">
@@ -184,14 +235,18 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
                 <input name="website" type="text" tabIndex={-1} autoComplete="off" />
               </label>
 
-              <label className="field-block">
+              <label className={`field-block ${fieldErrors.message ? "has-error" : ""}`}>
                 <span>Your memory</span>
                 <textarea
                   name="message"
                   placeholder="Write a memory, prayer, or note of support"
                   required
                   minLength={12}
+                  onChange={() =>
+                    setFieldErrors((current) => ({ ...current, message: undefined }))
+                  }
                 />
+                {fieldErrors.message ? <p className="field-error">{fieldErrors.message}</p> : null}
               </label>
 
               {turnstileSiteKey ? (

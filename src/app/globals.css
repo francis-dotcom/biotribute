@@ -1033,9 +1033,21 @@ textarea {
   font: 1rem var(--font-sans);
 }
 
+.field-block.has-error input,
+.field-block.has-error textarea {
+  border-color: rgba(171, 61, 61, 0.45);
+  background: rgba(251, 233, 233, 0.35);
+}
+
 .field-block textarea {
   min-height: 100px;
   resize: vertical;
+}
+
+.field-error {
+  margin: 6px 0 0;
+  color: #7c2d2d;
+  font: 600 0.85rem/1.45 var(--font-sans);
 }
 
 .choice-chip {
@@ -1772,6 +1784,11 @@ textarea {
   color: #6f9fcf;
 }
 
+.moderation-row-history-count {
+  color: var(--muted-3);
+  font: 600 0.84rem/1.4 var(--font-sans);
+}
+
 .moderation-row-preview {
   min-width: 0;
   overflow: hidden;
@@ -1845,6 +1862,31 @@ textarea {
   margin: 0 0 12px;
   color: var(--muted);
   font: 500 0.96rem/1.5 var(--font-sans);
+}
+
+.moderation-history-list {
+  display: grid;
+  gap: 14px;
+}
+
+.moderation-history-item {
+  display: grid;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.moderation-history-item:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.moderation-history-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .notice-toast {

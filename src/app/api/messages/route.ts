@@ -12,6 +12,8 @@ const requestSchema = z.object({
   turnstileToken: z.string().optional(),
 });
 
+type MessageFormField = "author" | "email" | "message";
+
 export async function POST(request: Request) {
   try {
     const json = await request.json();
@@ -25,8 +27,19 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
+      const fieldErrors = {} as Partial<Record<MessageFormField, string>>;
+      for (const issue of error.issues) {
+        const key = issue.path[0];
+        if ((key === "author" || key === "email" || key === "message") && !fieldErrors[key]) {
+          fieldErrors[key] = issue.message;
+        }
+      }
+
       return NextResponse.json(
-        { error: "Please complete all required fields correctly." },
+        {
+          error: "Please complete all required fields correctly.",
+          fieldErrors,
+        },
         { status: 400 }
       );
     }

@@ -8,6 +8,12 @@ type ModerationQueueProps = {
   redirectTo?: string;
 };
 
+type GroupedModerationRow = {
+  email: string;
+  latest: StoredMessageRow & { preview: string };
+  history: StoredMessageRow[];
+};
+
 function getMessagePreview(message: string) {
   const words = message.trim().split(/\s+/).filter(Boolean);
   if (words.length <= 4) {
@@ -21,60 +27,96 @@ export function ModerationQueue({
   messages,
   redirectTo,
 }: ModerationQueueProps) {
-  const [activeMessage, setActiveMessage] = useState<StoredMessageRow | null>(null);
+  const [activeGroup, setActiveGroup] = useState<GroupedModerationRow | null>(null);
 
   const rows = useMemo(
-    () =>
-      messages.map((message) => ({
-        ...message,
-        preview: getMessagePreview(message.message),
-      })),
+    () => {
+      const grouped = new Map<string, GroupedModerationRow>();
+
+      for (const message of messages) {
+        const key = message.email.trim().toLowerCase();
+        const existing = grouped.get(key);
+
+        if (!existing) {
+          grouped.set(key, {
+            email: key,
+            latest: {
+              ...message,
+              preview: getMessagePreview(message.message),
+            },
+            history: [message],
+          });
+          continue;
+        }
+
+        existing.history.push(message);
+
+        if (new Date(message.created_at).getTime() > new Date(existing.latest.created_at).getTime()) {
+          existing.latest = {
+            ...message,
+            preview: getMessagePreview(message.message),
+          };
+        }
+      }
+
+      return Array.from(grouped.values()).sort(
+        (left, right) =>
+          new Date(right.latest.created_at).getTime() - new Date(left.latest.created_at).getTime(),
+      );
+    },
     [messages],
   );
 
   return (
     <>
       <section className="admin-grid">
-        {rows.map((message) => (
-          <article className="moderation-row moderation-row-compact" key={message.id}>
+        {rows.map((group) => (
+          <article className="moderation-row moderation-row-compact" key={group.email}>
             <div className="moderation-row-main">
               <div className="moderation-row-meta">
-                <p className="card-label">{message.status.replaceAll("_", " ")} · {message.placement}</p>
+                <p className="card-label">
+                  {group.latest.status.replaceAll("_", " ")} · {group.latest.placement}
+                </p>
                 <p className="subtle-note">
-                  {new Date(message.created_at).toLocaleString("en-US")}
+                  {new Date(group.latest.created_at).toLocaleString("en-US")}
                 </p>
               </div>
               <button
                 className="moderation-row-open"
                 type="button"
-                onClick={() => setActiveMessage(message)}
+                onClick={() => setActiveGroup(group)}
               >
                 <span className="moderation-row-summary">
-                  <span className="moderation-row-author">{message.author}</span>
-                  <span className="moderation-row-preview">{message.preview}</span>
+                  <span className="moderation-row-author">{group.latest.author}</span>
+                  <span className="moderation-row-preview">{group.latest.preview}</span>
                 </span>
-                <span className="moderation-row-email">{message.email}</span>
+                <span className="moderation-row-email">{group.latest.email}</span>
+                {group.history.length > 1 ? (
+                  <span className="moderation-row-history-count">
+                    {group.history.length} posts
+                  </span>
+                ) : null}
               </button>
             </div>
             <div className="moderation-row-side">
               <span
                 className={
-                  message.email_verified
+                  group.latest.email_verified
                     ? "moderation-email-indicator is-verified"
                     : "moderation-email-indicator is-unverified"
                 }
-                aria-label={message.email_verified ? "Email verified" : "Email not verified"}
-                title={message.email_verified ? "Email verified" : "Email not verified"}
+                aria-label={group.latest.email_verified ? "Email verified" : "Email not verified"}
+                title={group.latest.email_verified ? "Email verified" : "Email not verified"}
               >
                 <span aria-hidden="true">✉</span>
               </span>
               <form
-                action={`/api/admin/messages/${message.id}`}
+                action={`/api/admin/messages/${group.latest.id}`}
                 method="post"
                 className="admin-actions admin-actions-inline"
               >
                 {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
-                {message.status === "pending_unverified" ? (
+                {group.latest.status === "pending_unverified" ? (
                   <button
                     className="moderation-icon-button"
                     type="submit"
@@ -115,36 +157,56 @@ export function ModerationQueue({
         ))}
       </section>
 
-      {activeMessage ? (
+      {activeGroup ? (
         <div
           className="message-modal-overlay"
           role="dialog"
           aria-modal="true"
           aria-labelledby="moderation-message-title"
-          onClick={() => setActiveMessage(null)}
+          onClick={() => setActiveGroup(null)}
         >
           <div className="message-modal-card moderation-message-modal" onClick={(event) => event.stopPropagation()}>
             <div className="message-modal-head">
               <div>
                 <p className="message-modal-kicker">
-                  {activeMessage.status.replaceAll("_", " ")} · {activeMessage.placement}
+                  {activeGroup.latest.status.replaceAll("_", " ")} · {activeGroup.latest.placement}
                 </p>
-                <h3 id="moderation-message-title">{activeMessage.author}</h3>
+                <h3 id="moderation-message-title">{activeGroup.latest.author}</h3>
                 <p className="message-date">
-                  {new Date(activeMessage.created_at).toLocaleString("en-US")}
+                  Latest post · {new Date(activeGroup.latest.created_at).toLocaleString("en-US")}
                 </p>
               </div>
               <button
                 className="message-modal-close"
                 type="button"
                 aria-label="Close message"
-                onClick={() => setActiveMessage(null)}
+                onClick={() => setActiveGroup(null)}
               >
                 ×
               </button>
             </div>
-            <p className="moderation-modal-email">{activeMessage.email}</p>
-            <p className="message-modal-copy">{activeMessage.message}</p>
+            <p className="moderation-modal-email">{activeGroup.latest.email}</p>
+            <div className="moderation-history-list">
+              {activeGroup.history
+                .slice()
+                .sort(
+                  (left, right) =>
+                    new Date(right.created_at).getTime() - new Date(left.created_at).getTime(),
+                )
+                .map((message) => (
+                  <article className="moderation-history-item" key={message.id}>
+                    <div className="moderation-history-meta">
+                      <span className="card-label">
+                        {message.status.replaceAll("_", " ")} · {message.placement}
+                      </span>
+                      <span className="message-date">
+                        {new Date(message.created_at).toLocaleString("en-US")}
+                      </span>
+                    </div>
+                    <p className="message-modal-copy">{message.message}</p>
+                  </article>
+                ))}
+            </div>
           </div>
         </div>
       ) : null}

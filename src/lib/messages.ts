@@ -32,6 +32,18 @@ export type CreateMessageInput = {
   website?: string;
 };
 
+type VerificationResult = {
+  slug: string;
+  author: string;
+  alreadyVerified: boolean;
+};
+
+type ExistingVerifiedEmailRow = {
+  id: string;
+  email_verified: boolean;
+  verified_at?: string | null;
+};
+
 function isMissingMessageTableError(error: { code?: string; message?: string } | null) {
   if (!error) {
     return false;
@@ -69,6 +81,82 @@ function getSupabaseAdmin() {
       persistSession: false,
     },
   });
+}
+
+function getSiteUrl() {
+  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+  if (explicit) {
+    return explicit.replace(/\/$/, "");
+  }
+
+  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
+  if (productionHost) {
+    return `https://${productionHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
+  }
+
+  const vercelHost = process.env.VERCEL_URL?.trim();
+  if (vercelHost) {
+    return `https://${vercelHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
+  }
+
+  return "";
+}
+
+function getVerificationEmailConfig() {
+  const apiKey = process.env.RESEND_API_KEY?.trim() ?? "";
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() ?? "";
+  const siteUrl = getSiteUrl();
+
+  return {
+    apiKey,
+    fromEmail,
+    siteUrl,
+    configured: Boolean(apiKey && fromEmail && siteUrl),
+  };
+}
+
+async function sendVerificationEmail(input: {
+  tributeSlug: string;
+  author: string;
+  email: string;
+  verificationToken: string;
+}) {
+  const { apiKey, fromEmail, siteUrl, configured } = getVerificationEmailConfig();
+  if (!configured) {
+    throw new Error(
+      "Verification email is not configured. Set RESEND_API_KEY, RESEND_FROM_EMAIL, and NEXT_PUBLIC_SITE_URL.",
+    );
+  }
+
+  const verifyUrl = `${siteUrl}/verify-message?token=${encodeURIComponent(input.verificationToken)}`;
+  const subject = `Confirm your guestbook message for ${input.tributeSlug}`;
+  const text = `Hello ${input.author},
+
+Please confirm your guestbook message by opening this link:
+${verifyUrl}
+
+After confirmation, the family can review your message for approval.
+
+If you did not submit this message, you can ignore this email.`;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [input.email],
+      subject,
+      text,
+    }),
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to send verification email.");
+  }
 }
 
 function toExcerpt(message: string) {
@@ -186,6 +274,23 @@ export async function createPendingMessage(input: CreateMessageInput) {
   const author = input.author.trim();
   const email = input.email.trim().toLowerCase();
   const verificationToken = crypto.randomUUID();
+  const { data: verifiedEmailRow } = await supabase
+    .from("tribute_messages")
+    .select("id, email_verified, verified_at")
+    .eq("tribute_slug", input.tributeSlug)
+    .eq("email", email)
+    .eq("email_verified", true)
+    .order("verified_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const hasVerifiedHistory = Boolean((verifiedEmailRow as ExistingVerifiedEmailRow | null)?.email_verified);
+  const initialStatus: StoredMessageStatus = hasVerifiedHistory
+    ? "pending_verified"
+    : "pending_unverified";
+  const initialVerifiedAt =
+    hasVerifiedHistory
+      ? new Date().toISOString()
+      : null;
 
   const { error } = await supabase.from("tribute_messages").insert({
     tribute_slug: input.tributeSlug,
@@ -194,10 +299,10 @@ export async function createPendingMessage(input: CreateMessageInput) {
     placement: input.placement,
     message,
     excerpt: toExcerpt(message),
-    status: "pending_unverified",
-    email_verified: false,
-    verification_token: verificationToken,
-    verified_at: null,
+    status: initialStatus,
+    email_verified: hasVerifiedHistory,
+    verification_token: hasVerifiedHistory ? null : verificationToken,
+    verified_at: initialVerifiedAt,
   });
 
   if (error) {
@@ -214,6 +319,28 @@ export async function createPendingMessage(input: CreateMessageInput) {
     }
 
     throw new Error("Unable to save message.");
+  }
+
+  if (!hasVerifiedHistory) {
+    try {
+      await sendVerificationEmail({
+        tributeSlug: input.tributeSlug,
+        author,
+        email,
+        verificationToken,
+      });
+    } catch (emailError) {
+      await supabase
+        .from("tribute_messages")
+        .delete()
+        .eq("verification_token", verificationToken);
+
+      if (emailError instanceof Error) {
+        throw emailError;
+      }
+
+      throw new Error("Unable to send verification email.");
+    }
   }
 }
 
@@ -279,4 +406,55 @@ export async function updateMessageStatus(id: string, status: StoredMessageStatu
   if (error) {
     throw new Error("Unable to update message.");
   }
+}
+
+export async function confirmMessageVerification(token: string): Promise<VerificationResult> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    throw new Error("Message storage is not configured.");
+  }
+
+  const normalizedToken = token.trim();
+  if (!normalizedToken) {
+    throw new Error("Verification token is missing.");
+  }
+
+  const { data, error } = await supabase
+    .from("tribute_messages")
+    .select("*")
+    .eq("verification_token", normalizedToken)
+    .maybeSingle();
+
+  if (error || !data) {
+    throw new Error("This verification link is invalid or has expired.");
+  }
+
+  const row = data as StoredMessageRow;
+
+  if (row.email_verified) {
+    return {
+      slug: row.tribute_slug,
+      author: row.author,
+      alreadyVerified: true,
+    };
+  }
+
+  const { error: updateError } = await supabase
+    .from("tribute_messages")
+    .update({
+      email_verified: true,
+      verified_at: new Date().toISOString(),
+      status: "pending_verified" as StoredMessageStatus,
+    })
+    .eq("id", row.id);
+
+  if (updateError) {
+    throw new Error("Unable to verify this message right now.");
+  }
+
+  return {
+    slug: row.tribute_slug,
+    author: row.author,
+    alreadyVerified: false,
+  };
 }
