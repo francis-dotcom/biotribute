@@ -2096,6 +2096,12 @@ textarea {
   background: rgba(251, 233, 233, 0.9);
 }
 
+.moderation-icon-button.is-delete {
+  color: #6d4e15;
+  border-color: rgba(149, 111, 17, 0.28);
+  background: rgba(255, 244, 216, 0.92);
+}
+
 .moderation-email-indicator {
   display: inline-flex;
   align-items: center;
@@ -2616,6 +2622,16 @@ textarea {
   gap: 10px;
 }
 
+.tribute-stream-thumbnail {
+  min-height: 220px;
+  border: 1px solid rgba(229, 229, 234, 0.9);
+  border-radius: var(--radius-md);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  box-shadow: var(--shadow-xs);
+}
+
 .tribute-stream-frame {
   min-height: 280px;
   aspect-ratio: 16 / 9;
@@ -2645,5 +2661,9 @@ textarea {
 
   .tribute-stream-frame {
     min-height: 220px;
+  }
+
+  .tribute-stream-thumbnail {
+    min-height: 180px;
   }
 }

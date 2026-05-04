@@ -62,6 +62,7 @@ export type TributeRecord = {
   videoNote?: string;
   showVideoSection: boolean;
   livestreamUrl?: string;
+  livestreamThumbnailUrl?: string;
   livestreamNote?: string;
   showLivestreamSection: boolean;
   messages: TributeMessage[];
@@ -133,6 +134,7 @@ export const tributes: TributeRecord[] = [
       "Add video memories from family and friends. Use direct MP4 links or YouTube/Vimeo links for playback.",
     showVideoSection: true,
     livestreamUrl: "",
+    livestreamThumbnailUrl: "",
     livestreamNote:
       "If you are running a memorial live stream, paste the YouTube/Vimeo stream link in the console.",
     showLivestreamSection: true,

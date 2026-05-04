@@ -75,6 +75,7 @@ export type TributeBuilderInput = {
   videoDescriptions?: string[];
   videoNote?: string;
   livestreamUrl?: string;
+  livestreamThumbnailUrl?: string;
   livestreamNote?: string;
   showGallerySection?: boolean;
   showVideoSection?: boolean;
@@ -185,6 +186,7 @@ type SupportNoteMetadata = {
   videoDescriptions?: string[];
   videoNote?: string;
   livestreamUrl?: string;
+  livestreamThumbnailUrl?: string;
   livestreamNote?: string;
   contactEmail?: string;
   donationAccountName?: string;
@@ -250,6 +252,10 @@ function parseSupportNoteMetadata(value: string | null) {
         : undefined,
       videoNote: typeof parsed.videoNote === "string" ? parsed.videoNote : undefined,
       livestreamUrl: typeof parsed.livestreamUrl === "string" ? parsed.livestreamUrl : undefined,
+      livestreamThumbnailUrl:
+        typeof parsed.livestreamThumbnailUrl === "string"
+          ? parsed.livestreamThumbnailUrl.trim() || undefined
+          : undefined,
       livestreamNote:
         typeof parsed.livestreamNote === "string" ? parsed.livestreamNote : undefined,
       contactEmail:
@@ -390,6 +396,8 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
       supportNoteMetadata?.livestreamUrl ??
       supportNoteUrls[0] ??
       fallback?.livestreamUrl,
+    livestreamThumbnailUrl:
+      supportNoteMetadata?.livestreamThumbnailUrl ?? fallback?.livestreamThumbnailUrl,
     livestreamNote:
       tributeRow.livestream_note ?? supportNoteMetadata?.livestreamNote ?? fallback?.livestreamNote,
     showLivestreamSection:
@@ -457,6 +465,7 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     videoDescriptions: (input.videoDescriptions ?? []).map((item) => item.trim()),
     videoNote: input.videoNote?.trim() || undefined,
     livestreamUrl: input.livestreamUrl?.trim() || undefined,
+    livestreamThumbnailUrl: input.livestreamThumbnailUrl?.trim() || undefined,
     livestreamNote: input.livestreamNote?.trim() || undefined,
     contactEmail: input.contactEmail?.trim().toLowerCase() || undefined,
     donationAccountName: input.donationAccountName?.trim() || undefined,

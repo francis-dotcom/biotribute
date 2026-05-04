@@ -8,6 +8,7 @@ type TributeMediaSectionProps = {
   videoDescriptions: TributeRecord["videoDescriptions"];
   videoNote?: string;
   livestreamUrl?: string;
+  livestreamThumbnailUrl?: string;
   livestreamNote?: string;
   showVideoSection: boolean;
   showLivestreamSection: boolean;
@@ -164,6 +165,7 @@ export function TributeMediaSection({
   videoDescriptions,
   videoNote,
   livestreamUrl,
+  livestreamThumbnailUrl,
   livestreamNote,
   showVideoSection,
   showLivestreamSection,
@@ -244,26 +246,34 @@ export function TributeMediaSection({
       <h2>Live Stream</h2>
       <span className="section-accent" />
 
-      {streamEmbed ? (
+      {streamEmbed || livestreamThumbnailUrl?.trim() ? (
         <div className="tribute-stream-card">
-          {streamEmbed.type === "iframe" ? (
-            <iframe
-              className="tribute-stream-frame"
-              src={streamEmbed.src}
-              title="Memorial livestream"
-              loading="lazy"
-              allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-              allowFullScreen
+          {livestreamThumbnailUrl?.trim() ? (
+            <div
+              className="tribute-stream-thumbnail"
+              style={{ backgroundImage: `url("${livestreamThumbnailUrl}")` }}
             />
-          ) : streamEmbed.type === "video" ? (
-            <video className="tribute-stream-frame" controls preload="metadata">
-              <source src={streamEmbed.src} />
-            </video>
-          ) : (
-            <a className="button-primary" href={streamEmbed.src} target="_blank" rel="noreferrer">
-              Open livestream
-            </a>
-          )}
+          ) : null}
+          {streamEmbed ? (
+            streamEmbed.type === "iframe" ? (
+              <iframe
+                className="tribute-stream-frame"
+                src={streamEmbed.src}
+                title="Memorial livestream"
+                loading="lazy"
+                allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                allowFullScreen
+              />
+            ) : streamEmbed.type === "video" ? (
+              <video className="tribute-stream-frame" controls preload="metadata">
+                <source src={streamEmbed.src} />
+              </video>
+            ) : (
+              <a className="button-primary tribute-media-link" href={streamEmbed.src} target="_blank" rel="noreferrer">
+                Open livestream
+              </a>
+            )
+          ) : null}
           {livestreamNote?.trim() ? <p className="subtle-note">{livestreamNote}</p> : null}
         </div>
       ) : (

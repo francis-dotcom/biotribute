@@ -39,6 +39,9 @@ export function TributeBuilderForm({
   ]);
   const [videoNote, setVideoNote] = useState(tribute.videoNote ?? "");
   const [livestreamUrl, setLivestreamUrl] = useState(tribute.livestreamUrl ?? "");
+  const [livestreamThumbnailUrl, setLivestreamThumbnailUrl] = useState(
+    tribute.livestreamThumbnailUrl ?? ""
+  );
   const [livestreamNote, setLivestreamNote] = useState(tribute.livestreamNote ?? "");
   const [timelineEntries, setTimelineEntries] = useState<TimelineDraft[]>(
     tribute.timeline.length > 0
@@ -109,6 +112,7 @@ export function TributeBuilderForm({
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
       videoNote: videoNote.trim(),
       livestreamUrl: livestreamValue,
+      livestreamThumbnailUrl: livestreamThumbnailUrl.trim(),
       livestreamNote: livestreamNote.trim(),
       showGallerySection,
       showVideoSection,
@@ -548,6 +552,16 @@ export function TributeBuilderForm({
           />
         </label>
         <label className="field-block">
+          <span>Livestream thumbnail image URL (optional)</span>
+          <input
+            name="livestreamThumbnailUrl"
+            type="url"
+            value={livestreamThumbnailUrl}
+            onChange={(event) => setLivestreamThumbnailUrl(event.currentTarget.value)}
+            placeholder="https://example.com/livestream-thumbnail.jpg"
+          />
+        </label>
+        <label className="field-block">
           <span>Livestream note</span>
           <input
             name="livestreamNote"
@@ -563,6 +577,7 @@ export function TributeBuilderForm({
             type="button"
             onClick={() => {
               setLivestreamUrl("");
+              setLivestreamThumbnailUrl("");
               setLivestreamNote("");
             }}
           >

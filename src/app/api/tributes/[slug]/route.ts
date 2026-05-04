@@ -43,6 +43,7 @@ const tributeSchema = z.object({
   videoDescriptions: z.array(z.string().trim()).optional(),
   videoNote: z.string().trim().optional(),
   livestreamUrl: z.string().trim().optional(),
+  livestreamThumbnailUrl: z.string().trim().optional(),
   livestreamNote: z.string().trim().optional(),
   showGallerySection: z.boolean().optional(),
   showVideoSection: z.boolean().optional(),

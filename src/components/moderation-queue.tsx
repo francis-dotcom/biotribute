@@ -72,6 +72,11 @@ export function ModerationQueue({
   const rejectedRows = rows.filter((group) => group.latest.status === "rejected");
 
   function renderActions(message: StoredMessageRow) {
+    const isPending = message.status.startsWith("pending");
+    const showVerify = message.status === "pending_unverified";
+    const showApprove = isPending || message.status === "rejected";
+    const showReject = isPending || message.status === "approved";
+
     return (
       <form
         action={`/api/admin/messages/${message.id}`}
@@ -79,7 +84,7 @@ export function ModerationQueue({
         className="admin-actions admin-actions-inline"
       >
         {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
-        {message.status === "pending_unverified" ? (
+        {showVerify ? (
           <button
             className="moderation-icon-button"
             type="submit"
@@ -92,30 +97,34 @@ export function ModerationQueue({
             <span className="sr-only">Mark pending verified</span>
           </button>
         ) : null}
+        {showApprove ? (
+          <button
+            className="moderation-icon-button is-approve"
+            type="submit"
+            name="status"
+            value="approved"
+            aria-label="Approve message"
+            title="Approve message"
+          >
+            <span aria-hidden="true">✓</span>
+            <span className="sr-only">Approve message</span>
+          </button>
+        ) : null}
+        {showReject ? (
+          <button
+            className="moderation-icon-button is-reject"
+            type="submit"
+            name="status"
+            value="rejected"
+            aria-label="Reject message"
+            title="Reject message"
+          >
+            <span aria-hidden="true">×</span>
+            <span className="sr-only">Reject message</span>
+          </button>
+        ) : null}
         <button
-          className="moderation-icon-button is-approve"
-          type="submit"
-          name="status"
-          value="approved"
-          aria-label="Approve message"
-          title="Approve message"
-        >
-          <span aria-hidden="true">✓</span>
-          <span className="sr-only">Approve message</span>
-        </button>
-        <button
-          className="moderation-icon-button is-reject"
-          type="submit"
-          name="status"
-          value="rejected"
-          aria-label="Reject message"
-          title="Reject message"
-        >
-          <span aria-hidden="true">×</span>
-          <span className="sr-only">Reject message</span>
-        </button>
-        <button
-          className="moderation-icon-button is-reject"
+          className="moderation-icon-button is-delete"
           type="submit"
           name="action"
           value="delete"
