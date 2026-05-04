@@ -210,8 +210,8 @@ export default async function TributePage({ params }: PageProps) {
         </section>
 
         <section className="content-section content-section-dark" id="support-section">
-          <p className="section-kicker">Support the Family</p>
-          <h2>Support the Family</h2>
+          <p className="section-kicker">Show Love to the Family</p>
+          <h2>Show Love to the Family</h2>
           <span className="section-accent" />
           <div className="support-grid">
             <article className="form-card support-actions-card">
@@ -255,7 +255,7 @@ export default async function TributePage({ params }: PageProps) {
             <a href="#messages-section">Contact</a>
           </div>
           <div>
-            Organized by <strong>{tribute.organizer}</strong> · Powered by CyquadTech
+            Organized by <strong>{tribute.organizer}</strong> · Powered by Ogigrid
           </div>
         </footer>
       </div>

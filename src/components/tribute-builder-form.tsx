@@ -9,6 +9,12 @@ type TributeBuilderFormProps = {
   storeConfigured: boolean;
 };
 
+type TimelineDraft = {
+  year: string;
+  title: string;
+  copy: string;
+};
+
 export function TributeBuilderForm({
   tribute,
   storeConfigured,
@@ -34,6 +40,40 @@ export function TributeBuilderForm({
   const [videoNote, setVideoNote] = useState(tribute.videoNote ?? "");
   const [livestreamUrl, setLivestreamUrl] = useState(tribute.livestreamUrl ?? "");
   const [livestreamNote, setLivestreamNote] = useState(tribute.livestreamNote ?? "");
+  const [timelineEntries, setTimelineEntries] = useState<TimelineDraft[]>(
+    tribute.timeline.length > 0
+      ? tribute.timeline.map((entry) => ({
+          year: entry.year,
+          title: entry.title,
+          copy: entry.copy,
+        }))
+      : [{ year: "", title: "", copy: "" }]
+  );
+
+  function updateTimelineEntry(
+    index: number,
+    field: keyof TimelineDraft,
+    value: string
+  ) {
+    setTimelineEntries((current) =>
+      current.map((entry, entryIndex) =>
+        entryIndex === index ? { ...entry, [field]: value } : entry
+      )
+    );
+  }
+
+  function addTimelineEntry() {
+    setTimelineEntries((current) => [...current, { year: "", title: "", copy: "" }]);
+  }
+
+  function removeTimelineEntry(index: number) {
+    setTimelineEntries((current) => {
+      if (current.length <= 1) {
+        return [{ year: "", title: "", copy: "" }];
+      }
+      return current.filter((_, entryIndex) => entryIndex !== index);
+    });
+  }
 
   async function handleSubmit(formData: FormData) {
     if (!storeConfigured) {
@@ -73,11 +113,13 @@ export function TributeBuilderForm({
       showGallerySection,
       showVideoSection,
       showLivestreamSection,
-      timeline: tribute.timeline.map((_, index) => ({
-        year: String(formData.get(`timelineYear-${index}`) ?? ""),
-        title: String(formData.get(`timelineTitle-${index}`) ?? ""),
-        copy: String(formData.get(`timelineCopy-${index}`) ?? ""),
-      })),
+      timeline: timelineEntries
+        .map((entry) => ({
+          year: entry.year.trim(),
+          title: entry.title.trim(),
+          copy: entry.copy.trim(),
+        }))
+        .filter((entry) => entry.year || entry.title || entry.copy),
       contributors: tribute.contributors.map((_, index) => ({
         label: String(formData.get(`contributorLabel-${index}`) ?? ""),
         name: String(formData.get(`contributorName-${index}`) ?? ""),
@@ -256,14 +298,17 @@ export function TributeBuilderForm({
         <p className="card-label">Timeline</p>
         <h3>Milestones and key memories</h3>
         <div className="builder-repeat-grid">
-          {tribute.timeline.map((entry, index) => (
-            <div className="builder-repeat-card" key={`${entry.year}-${entry.title}`}>
+          {timelineEntries.map((entry, index) => (
+            <div className="builder-repeat-card" key={`timeline-entry-${index}`}>
               <label className="field-block">
                 <span>Year {index + 1}</span>
                 <input
                   name={`timelineYear-${index}`}
                   type="text"
-                  defaultValue={entry.year}
+                  value={entry.year}
+                  onChange={(event) =>
+                    updateTimelineEntry(index, "year", event.currentTarget.value)
+                  }
                 />
               </label>
               <label className="field-block">
@@ -271,18 +316,38 @@ export function TributeBuilderForm({
                 <input
                   name={`timelineTitle-${index}`}
                   type="text"
-                  defaultValue={entry.title}
+                  value={entry.title}
+                  onChange={(event) =>
+                    updateTimelineEntry(index, "title", event.currentTarget.value)
+                  }
                 />
               </label>
               <label className="field-block">
                 <span>Story</span>
                 <textarea
                   name={`timelineCopy-${index}`}
-                  defaultValue={entry.copy}
+                  value={entry.copy}
+                  onChange={(event) =>
+                    updateTimelineEntry(index, "copy", event.currentTarget.value)
+                  }
                 />
               </label>
+              <div className="builder-inline-actions">
+                <button
+                  className="button-secondary dashboard-danger-button"
+                  type="button"
+                  onClick={() => removeTimelineEntry(index)}
+                >
+                  Remove milestone
+                </button>
+              </div>
             </div>
           ))}
+        </div>
+        <div className="builder-inline-actions">
+          <button className="button-secondary" type="button" onClick={addTimelineEntry}>
+            Add milestone
+          </button>
         </div>
       </article>
 

@@ -2442,14 +2442,25 @@ textarea {
   .messages-toolbar {
     align-items: stretch;
     flex-direction: column;
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
   }
 
   .messages-search {
     width: 100%;
+    max-width: calc(100vw - 48px);
+    min-width: 0;
   }
 
   .messages-search span {
     display: none;
+  }
+
+  .messages-search input {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
   }
 
   .messages-scroll-actions {
