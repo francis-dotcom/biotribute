@@ -129,21 +129,6 @@ export default async function TributePage({ params }: PageProps) {
           </div>
         </section>
 
-        <section className="content-section">
-          <p className="section-kicker">The Family</p>
-          <h2>Family & Contributors</h2>
-          <span className="section-accent" />
-          <div className="contributors-grid">
-            {tribute.contributors.map((contributor) => (
-              <article className="soft-card" key={contributor.name}>
-                <p className="card-label">{contributor.label}</p>
-                <h3>{contributor.name}</h3>
-                <p>{contributor.copy}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-
         {tribute.showGallerySection ? (
           <section className="content-section content-section-soft">
             <p className="section-kicker">Photo Gallery</p>
@@ -207,6 +192,21 @@ export default async function TributePage({ params }: PageProps) {
           <h2>A Journey Through Time</h2>
           <span className="section-accent" />
           <TimelineSection entries={tribute.timeline} />
+        </section>
+
+        <section className="content-section">
+          <p className="section-kicker">The Family</p>
+          <h2>Family & Contributors</h2>
+          <span className="section-accent" />
+          <div className="contributors-grid">
+            {tribute.contributors.map((contributor) => (
+              <article className="soft-card" key={contributor.name}>
+                <p className="card-label">{contributor.label}</p>
+                <h3>{contributor.name}</h3>
+                <p>{contributor.copy}</p>
+              </article>
+            ))}
+          </div>
         </section>
 
         <section className="content-section content-section-dark" id="support-section">
