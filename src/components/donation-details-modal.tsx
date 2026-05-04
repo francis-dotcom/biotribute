@@ -7,6 +7,8 @@ type DonationDetailsModalProps = {
   accountNumber?: string;
   bankName?: string;
   phone?: string;
+  triggerClassName?: string;
+  triggerLabel?: string;
 };
 
 export function DonationDetailsModal({
@@ -14,6 +16,8 @@ export function DonationDetailsModal({
   accountNumber,
   bankName,
   phone,
+  triggerClassName,
+  triggerLabel,
 }: DonationDetailsModalProps) {
   const [open, setOpen] = useState(false);
   const hasDetails = Boolean(accountName || accountNumber || bankName || phone);
@@ -21,11 +25,11 @@ export function DonationDetailsModal({
   return (
     <>
       <button
-        className="support-action-pill support-action-pill-accent"
+        className={triggerClassName ?? "support-action-pill support-action-pill-accent"}
         type="button"
         onClick={() => setOpen(true)}
       >
-        Donations
+        {triggerLabel ?? "Donate"}
       </button>
 
       {open ? (

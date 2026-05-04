@@ -288,7 +288,10 @@ textarea {
 .hero-donation-badge {
   position: absolute;
   top: 2px;
-  right: -126px;
+  right: -102px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 96px;
   padding: 8px 12px;
   border-radius: 10px;
@@ -303,6 +306,7 @@ textarea {
     0 8px 16px rgba(149, 111, 17, 0.2),
     inset 0 1px 0 rgba(255, 255, 255, 0.55);
   transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+  cursor: pointer;
 }
 
 .hero-donation-badge:hover {
@@ -1144,9 +1148,15 @@ textarea {
 }
 
 .support-action-pill-accent {
-  border-color: rgba(200, 169, 106, 0.34);
-  background: var(--gold-soft);
-  color: #7d602a;
+  border-color: rgba(149, 111, 17, 0.35);
+  background: linear-gradient(180deg, #f8de79 0%, #efc94f 100%);
+  color: #5c4205;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.support-action-pill-accent:hover {
+  border-color: rgba(149, 111, 17, 0.4);
+  background: linear-gradient(180deg, #f9e18a 0%, #f0cc57 100%);
 }
 
 .support-primary-pill {

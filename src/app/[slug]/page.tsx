@@ -82,9 +82,14 @@ export default async function TributePage({ params }: PageProps) {
               className={tribute.heroImageUrl ? "avatar-placeholder has-image" : "avatar-placeholder"}
               aria-hidden="true"
             />
-            <a className="hero-donation-badge" href="#support-section">
-              Donate
-            </a>
+            <DonationDetailsModal
+              accountName={tribute.donationAccountName}
+              accountNumber={tribute.donationAccountNumber}
+              bankName={tribute.donationBankName}
+              phone={tribute.donationPhone}
+              triggerClassName="hero-donation-badge"
+              triggerLabel="Donate"
+            />
           </div>
           <div className="hero-divider" aria-hidden="true">
             <span />

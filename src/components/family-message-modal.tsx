@@ -15,7 +15,6 @@ export function FamilyMessageModal({
 }: FamilyMessageModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
-  const isConfigured = Boolean(recipientEmail?.trim());
 
   const subject = useMemo(
     () => `Private Message for ${tributeName}`,
@@ -49,9 +48,6 @@ Reply to: ${senderEmail}`;
       <button className="support-action-pill" type="button" onClick={() => setIsOpen(true)}>
         Message
       </button>
-      {!isConfigured ? (
-        <p className="subtle-note">Family message inbox is not configured yet.</p>
-      ) : null}
 
       {isOpen ? (
         <div className="message-modal-overlay" onClick={() => setIsOpen(false)}>
