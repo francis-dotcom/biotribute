@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MarkdownText } from "@/components/markdown-text";
+import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import type { TributeMessage } from "@/data/tributes";
 
 type MessageFeedProps = {
@@ -148,7 +148,9 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                   </span>
                   <span className="message-date">{message.date}</span>
                 </div>
-                <p className="message-author">{message.author}</p>
+                <p className="message-author">
+                  <MarkdownInline content={message.author} />
+                </p>
                 <MarkdownText content={message.excerpt} className="message-excerpt" />
               </div>
               <button
@@ -180,7 +182,9 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                 <p className="message-modal-kicker">
                   {activeMessage.placement === "timeline" ? "Timeline Memory" : "Memory Feed"}
                 </p>
-                <h3 id="message-modal-title">{activeMessage.author}</h3>
+                <h3 id="message-modal-title">
+                  <MarkdownInline content={activeMessage.author} />
+                </h3>
                 <p className="message-date">{activeMessage.date}</p>
               </div>
               <button
@@ -257,7 +261,9 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                       </span>
                       <span className="message-date">{message.date}</span>
                     </div>
-                    <p className="message-author">{message.author}</p>
+                    <p className="message-author">
+                      <MarkdownInline content={message.author} />
+                    </p>
                     <MarkdownText content={message.excerpt} className="message-excerpt" />
                   </button>
                 ))}

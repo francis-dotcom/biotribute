@@ -4,7 +4,7 @@ import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
 import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
-import { MarkdownText } from "@/components/markdown-text";
+import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
 import { ShareTributeIconButton } from "@/components/share-tribute-icon-button";
@@ -101,14 +101,24 @@ export default async function TributePage({ params }: PageProps) {
             <span />
           </div>
           {tribute.honorificTitle?.trim() ? (
-            <p className="hero-honorific">{tribute.honorificTitle}</p>
+            <p className="hero-honorific">
+              <MarkdownInline content={tribute.honorificTitle} />
+            </p>
           ) : null}
-          <h1>{tribute.name}</h1>
+          <h1>
+            <MarkdownInline content={tribute.name} />
+          </h1>
           {tribute.positionTitle?.trim() ? (
-            <p className="hero-position">{tribute.positionTitle}</p>
+            <p className="hero-position">
+              <MarkdownInline content={tribute.positionTitle} />
+            </p>
           ) : null}
-          <p className="hero-dates">{tribute.years}</p>
-          <p className="hero-tagline">{tribute.tagline}</p>
+          <p className="hero-dates">
+            <MarkdownInline content={tribute.years} />
+          </p>
+          <p className="hero-tagline">
+            <MarkdownInline content={tribute.tagline} />
+          </p>
           <div className="hero-theme-indicator" aria-label="Selected theme colors">
             <span className="hero-theme-swatches" aria-hidden="true">
               <i style={{ background: "var(--gold)" }} />
@@ -166,7 +176,7 @@ export default async function TributePage({ params }: PageProps) {
                 )}
               </div>
               {tribute.galleryImages.length === 0 ? (
-                <p className="subtle-note">{tribute.galleryNote}</p>
+                <MarkdownText content={tribute.galleryNote} className="subtle-note" />
               ) : null}
             </div>
           </section>
@@ -207,8 +217,12 @@ export default async function TributePage({ params }: PageProps) {
           <div className="contributors-grid">
             {tribute.contributors.map((contributor) => (
               <article className="soft-card" key={contributor.name}>
-                <p className="card-label">{contributor.label}</p>
-                <h3>{contributor.name}</h3>
+                <p className="card-label">
+                  <MarkdownInline content={contributor.label} />
+                </p>
+                <h3>
+                  <MarkdownInline content={contributor.name} />
+                </h3>
                 <MarkdownText content={contributor.copy} />
               </article>
             ))}

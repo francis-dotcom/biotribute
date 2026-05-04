@@ -833,6 +833,17 @@ export function TributeBuilderForm({
             </button>
           </div>
         ) : null}
+        {visibleVideoCount > 1 ? (
+          <div className="builder-inline-actions">
+            <button
+              className="button-secondary"
+              type="button"
+              onClick={() => setVisibleVideoCount((current) => Math.max(current - 1, 1))}
+            >
+              Load less videos
+            </button>
+          </div>
+        ) : null}
         <label className="field-block">
           <span>Video section note</span>
           <textarea

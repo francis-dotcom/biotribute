@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MarkdownText } from "@/components/markdown-text";
+import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import type { TributeTimelineEntry } from "@/data/tributes";
 
 type TimelineSectionProps = {
@@ -39,8 +39,16 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
       <div className="timeline-list">
         {visibleEntries.map((entry, index) => (
           <article className="timeline-item" key={`${entry.year}-${entry.title}-${index}`}>
-            {entry.year.trim() ? <p className="timeline-year">{entry.year}</p> : null}
-              {entry.title.trim() ? <h3>{entry.title}</h3> : null}
+            {entry.year.trim() ? (
+              <p className="timeline-year">
+                <MarkdownInline content={entry.year} />
+              </p>
+            ) : null}
+            {entry.title.trim() ? (
+              <h3>
+                <MarkdownInline content={entry.title} />
+              </h3>
+            ) : null}
               <MarkdownText content={entry.copy} />
             <button
               className="timeline-read-more"
@@ -63,6 +71,17 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
           </button>
         </div>
       ) : null}
+      {visibleCount > batchSize ? (
+        <div className="builder-inline-actions">
+          <button
+            className="button-secondary"
+            type="button"
+            onClick={() => setVisibleCount(batchSize)}
+          >
+            Load less
+          </button>
+        </div>
+      ) : null}
 
       {activeEntry ? (
         <div
@@ -77,10 +96,12 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
               <div>
                 <p className="message-modal-kicker">Timeline Story</p>
                 <h3 id="timeline-modal-title">
-                  {activeEntry.title.trim() || "Memory"}
+                  <MarkdownInline content={activeEntry.title.trim() || "Memory"} />
                 </h3>
                 {activeEntry.year.trim() ? (
-                  <p className="message-date">{activeEntry.year}</p>
+                  <p className="message-date">
+                    <MarkdownInline content={activeEntry.year} />
+                  </p>
                 ) : null}
               </div>
               <button

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { MarkdownInline } from "@/components/markdown-text";
 
 type DonationDetailsModalProps = {
   accountName?: string;
@@ -57,25 +58,33 @@ export function DonationDetailsModal({
                     {accountName ? (
                       <div className="donation-detail-row">
                         <span>Account Name</span>
-                        <strong>{accountName}</strong>
+                        <strong>
+                          <MarkdownInline content={accountName} />
+                        </strong>
                       </div>
                     ) : null}
                     {accountNumber ? (
                       <div className="donation-detail-row">
                         <span>Account Number</span>
-                        <strong>{accountNumber}</strong>
+                        <strong>
+                          <MarkdownInline content={accountNumber} />
+                        </strong>
                       </div>
                     ) : null}
                     {bankName ? (
                       <div className="donation-detail-row">
                         <span>Bank</span>
-                        <strong>{bankName}</strong>
+                        <strong>
+                          <MarkdownInline content={bankName} />
+                        </strong>
                       </div>
                     ) : null}
                     {phone ? (
                       <div className="donation-detail-row">
                         <span>Text donation details to this number and it will be acknowledged.</span>
-                        <strong>{phone}</strong>
+                        <strong>
+                          <MarkdownInline content={phone} />
+                        </strong>
                       </div>
                     ) : null}
                   </div>
