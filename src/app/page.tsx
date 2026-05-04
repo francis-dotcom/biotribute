@@ -14,7 +14,7 @@ export default function HomePage() {
           personal, calm, and easy to share across family and community.
         </p>
         <div className="landing-actions">
-          <Link className="button-primary" href={`/biotribute/${featuredTribute.slug}`}>
+          <Link className="button-primary" href={`/${featuredTribute.slug}`}>
             View Tribute Demo
           </Link>
           <a className="button-secondary" href="#next-steps">

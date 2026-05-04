@@ -12,7 +12,7 @@ type DashboardPageProps = {
 export default async function DashboardPage({ params, searchParams }: DashboardPageProps) {
   const { slug } = await params;
   const { token } = await searchParams;
-  requireAdminToken(token, `/biotribute/${slug}`);
+  requireAdminToken(token, `/${slug}`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {
@@ -31,10 +31,10 @@ export default async function DashboardPage({ params, searchParams }: DashboardP
         <h2>{tribute.slug}</h2>
         <p>
           This tribute is currently available at the dynamic route
-          <strong> /biotribute/{tribute.slug}</strong>. You can later map this to a cleaner
+          <strong> /{tribute.slug}</strong>. You can later map this to a cleaner
           public route like <strong>/{tribute.slug}</strong>.
         </p>
-        <Link className="button-secondary" href={`/biotribute/${tribute.slug}`}>
+        <Link className="button-secondary" href={`/${tribute.slug}`}>
           View Public Tribute
         </Link>
       </article>

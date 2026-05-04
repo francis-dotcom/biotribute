@@ -165,15 +165,15 @@ export const tributes: TributeRecord[] = [
       }
     ],
     supportAmounts: [
-      { label: "$25" },
-      { label: "$50", featured: true },
-      { label: "$100" },
-      { label: "$250" },
-      { label: "Custom" }
+      { label: "Standard Card" },
+      { label: "Premium Card", featured: true },
+      { label: "Family Support Tribute" },
+      { label: "Featured Memorial Card" },
+      { label: "Custom Tribute" }
     ],
     contactEmail: "",
     supportNote:
-      "Contributions can help with memorial costs, family support, or any purpose the page owner defines."
+      "Choose a paid tribute card tier and include a personal sympathy message for the family."
   }
 ];
 

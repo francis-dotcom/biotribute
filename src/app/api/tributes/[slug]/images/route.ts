@@ -129,7 +129,7 @@ async function deleteStorageObject(publicUrl: string | null | undefined) {
 }
 
 function revalidateTributePaths(slug: string) {
-  revalidatePath(`/biotribute/${slug}`);
+  revalidatePath(`/${slug}`);
   revalidatePath(`/console/${slug}`);
   revalidatePath(`/dashboard/${slug}`);
 }

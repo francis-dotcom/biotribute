@@ -50,7 +50,7 @@ export async function POST(request: Request) {
   try {
     const payload = tributeSchema.parse(await request.json());
     await saveTributeRecord(payload);
-    revalidatePath(`/biotribute/${payload.slug}`);
+    revalidatePath(`/${payload.slug}`);
     revalidatePath(`/console/${payload.slug}`);
     revalidatePath(`/dashboard/${payload.slug}`);
     return NextResponse.json({ message: "Tribute saved to Supabase." });

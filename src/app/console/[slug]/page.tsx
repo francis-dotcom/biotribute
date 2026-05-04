@@ -20,7 +20,7 @@ export default async function ConsolePage({
 }: ConsolePageProps) {
   const { slug } = await params;
   const { token } = await searchParams;
-  requireAdminToken(token, `/biotribute/${slug}`);
+  requireAdminToken(token, `/${slug}`);
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {
@@ -67,7 +67,7 @@ export default async function ConsolePage({
           <a href="#theme">Theme</a>
           <Link href={`/console/${slug}/messages${tokenQuery}`}>Approval Page</Link>
           <a href="#media">Video & Live</a>
-          <Link href={`/biotribute/${tribute.slug}`}>View Public Page</Link>
+          <Link href={`/${tribute.slug}`}>View Public Page</Link>
         </div>
       </section>
 
@@ -75,10 +75,10 @@ export default async function ConsolePage({
         <article className="dashboard-row">
           <div className="dashboard-row-main">
             <p className="card-label">Public Tribute</p>
-            <h2>/biotribute/{tribute.slug}</h2>
+            <h2>/{tribute.slug}</h2>
             <p>Use this to review exactly what visitors will see after each save.</p>
           </div>
-          <Link className="button-secondary" href={`/biotribute/${tribute.slug}`}>
+          <Link className="button-secondary" href={`/${tribute.slug}`}>
             Open Public Page
           </Link>
         </article>

@@ -14,7 +14,7 @@ export default async function TributeBuilderPage({
 }: TributeBuilderPageProps) {
   const { slug } = await params;
   const { token } = await searchParams;
-  requireAdminToken(token, `/biotribute/${slug}`);
+  requireAdminToken(token, `/${slug}`);
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {

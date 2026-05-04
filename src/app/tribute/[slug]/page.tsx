@@ -6,5 +6,5 @@ type LegacyTributePageProps = {
 
 export default async function LegacyTributePage({ params }: LegacyTributePageProps) {
   const { slug } = await params;
-  redirect(`/biotribute/${slug}`);
+  redirect(`/${slug}`);
 }

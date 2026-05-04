@@ -161,7 +161,7 @@ export function TributeBuilderForm({
           </p>
           <div className="builder-status-stack">
             <div className="dashboard-info-banner">
-              Public route: <strong>/biotribute/{tribute.slug}</strong>
+              Public route: <strong>/{tribute.slug}</strong>
             </div>
             <div className="dashboard-info-banner">
               Messages remain moderated even after the page is public.
@@ -173,7 +173,7 @@ export function TributeBuilderForm({
             </button>
             <a
               className="button-secondary"
-              href={`/biotribute/${tribute.slug}`}
+              href={`/${tribute.slug}`}
               target="_blank"
               rel="noreferrer"
             >
@@ -542,12 +542,12 @@ export function TributeBuilderForm({
           ))}
         </div>
         <label className="field-block">
-          <span>Support note</span>
+          <span>Tribute card note</span>
           <input
             name="supportNote"
             type="text"
             defaultValue={tribute.supportNote ?? ""}
-            placeholder="Optional support note"
+            placeholder="Explain your tribute card offer"
           />
         </label>
         <label className="field-block">

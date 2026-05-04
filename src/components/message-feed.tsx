@@ -9,6 +9,7 @@ type MessageFeedProps = {
 
 export function MessageFeed({ messages }: MessageFeedProps) {
   const [activeMessage, setActiveMessage] = useState<TributeMessage | null>(null);
+  const [showLibrary, setShowLibrary] = useState(false);
   const [query, setQuery] = useState("");
   const [isHovered, setIsHovered] = useState(false);
   const trackRef = useRef<HTMLDivElement | null>(null);
@@ -108,6 +109,13 @@ export function MessageFeed({ messages }: MessageFeedProps) {
         </label>
         <div className="messages-scroll-actions" role="group" aria-label="Scroll messages">
           <button
+            className="messages-library-button"
+            type="button"
+            onClick={() => setShowLibrary(true)}
+          >
+            View all messages
+          </button>
+          <button
             className="messages-scroll-button"
             type="button"
             disabled={isSearching}
@@ -202,6 +210,79 @@ export function MessageFeed({ messages }: MessageFeedProps) {
               </button>
             </div>
             <p className="message-modal-copy">{activeMessage.full}</p>
+          </div>
+        </div>
+      ) : null}
+
+      {showLibrary ? (
+        <div
+          className="message-modal-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="messages-library-title"
+          onClick={() => setShowLibrary(false)}
+        >
+          <div
+            className="message-modal-card messages-library-modal"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="message-modal-head">
+              <div>
+                <p className="message-modal-kicker">Message Archive</p>
+                <h3 id="messages-library-title">All messages</h3>
+                <p className="message-date">{filteredMessages.length} message(s)</p>
+              </div>
+              <button
+                className="message-modal-close"
+                type="button"
+                aria-label="Close message archive"
+                onClick={() => setShowLibrary(false)}
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="messages-library-body">
+              <label className="messages-search messages-library-search" htmlFor="message-library-search">
+                <span>Search all messages</span>
+                <input
+                  id="message-library-search"
+                  type="search"
+                  value={query}
+                  placeholder="Search by name or memory..."
+                  onChange={(event) => setQuery(event.target.value)}
+                />
+              </label>
+
+              <div className="messages-library-list">
+                {filteredMessages.map((message) => (
+                  <button
+                    key={message.id}
+                    className="messages-library-item"
+                    type="button"
+                    onClick={() => setActiveMessage(message)}
+                  >
+                    <div className="messages-library-item-top">
+                      <span
+                        className={
+                          message.placement === "timeline"
+                            ? "message-chip is-timeline"
+                            : "message-chip"
+                        }
+                      >
+                        {message.placement}
+                      </span>
+                      <span className="message-date">{message.date}</span>
+                    </div>
+                    <p className="message-author">{message.author}</p>
+                    <p className="message-excerpt">{message.excerpt}</p>
+                  </button>
+                ))}
+                {filteredMessages.length === 0 ? (
+                  <p className="subtle-note">No messages match your search yet.</p>
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
       ) : null}

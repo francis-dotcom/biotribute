@@ -16,7 +16,7 @@ export default async function TributeMessagesPage({
 }: TributeMessagesPageProps) {
   const { slug } = await params;
   const { token, notice, tone } = await searchParams;
-  requireAdminToken(token, `/biotribute/${slug}`);
+  requireAdminToken(token, `/${slug}`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {

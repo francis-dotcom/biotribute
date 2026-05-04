@@ -10,7 +10,7 @@ type EditTributePageProps = {
 export default async function EditTributePage({ params, searchParams }: EditTributePageProps) {
   const { slug } = await params;
   const { token } = await searchParams;
-  requireAdminToken(token, `/biotribute/${slug}`);
+  requireAdminToken(token, `/${slug}`);
   const tribute = await getTributeRecord(slug);
 
   if (!tribute) {

@@ -8,6 +8,7 @@ type MessageFormProps = {
 };
 
 export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [placement, setPlacement] = useState<"feed" | "timeline">("feed");
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -30,7 +31,14 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
       placement,
       message: String(formData.get("message") ?? ""),
       website: String(formData.get("website") ?? ""),
+      turnstileToken: String(formData.get("cf-turnstile-response") ?? ""),
     };
+
+    if (turnstileSiteKey && !payload.turnstileToken.trim()) {
+      setStatus("Please complete bot verification before submitting.");
+      setPending(false);
+      return;
+    }
 
     const response = await fetch("/api/messages", {
       method: "POST",
@@ -64,7 +72,6 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     <>
       <div className="message-trigger-card">
         <p className="card-label">Guestbook</p>
-        <h3>Leave a Message</h3>
         <p className="subtle-note">
           Share a condolence, short memory, or note of support.
         </p>
@@ -154,6 +161,13 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
                   minLength={12}
                 />
               </label>
+
+              {turnstileSiteKey ? (
+                <div className="field-block">
+                  <span>Bot Verification</span>
+                  <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                </div>
+              ) : null}
 
               <button className="button-primary" type="submit" disabled={pending}>
                 {pending ? "Submitting..." : "Submit Message"}

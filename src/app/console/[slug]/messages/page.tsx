@@ -19,7 +19,7 @@ export default async function ConsoleMessagesPage({
 }: ConsoleMessagesPageProps) {
   const { slug } = await params;
   const { token, notice, tone } = await searchParams;
-  requireAdminToken(token, `/biotribute/${slug}`);
+  requireAdminToken(token, `/${slug}`);
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {
@@ -52,7 +52,7 @@ export default async function ConsoleMessagesPage({
         </p>
         <div className="console-quick-links">
           <Link href={`/console/${slug}${tokenQuery}`}>Back to Console</Link>
-          <Link href={`/biotribute/${slug}`}>View Public Page</Link>
+          <Link href={`/${slug}`}>View Public Page</Link>
         </div>
       </section>
 

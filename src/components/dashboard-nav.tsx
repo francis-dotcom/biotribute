@@ -20,7 +20,7 @@ export function DashboardNav({ slug }: DashboardNavProps) {
     { href: `/dashboard/${slug}/theme${tokenQuery}`, label: "Theme" },
     { href: `/dashboard/${slug}/gallery${tokenQuery}`, label: "Images" },
     { href: `/dashboard/${slug}/messages${tokenQuery}`, label: "Messages" },
-    { href: `/biotribute/${slug}`, label: "Public Tribute" },
+    { href: `/${slug}`, label: "Public Tribute" },
   ];
 
   return (
