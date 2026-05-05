@@ -2081,11 +2081,21 @@ textarea {
 }
 
 .private-inbox-row {
-  border-color: color-mix(in srgb, var(--violet-deep) 28%, white);
-  background: color-mix(in srgb, var(--violet-soft) 50%, white);
+  border-color: color-mix(in srgb, var(--violet-deep) 44%, white);
+  border-left: 5px solid var(--violet-deep);
+  background: linear-gradient(
+    120deg,
+    color-mix(in srgb, var(--violet-soft) 78%, white) 0%,
+    color-mix(in srgb, var(--violet-soft) 36%, white) 100%
+  );
+  box-shadow: 0 12px 28px rgba(64, 50, 95, 0.12);
 }
 
 .private-inbox-row .card-label {
+  color: var(--violet-deep);
+}
+
+.private-inbox-row .message-author {
   color: var(--violet-deep);
 }
 
