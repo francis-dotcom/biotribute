@@ -23,7 +23,9 @@ export async function POST(request: Request) {
     return NextResponse.json({
       message: result.verificationRequired
         ? "Your email is not verified yet. The family will not see your message until you verify from your inbox."
-        : "Your email is already verified. Your message was sent to the family immediately.",
+        : result.emailNotified
+          ? "Your email is already verified. Your message was sent to the family and emailed to them immediately."
+          : "Your email is already verified. Your message was saved for the family immediately.",
     });
   } catch (error) {
     if (error instanceof z.ZodError) {

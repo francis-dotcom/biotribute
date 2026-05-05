@@ -11,7 +11,7 @@ export default async function VerifyFamilyMessagePage({
   const { token } = await searchParams;
 
   let result:
-    | { ok: true; tributeSlug: string; senderName: string }
+    | { ok: true; tributeSlug: string; senderName: string; emailNotified: boolean }
     | { ok: false; error: string };
 
   try {
@@ -31,7 +31,9 @@ export default async function VerifyFamilyMessagePage({
         <h1>{result.ok ? "Family message confirmed" : "Verification failed"}</h1>
         <p className="landing-copy">
           {result.ok
-            ? `${result.senderName}'s message is now confirmed and sent to the family.`
+            ? result.emailNotified
+              ? `${result.senderName}'s message is now confirmed, saved, and emailed to the family.`
+              : `${result.senderName}'s message is now confirmed and saved for the family.`
             : result.error}
         </p>
         {result.ok ? (

@@ -10,6 +10,10 @@ export type CreateFamilyPrivateMessageInput = {
   website?: string;
 };
 
+type InsertFamilyPrivateMessageResult = {
+  emailNotified: boolean;
+};
+
 type FamilyMessageVerificationPayload = {
   tributeSlug: string;
   recipientEmail: string;
@@ -138,6 +142,17 @@ function getVerificationEmailConfig() {
   };
 }
 
+function getFamilyNotificationEmailConfig() {
+  const apiKey = process.env.RESEND_API_KEY?.trim() ?? "";
+  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim() ?? "";
+
+  return {
+    apiKey,
+    fromEmail,
+    configured: Boolean(apiKey && fromEmail),
+  };
+}
+
 async function sendFamilyVerificationEmail(input: {
   senderName: string;
   senderEmail: string;
@@ -182,6 +197,46 @@ If you did not submit this message, you can ignore this email.`;
   }
 }
 
+async function sendFamilyNotificationEmail(input: {
+  tributeSlug: string;
+  recipientEmail: string;
+  senderName: string;
+  senderEmail: string;
+  message: string;
+}) {
+  const { apiKey, fromEmail, configured } = getFamilyNotificationEmailConfig();
+  if (!configured) {
+    return false;
+  }
+
+  const subject = `New private message for ${input.tributeSlug}`;
+  const text = `You have a new private message for ${input.tributeSlug}.
+
+From: ${input.senderName}
+Reply email: ${input.senderEmail}
+
+Message:
+${input.message}
+`;
+
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: fromEmail,
+      to: [input.recipientEmail],
+      subject,
+      text,
+    }),
+    cache: "no-store",
+  });
+
+  return response.ok;
+}
+
 async function insertFamilyPrivateMessage(input: CreateFamilyPrivateMessageInput) {
   if (input.website?.trim()) {
     throw new Error("Spam detected.");
@@ -192,12 +247,20 @@ async function insertFamilyPrivateMessage(input: CreateFamilyPrivateMessageInput
     throw new Error("Private family message storage is not configured.");
   }
 
-  const { error } = await supabase.from("family_private_messages").insert({
-    tribute_slug: input.tributeSlug.trim(),
-    recipient_email: input.recipientEmail.trim().toLowerCase(),
-    sender_name: input.senderName.trim(),
-    sender_email: input.senderEmail.trim().toLowerCase(),
+  const normalized = {
+    tributeSlug: input.tributeSlug.trim(),
+    recipientEmail: input.recipientEmail.trim().toLowerCase(),
+    senderName: input.senderName.trim(),
+    senderEmail: input.senderEmail.trim().toLowerCase(),
     message: input.message.trim(),
+  };
+
+  const { error } = await supabase.from("family_private_messages").insert({
+    tribute_slug: normalized.tributeSlug,
+    recipient_email: normalized.recipientEmail,
+    sender_name: normalized.senderName,
+    sender_email: normalized.senderEmail,
+    message: normalized.message,
   });
 
   if (error) {
@@ -209,6 +272,9 @@ async function insertFamilyPrivateMessage(input: CreateFamilyPrivateMessageInput
 
     throw new Error("Unable to save private family message.");
   }
+
+  const emailNotified = await sendFamilyNotificationEmail(normalized);
+  return { emailNotified } as InsertFamilyPrivateMessageResult;
 }
 
 async function hasPreviouslyVerifiedEmail(senderEmail: string) {
@@ -248,8 +314,8 @@ export async function createPendingFamilyPrivateMessage(input: CreateFamilyPriva
 
   const alreadyVerified = await hasPreviouslyVerifiedEmail(input.senderEmail);
   if (alreadyVerified) {
-    await insertFamilyPrivateMessage(input);
-    return { verificationRequired: false as const };
+    const insertResult = await insertFamilyPrivateMessage(input);
+    return { verificationRequired: false as const, emailNotified: insertResult.emailNotified };
   }
 
   const payload: FamilyMessageVerificationPayload = {
@@ -269,7 +335,7 @@ export async function createPendingFamilyPrivateMessage(input: CreateFamilyPriva
     verificationToken,
   });
 
-  return { verificationRequired: true as const };
+  return { verificationRequired: true as const, emailNotified: false };
 }
 
 export async function confirmFamilyPrivateMessageVerification(token: string) {
@@ -279,7 +345,7 @@ export async function confirmFamilyPrivateMessageVerification(token: string) {
   }
 
   const payload = parseVerificationToken(normalizedToken);
-  await insertFamilyPrivateMessage({
+  const insertResult = await insertFamilyPrivateMessage({
     tributeSlug: payload.tributeSlug,
     recipientEmail: payload.recipientEmail,
     senderName: payload.senderName,
@@ -290,5 +356,6 @@ export async function confirmFamilyPrivateMessageVerification(token: string) {
   return {
     tributeSlug: payload.tributeSlug,
     senderName: payload.senderName,
+    emailNotified: insertResult.emailNotified,
   };
 }

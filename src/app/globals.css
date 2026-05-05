@@ -1356,27 +1356,27 @@ textarea {
 }
 
 .support-action-pill-accent {
-  border-color: rgba(166, 118, 6, 0.42);
-  background: linear-gradient(180deg, #ffe27a 0%, #f4bf18 100%);
-  color: #4d3600;
+  border-color: rgba(185, 145, 54, 0.34);
+  background: linear-gradient(180deg, #f9df86 0%, #efcb5f 100%);
+  color: #5d4713;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .support-action-pill-accent:hover {
-  border-color: rgba(149, 111, 17, 0.4);
-  background: linear-gradient(180deg, #f9e18a 0%, #f0cc57 100%);
+  border-color: rgba(170, 129, 31, 0.36);
+  background: linear-gradient(180deg, #f7e2a3 0%, #efd27a 100%);
 }
 
 .support-action-pill-solid-yellow {
-  border-color: #d2a227;
-  background: #f4c430;
-  color: #3b2a00;
-  box-shadow: none;
+  border-color: #d2a227 !important;
+  background: #f4c430 !important;
+  color: #3b2a00 !important;
+  box-shadow: none !important;
 }
 
 .support-action-pill-solid-yellow:hover {
-  border-color: #c49624;
-  background: #eab71f;
+  border-color: #c49624 !important;
+  background: #eab71f !important;
 }
 
 .support-primary-pill {
