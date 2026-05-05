@@ -1,20 +1,42 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { TributeVisitDetail } from "@/lib/visits";
+import type { TributeVisitSessionDetail } from "@/lib/visits";
 
 type VisitorDetailsPanelProps = {
-  visits: TributeVisitDetail[];
+  visits: TributeVisitSessionDetail[];
   error?: string | null;
 };
 
 type VisitorSummary = {
   visitorHash: string;
   visits: number;
-  lastVisitedAt: string;
-  lastPath: string;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  pagesVisited: string[];
   lastReferer?: string | null;
+  estimatedDurationSeconds: number;
 };
+
+function formatDuration(totalSeconds: number) {
+  if (totalSeconds < 60) {
+    return `${totalSeconds}s`;
+  }
+
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+
+  if (minutes > 0) {
+    return seconds > 0 ? `${minutes}m ${seconds}s` : `${minutes}m`;
+  }
+
+  return `${seconds}s`;
+}
 
 export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps) {
   const [mode, setMode] = useState<"recent" | "unique">("recent");
@@ -24,21 +46,30 @@ export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps)
 
     for (const visit of visits) {
       const existing = grouped.get(visit.visitorHash);
+
       if (!existing) {
         grouped.set(visit.visitorHash, {
           visitorHash: visit.visitorHash,
           visits: 1,
-          lastVisitedAt: visit.createdAt,
-          lastPath: visit.path,
+          firstSeenAt: visit.firstSeenAt,
+          lastSeenAt: visit.lastSeenAt,
+          pagesVisited: [visit.path],
           lastReferer: visit.referer,
+          estimatedDurationSeconds: visit.estimatedDurationSeconds,
         });
         continue;
       }
 
       existing.visits += 1;
-      if (new Date(visit.createdAt).getTime() > new Date(existing.lastVisitedAt).getTime()) {
-        existing.lastVisitedAt = visit.createdAt;
-        existing.lastPath = visit.path;
+      existing.estimatedDurationSeconds += visit.estimatedDurationSeconds;
+      if (!existing.pagesVisited.includes(visit.path)) {
+        existing.pagesVisited.push(visit.path);
+      }
+      if (new Date(visit.firstSeenAt).getTime() < new Date(existing.firstSeenAt).getTime()) {
+        existing.firstSeenAt = visit.firstSeenAt;
+      }
+      if (new Date(visit.lastSeenAt).getTime() > new Date(existing.lastSeenAt).getTime()) {
+        existing.lastSeenAt = visit.lastSeenAt;
         existing.lastReferer = visit.referer;
       }
     }
@@ -48,7 +79,7 @@ export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps)
         return right.visits - left.visits;
       }
 
-      return new Date(right.lastVisitedAt).getTime() - new Date(left.lastVisitedAt).getTime();
+      return new Date(right.lastSeenAt).getTime() - new Date(left.lastSeenAt).getTime();
     });
   }, [visits]);
 
@@ -77,12 +108,16 @@ export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps)
         visits.length > 0 ? (
           <div className="console-visit-list">
             {visits.map((visit) => (
-              <div className="console-visit-item" key={`${visit.visitorHash}-${visit.createdAt}`}>
+              <div className="console-visit-item" key={`${visit.sessionId}-${visit.path}`}>
                 <p>
-                  <strong>{new Date(visit.createdAt).toLocaleString("en-US")}</strong>
+                  <strong>{new Date(visit.lastSeenAt).toLocaleString("en-US")}</strong>
                 </p>
                 <p>Path: {visit.path}</p>
                 <p>Visitor: {visit.visitorHash.slice(0, 10)}...</p>
+                <p>First seen: {new Date(visit.firstSeenAt).toLocaleString("en-US")}</p>
+                <p>Last seen: {new Date(visit.lastSeenAt).toLocaleString("en-US")}</p>
+                <p>Estimated time on page: {formatDuration(visit.estimatedDurationSeconds)}</p>
+                <p>Heartbeat updates: {visit.heartbeatCount}</p>
                 <p>Referer: {visit.referer?.trim() ? visit.referer : "Direct / unknown"}</p>
               </div>
             ))}
@@ -98,11 +133,13 @@ export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps)
             {groupedVisitors.map((visitor) => (
               <div className="console-visit-item" key={visitor.visitorHash}>
                 <p>
-                  <strong>{visitor.visits} visit{visitor.visits === 1 ? "" : "s"}</strong>
+                  <strong>{visitor.visits} page visit{visitor.visits === 1 ? "" : "s"}</strong>
                 </p>
                 <p>Visitor: {visitor.visitorHash.slice(0, 10)}...</p>
-                <p>Last seen: {new Date(visitor.lastVisitedAt).toLocaleString("en-US")}</p>
-                <p>Last path: {visitor.lastPath}</p>
+                <p>First seen: {new Date(visitor.firstSeenAt).toLocaleString("en-US")}</p>
+                <p>Last seen: {new Date(visitor.lastSeenAt).toLocaleString("en-US")}</p>
+                <p>Pages visited: {visitor.pagesVisited.join(", ")}</p>
+                <p>Estimated session duration: {formatDuration(visitor.estimatedDurationSeconds)}</p>
                 <p>Referer: {visitor.lastReferer?.trim() ? visitor.lastReferer : "Direct / unknown"}</p>
               </div>
             ))}

@@ -14,6 +14,17 @@ export type TributeVisitDetail = {
   createdAt: string;
 };
 
+export type TributeVisitSessionDetail = {
+  sessionId: string;
+  visitorHash: string;
+  path: string;
+  referer?: string | null;
+  firstSeenAt: string;
+  lastSeenAt: string;
+  estimatedDurationSeconds: number;
+  heartbeatCount: number;
+};
+
 function getVisitHashSecret() {
   return (
     process.env.VISITOR_HASH_SECRET?.trim() ||
@@ -67,6 +78,115 @@ export async function recordTributeVisit(input: {
     }
 
     throw new Error("Unable to record visit.");
+  }
+}
+
+type RecordTributeVisitSessionInput = {
+  tributeSlug: string;
+  sessionId: string;
+  path: string;
+  ip: string;
+  userAgent?: string;
+  referer?: string;
+  eventType?: "enter" | "heartbeat" | "leave";
+};
+
+function isMissingVisitSessionTableError(error: { code?: string; message?: string } | null) {
+  if (!error) {
+    return false;
+  }
+
+  return (
+    error.code === "PGRST205" ||
+    error.code === "42P01" ||
+    error.message?.toLowerCase().includes("tribute_visit_page_sessions") === true
+  );
+}
+
+export async function recordTributeVisitSession(input: RecordTributeVisitSessionInput) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return;
+  }
+
+  const nowIso = new Date().toISOString();
+  const normalizedIp = input.ip.trim() || "unknown";
+  const normalizedUserAgent = input.userAgent?.trim() || "unknown";
+  const visitorHash = hashValue(`${normalizedIp}|${normalizedUserAgent}`);
+
+  const { data: existingRow, error: lookupError } = await supabase
+    .from("tribute_visit_page_sessions")
+    .select(
+      "id, first_seen_at, heartbeat_count, referer",
+    )
+    .eq("tribute_slug", input.tributeSlug)
+    .eq("session_id", input.sessionId)
+    .eq("path", input.path)
+    .maybeSingle();
+
+  if (lookupError) {
+    if (isMissingVisitSessionTableError(lookupError)) {
+      throw new Error(
+        "Visit session tracking table is missing. Run the tribute_visit_page_sessions migration.",
+      );
+    }
+
+    throw new Error("Unable to load visit session state.");
+  }
+
+  if (!existingRow) {
+    const { error } = await supabase.from("tribute_visit_page_sessions").insert({
+      tribute_slug: input.tributeSlug,
+      session_id: input.sessionId,
+      path: input.path,
+      visitor_hash: visitorHash,
+      referer: input.referer?.trim() || null,
+      first_seen_at: nowIso,
+      last_seen_at: nowIso,
+      estimated_duration_seconds: 0,
+      heartbeat_count: input.eventType === "heartbeat" ? 1 : 0,
+      updated_at: nowIso,
+    });
+
+    if (error) {
+      if (isMissingVisitSessionTableError(error)) {
+        throw new Error(
+          "Visit session tracking table is missing. Run the tribute_visit_page_sessions migration.",
+        );
+      }
+
+      throw new Error("Unable to save visit session.");
+    }
+
+    return;
+  }
+
+  const firstSeenAt = new Date(existingRow.first_seen_at);
+  const estimatedDurationSeconds = Math.max(
+    0,
+    Math.floor((new Date(nowIso).getTime() - firstSeenAt.getTime()) / 1000),
+  );
+
+  const { error: updateError } = await supabase
+    .from("tribute_visit_page_sessions")
+    .update({
+      last_seen_at: nowIso,
+      estimated_duration_seconds: estimatedDurationSeconds,
+      heartbeat_count:
+        Number(existingRow.heartbeat_count ?? 0) + (input.eventType === "heartbeat" ? 1 : 0),
+      referer: existingRow.referer?.trim() ? existingRow.referer : input.referer?.trim() || null,
+      updated_at: nowIso,
+    })
+    .eq("id", existingRow.id);
+
+  if (updateError) {
+    if (isMissingVisitSessionTableError(updateError)) {
+      throw new Error(
+        "Visit session tracking table is missing. Run the tribute_visit_page_sessions migration.",
+      );
+    }
+
+    throw new Error("Unable to update visit session.");
   }
 }
 
@@ -146,5 +266,45 @@ export async function getRecentTributeVisits(
     path: row.path,
     referer: row.referer,
     createdAt: row.created_at,
+  }));
+}
+
+export async function getRecentTributeVisitSessions(
+  tributeSlug: string,
+  limit = 40,
+): Promise<TributeVisitSessionDetail[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("tribute_visit_page_sessions")
+    .select(
+      "session_id, visitor_hash, path, referer, first_seen_at, last_seen_at, estimated_duration_seconds, heartbeat_count",
+    )
+    .eq("tribute_slug", tributeSlug)
+    .order("last_seen_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    if (isMissingVisitSessionTableError(error)) {
+      throw new Error(
+        "Visit session tracking table is missing. Run the tribute_visit_page_sessions migration.",
+      );
+    }
+
+    throw new Error("Unable to load visit session details.");
+  }
+
+  return (data ?? []).map((row) => ({
+    sessionId: row.session_id,
+    visitorHash: row.visitor_hash,
+    path: row.path,
+    referer: row.referer,
+    firstSeenAt: row.first_seen_at,
+    lastSeenAt: row.last_seen_at,
+    estimatedDurationSeconds: Number(row.estimated_duration_seconds ?? 0),
+    heartbeatCount: Number(row.heartbeat_count ?? 0),
   }));
 }

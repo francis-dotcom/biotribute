@@ -9,10 +9,10 @@ import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
 import {
-  getRecentTributeVisits,
+  getRecentTributeVisitSessions,
   getTributeVisitStats,
   isVisitStoreConfigured,
-  type TributeVisitDetail,
+  type TributeVisitSessionDetail,
   type TributeVisitStats,
 } from "@/lib/visits";
 import { getTributeThemePreset, tributeThemePresets } from "@/data/tributes";
@@ -37,7 +37,7 @@ export default async function ConsolePage({
     pageViews: 0,
     uniqueVisitors: 0,
   };
-  let recentVisits: TributeVisitDetail[] = [];
+  let recentVisits: TributeVisitSessionDetail[] = [];
   let visitStatsError: string | null = null;
   try {
     messages = await getMessagesForAdmin(slug);
@@ -46,7 +46,7 @@ export default async function ConsolePage({
   }
   try {
     visitStats = await getTributeVisitStats(slug);
-    recentVisits = await getRecentTributeVisits(slug);
+    recentVisits = await getRecentTributeVisitSessions(slug);
   } catch (error) {
     visitStats = {
       pageViews: 0,

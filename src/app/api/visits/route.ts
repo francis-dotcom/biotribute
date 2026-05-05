@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getClientIp } from "@/lib/rate-limit";
-import { recordTributeVisit } from "@/lib/visits";
+import { recordTributeVisitSession } from "@/lib/visits";
 
 const requestSchema = z.object({
   tributeSlug: z.string().trim().min(1),
+  sessionId: z.string().trim().min(1).max(120),
   path: z.string().trim().min(1).max(300),
+  eventType: z.enum(["enter", "heartbeat", "leave"]).optional(),
 });
 
 export async function POST(request: Request) {
@@ -13,12 +15,14 @@ export async function POST(request: Request) {
     const json = await request.json();
     const payload = requestSchema.parse(json);
 
-    await recordTributeVisit({
+    await recordTributeVisitSession({
       tributeSlug: payload.tributeSlug,
+      sessionId: payload.sessionId,
       path: payload.path,
       ip: getClientIp(request),
       userAgent: request.headers.get("user-agent") ?? "",
       referer: request.headers.get("referer") ?? "",
+      eventType: payload.eventType ?? "heartbeat",
     });
 
     return new NextResponse(null, { status: 204 });
