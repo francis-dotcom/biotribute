@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
+import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
 import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import { MessageFeed } from "@/components/message-feed";
@@ -86,6 +87,14 @@ export default async function TributePage({ params }: PageProps) {
             <div
               className={tribute.heroImageUrl ? "avatar-placeholder has-image" : "avatar-placeholder"}
               aria-hidden="true"
+            />
+            <DonationDetailsModal
+              accountName={tribute.donationAccountName}
+              accountNumber={tribute.donationAccountNumber}
+              bankName={tribute.donationBankName}
+              phone={tribute.donationPhone}
+              triggerClassName="hero-donation-badge"
+              triggerLabel="Donate"
             />
             <ShareTributeIconButton className="hero-share-icon" />
           </div>
