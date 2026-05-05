@@ -456,7 +456,7 @@ textarea {
 }
 
 .hero-view-count strong {
-  color: var(--text);
+  color: #1f9d55;
   font-size: 0.86rem;
   letter-spacing: 0.03em;
 }
