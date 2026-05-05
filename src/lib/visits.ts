@@ -195,7 +195,7 @@ export async function recordTributeVisitSession(input: RecordTributeVisitSession
       ip: input.ip,
       userAgent: input.userAgent,
       referer: input.referer,
-      dedupeHours: 12,
+      dedupeHours: 24,
     });
 
     return;
