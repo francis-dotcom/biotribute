@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type TributeCardModalProps = {
   recipientEmail?: string;
@@ -22,9 +22,13 @@ export function TributeCardModal({
   tributeName,
   storeConfigured,
 }: TributeCardModalProps) {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [isOpen, setIsOpen] = useState(false);
   const [pending, setPending] = useState(false);
   const [toast, setToast] = useState<{ message: string; tone: "success" | "error" } | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!toast) {
@@ -34,6 +38,62 @@ export function TributeCardModal({
     const timeout = window.setTimeout(() => setToast(null), 4500);
     return () => window.clearTimeout(timeout);
   }, [toast]);
+
+  useEffect(() => {
+    if (!isOpen || !turnstileSiteKey) {
+      return;
+    }
+
+    let pollingTimer: number | null = null;
+    const renderTurnstile = () => {
+      const turnstile = (window as unknown as { turnstile?: {
+        render: (
+          container: HTMLElement,
+          options: {
+            sitekey: string;
+            callback?: (token: string) => void;
+            "expired-callback"?: () => void;
+            "error-callback"?: () => void;
+          },
+        ) => string;
+        reset: (widgetId: string) => void;
+      } }).turnstile;
+
+      if (!turnstile || !turnstileContainerRef.current) {
+        return false;
+      }
+
+      setTurnstileToken("");
+      if (turnstileWidgetIdRef.current) {
+        turnstile.reset(turnstileWidgetIdRef.current);
+        return true;
+      }
+
+      turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
+        sitekey: turnstileSiteKey,
+        callback: (token: string) => setTurnstileToken(token),
+        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => setTurnstileToken(""),
+      });
+
+      return true;
+    };
+
+    if (!renderTurnstile()) {
+      pollingTimer = window.setInterval(() => {
+        if (renderTurnstile() && pollingTimer) {
+          window.clearInterval(pollingTimer);
+          pollingTimer = null;
+        }
+      }, 250);
+    }
+
+    return () => {
+      if (pollingTimer) {
+        window.clearInterval(pollingTimer);
+      }
+    };
+  }, [isOpen, turnstileSiteKey]);
 
   async function handleSubmit(formData: FormData) {
     if (!storeConfigured) {
@@ -62,7 +122,17 @@ export function TributeCardModal({
 
 ${cardMessage}`,
       website: String(formData.get("website") ?? ""),
+      turnstileToken,
     };
+
+    if (turnstileSiteKey && !payload.turnstileToken.trim()) {
+      setToast({
+        message: "Please complete bot verification before sending your card.",
+        tone: "error",
+      });
+      setPending(false);
+      return;
+    }
 
     const response = await fetch("/api/family-messages", {
       method: "POST",
@@ -179,6 +249,13 @@ ${cardMessage}`,
                 <span>Website</span>
                 <input name="website" type="text" tabIndex={-1} autoComplete="off" />
               </label>
+
+              {turnstileSiteKey ? (
+                <div className="field-block">
+                  <span>Bot Verification</span>
+                  <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                </div>
+              ) : null}
 
               <button className="button-primary" type="submit" disabled={pending}>
                 {pending ? "Sending..." : "Send Card"}

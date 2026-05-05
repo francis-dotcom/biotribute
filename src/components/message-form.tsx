@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type MessageFormProps = {
   tributeSlug: string;
@@ -16,6 +16,9 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
   const [fieldErrors, setFieldErrors] = useState<Partial<Record<MessageFormField, string>>>({});
   const [pending, setPending] = useState(false);
   const [open, setOpen] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState("");
+  const turnstileContainerRef = useRef<HTMLDivElement | null>(null);
+  const turnstileWidgetIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!toast) {
@@ -34,6 +37,62 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     window.addEventListener("biotribute:open-message-form", openFromActionBar);
     return () => window.removeEventListener("biotribute:open-message-form", openFromActionBar);
   }, []);
+
+  useEffect(() => {
+    if (!open || !turnstileSiteKey) {
+      return;
+    }
+
+    let pollingTimer: number | null = null;
+    const renderTurnstile = () => {
+      const turnstile = (window as unknown as { turnstile?: {
+        render: (
+          container: HTMLElement,
+          options: {
+            sitekey: string;
+            callback?: (token: string) => void;
+            "expired-callback"?: () => void;
+            "error-callback"?: () => void;
+          },
+        ) => string;
+        reset: (widgetId: string) => void;
+      } }).turnstile;
+
+      if (!turnstile || !turnstileContainerRef.current) {
+        return false;
+      }
+
+      setTurnstileToken("");
+      if (turnstileWidgetIdRef.current) {
+        turnstile.reset(turnstileWidgetIdRef.current);
+        return true;
+      }
+
+      turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
+        sitekey: turnstileSiteKey,
+        callback: (token: string) => setTurnstileToken(token),
+        "expired-callback": () => setTurnstileToken(""),
+        "error-callback": () => setTurnstileToken(""),
+      });
+
+      return true;
+    };
+
+    if (!renderTurnstile()) {
+      pollingTimer = window.setInterval(() => {
+        if (renderTurnstile() && pollingTimer) {
+          window.clearInterval(pollingTimer);
+          pollingTimer = null;
+        }
+      }, 250);
+    }
+
+    return () => {
+      if (pollingTimer) {
+        window.clearInterval(pollingTimer);
+      }
+    };
+  }, [open, turnstileSiteKey]);
 
   function showToast(message: string, tone: "success" | "error") {
     setToast({ message, tone });
@@ -77,7 +136,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
       placement,
       message: String(formData.get("message") ?? ""),
       website: String(formData.get("website") ?? ""),
-      turnstileToken: String(formData.get("cf-turnstile-response") ?? ""),
+      turnstileToken,
     };
 
     if (turnstileSiteKey && !payload.turnstileToken.trim()) {
@@ -261,7 +320,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
               {turnstileSiteKey ? (
                 <div className="field-block">
                   <span>Bot Verification</span>
-                  <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                  <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
                 </div>
               ) : null}
 
