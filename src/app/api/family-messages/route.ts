@@ -17,7 +17,7 @@ const requestSchema = z.object({
 type FamilyMessageField = "senderName" | "senderEmail" | "message";
 
 export async function POST(request: Request) {
-  const rateLimit = consumeRateLimit({
+  const rateLimit = await consumeRateLimit({
     key: `api:family-messages:${getClientIp(request)}`,
     limit: 4,
     windowMs: 1000 * 60 * 10,

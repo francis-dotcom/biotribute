@@ -270,8 +270,8 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
               </button>
 
               <p className="subtle-note">
-                Bot protection can use Cloudflare Turnstile or reCAPTCHA. After you submit,
-                please verify your email before moderation and public display.
+                Please verify your email after submitting. Your message appears after
+                review.
               </p>
             </form>
           </div>

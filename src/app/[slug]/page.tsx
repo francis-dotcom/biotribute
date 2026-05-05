@@ -12,6 +12,7 @@ import { TimelineSection } from "@/components/timeline-section";
 import { TributeActionBar } from "@/components/tribute-action-bar";
 import { TributeCardModal } from "@/components/tribute-card-modal";
 import { TributeMediaSection } from "@/components/tribute-media-section";
+import { TributeVisitTracker } from "@/components/tribute-visit-tracker";
 import { getTributeThemePreset } from "@/data/tributes";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
 import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
@@ -80,6 +81,7 @@ export default async function TributePage({ params }: PageProps) {
 
   return (
     <main className="page-shell tribute-page-shell" style={pageStyle}>
+      <TributeVisitTracker tributeSlug={tribute.slug} />
       <div className="tribute-page">
         <section className="hero-section" id="tribute-top">
           <p className="hero-kicker">In Loving Memory</p>

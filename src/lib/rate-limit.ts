@@ -98,11 +98,15 @@ export async function consumeRateLimit(input: {
     return consumeMemoryRateLimit(input);
   }
 
-  const row = data[0] as Partial<RateLimitResult>;
+  const row = data[0] as Partial<RateLimitResult> & { retry_after_seconds?: number };
   return {
     allowed: Boolean(row.allowed),
     remaining: typeof row.remaining === "number" ? row.remaining : 0,
     retryAfterSeconds:
-      typeof row.retryAfterSeconds === "number" ? row.retryAfterSeconds : Math.ceil(input.windowMs / 1000),
+      typeof row.retryAfterSeconds === "number"
+        ? row.retryAfterSeconds
+        : typeof row.retry_after_seconds === "number"
+          ? row.retry_after_seconds
+          : Math.ceil(input.windowMs / 1000),
   } satisfies RateLimitResult;
 }

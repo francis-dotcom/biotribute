@@ -8,7 +8,7 @@ function getAdminSecret() {
 }
 
 export async function POST(request: Request) {
-  const rateLimit = consumeRateLimit({
+  const rateLimit = await consumeRateLimit({
     key: `api:admin-session:${getClientIp(request)}`,
     limit: 5,
     windowMs: 1000 * 60 * 15,

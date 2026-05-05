@@ -16,7 +16,7 @@ const requestSchema = z.object({
 type MessageFormField = "author" | "email" | "message";
 
 export async function POST(request: Request) {
-  const rateLimit = consumeRateLimit({
+  const rateLimit = await consumeRateLimit({
     key: `api:messages:${getClientIp(request)}`,
     limit: 6,
     windowMs: 1000 * 60 * 10,

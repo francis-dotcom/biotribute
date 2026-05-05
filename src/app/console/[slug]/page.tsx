@@ -7,6 +7,7 @@ import { TributeBuilderForm } from "@/components/tribute-builder-form";
 import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
+import { getTributeVisitStats, type TributeVisitStats } from "@/lib/visits";
 import { getTributeThemePreset, tributeThemePresets } from "@/data/tributes";
 
 type ConsolePageProps = {
@@ -25,10 +26,22 @@ export default async function ConsolePage({
   }
 
   let messages = [] as Awaited<ReturnType<typeof getMessagesForAdmin>>;
+  let visitStats: TributeVisitStats = {
+    pageViews: 0,
+    uniqueVisitors: 0,
+  };
   try {
     messages = await getMessagesForAdmin(slug);
   } catch {
     messages = [];
+  }
+  try {
+    visitStats = await getTributeVisitStats(slug);
+  } catch {
+    visitStats = {
+      pageViews: 0,
+      uniqueVisitors: 0,
+    };
   }
   const approved = messages.filter((message) => message.status === "approved").length;
   const latestByEmail = new Map<typeof messages[number]["email"], typeof messages[number]>();
@@ -52,6 +65,15 @@ export default async function ConsolePage({
   const shellStyle = {
     ...activeTheme.variables,
   } as CSSProperties;
+  const lastVisitedLabel = visitStats.lastVisitedAt
+    ? new Date(visitStats.lastVisitedAt).toLocaleString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      })
+    : "No visits recorded yet";
 
   return (
     <main className="landing-shell console-shell dashboard-theme-shell" style={shellStyle}>
@@ -110,6 +132,19 @@ export default async function ConsolePage({
           </div>
           <Link className="button-secondary" href={`/console/${slug}/messages`}>
             Open Approval Page
+          </Link>
+        </article>
+
+        <article className="dashboard-row">
+          <div className="dashboard-row-main">
+            <p className="card-label">Visitors</p>
+            <h2>{visitStats.pageViews}</h2>
+            <p>
+              {visitStats.uniqueVisitors} unique visitors tracked. Last visit: {lastVisitedLabel}.
+            </p>
+          </div>
+          <Link className="button-secondary" href={`/${tribute.slug}`}>
+            Open Public Page
           </Link>
         </article>
 
