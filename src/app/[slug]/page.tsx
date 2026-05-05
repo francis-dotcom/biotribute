@@ -212,7 +212,7 @@ export default async function TributePage({ params }: PageProps) {
 
         <section className="content-section">
           <p className="section-kicker">The Family</p>
-          <h2>Family & Special Contributors</h2>
+          <h2>Family & Associates</h2>
           <span className="section-accent" />
           <div className="contributors-grid">
             {tribute.contributors.map((contributor) => (
