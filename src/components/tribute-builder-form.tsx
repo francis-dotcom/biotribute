@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { TributeRecord } from "@/data/tributes";
 
@@ -68,6 +68,8 @@ export function TributeBuilderForm({
   const [showLivestreamSection, setShowLivestreamSection] = useState(
     tribute.showLivestreamSection
   );
+  const [heroImageUrl, setHeroImageUrl] = useState(tribute.heroImageUrl ?? "");
+  const [backgroundImageUrl, setBackgroundImageUrl] = useState(tribute.backgroundImageUrl ?? "");
   const [videoUrls, setVideoUrls] = useState([
     tribute.videoUrls[0] ?? "",
     tribute.videoUrls[1] ?? "",
@@ -169,6 +171,26 @@ export function TributeBuilderForm({
     ];
   });
 
+  useEffect(() => {
+    function syncHeroImage(event: Event) {
+      const customEvent = event as CustomEvent<{ imageUrl?: string }>;
+      setHeroImageUrl(customEvent.detail?.imageUrl ?? "");
+    }
+
+    function syncBackgroundImage(event: Event) {
+      const customEvent = event as CustomEvent<{ imageUrl?: string }>;
+      setBackgroundImageUrl(customEvent.detail?.imageUrl ?? "");
+    }
+
+    window.addEventListener("biotribute:hero-image-updated", syncHeroImage);
+    window.addEventListener("biotribute:background-image-updated", syncBackgroundImage);
+
+    return () => {
+      window.removeEventListener("biotribute:hero-image-updated", syncHeroImage);
+      window.removeEventListener("biotribute:background-image-updated", syncBackgroundImage);
+    };
+  }, []);
+
   function updateTimelineEntry(
     index: number,
     field: keyof TimelineDraft,
@@ -247,8 +269,8 @@ export function TributeBuilderForm({
       tagline: String(formData.get("tagline") ?? ""),
       organizer: String(formData.get("organizer") ?? ""),
       theme: String(formData.get("theme") ?? tribute.theme),
-      heroImageUrl: String(formData.get("heroImageUrl") ?? ""),
-      backgroundImageUrl: String(formData.get("backgroundImageUrl") ?? ""),
+      heroImageUrl: heroImageUrl.trim(),
+      backgroundImageUrl: backgroundImageUrl.trim(),
       galleryNote: String(formData.get("galleryNote") ?? ""),
       lifeStory: String(formData.get("lifeStory") ?? ""),
       supportNote: String(formData.get("supportNote") ?? ""),
@@ -506,7 +528,12 @@ export function TributeBuilderForm({
           <h3>Main photo</h3>
           <label className="field-block">
             <span>Hero image URL</span>
-            <input name="heroImageUrl" type="text" defaultValue={tribute.heroImageUrl ?? ""} />
+            <input
+              name="heroImageUrl"
+              type="text"
+              value={heroImageUrl}
+              onChange={(event) => setHeroImageUrl(event.currentTarget.value)}
+            />
           </label>
           <div className="field-block">
             <span>Upload hero photo</span>
@@ -524,7 +551,8 @@ export function TributeBuilderForm({
             <input
               name="backgroundImageUrl"
               type="text"
-              defaultValue={tribute.backgroundImageUrl ?? ""}
+              value={backgroundImageUrl}
+              onChange={(event) => setBackgroundImageUrl(event.currentTarget.value)}
             />
           </label>
           <div className="field-block">

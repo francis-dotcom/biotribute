@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { TributeGalleryItem } from "@/data/tributes";
 
 type GalleryDashboardManagerProps = {
@@ -18,6 +19,7 @@ export function GalleryDashboardManager({
   backgroundImageUrl,
   galleryImages,
 }: GalleryDashboardManagerProps) {
+  const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [pendingKind, setPendingKind] = useState<UploadKind | null>(null);
   const [heroImage, setHeroImage] = useState(heroImageUrl ?? "");
@@ -63,10 +65,22 @@ export function GalleryDashboardManager({
 
     if (kind === "hero" && data.uploads?.[0]?.imageUrl) {
       setHeroImage(data.uploads[0].imageUrl);
+      window.dispatchEvent(
+        new CustomEvent("biotribute:hero-image-updated", {
+          detail: { imageUrl: data.uploads[0].imageUrl },
+        }),
+      );
+      router.refresh();
     }
 
     if (kind === "background" && data.uploads?.[0]?.imageUrl) {
       setBackgroundImage(data.uploads[0].imageUrl);
+      window.dispatchEvent(
+        new CustomEvent("biotribute:background-image-updated", {
+          detail: { imageUrl: data.uploads[0].imageUrl },
+        }),
+      );
+      router.refresh();
     }
 
     const uploadedItems = data.uploads ?? [];
@@ -106,10 +120,22 @@ export function GalleryDashboardManager({
 
     if (kind === "hero") {
       setHeroImage("");
+      window.dispatchEvent(
+        new CustomEvent("biotribute:hero-image-updated", {
+          detail: { imageUrl: "" },
+        }),
+      );
+      router.refresh();
     }
 
     if (kind === "background") {
       setBackgroundImage("");
+      window.dispatchEvent(
+        new CustomEvent("biotribute:background-image-updated", {
+          detail: { imageUrl: "" },
+        }),
+      );
+      router.refresh();
     }
 
     if (kind === "gallery" && galleryId) {
