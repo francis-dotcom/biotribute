@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
+import { headers } from "next/headers";
 import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
 import { DonationDetailsModal } from "@/components/donation-details-modal";
@@ -12,11 +13,11 @@ import { TimelineSection } from "@/components/timeline-section";
 import { TributeActionBar } from "@/components/tribute-action-bar";
 import { TributeCardModal } from "@/components/tribute-card-modal";
 import { TributeMediaSection } from "@/components/tribute-media-section";
-import { TributeVisitTracker } from "@/components/tribute-visit-tracker";
 import { getTributeThemePreset } from "@/data/tributes";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
 import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
 import { getTributeRecord, resolveCanonicalTributeSlug } from "@/lib/tributes-store";
+import { recordTributeVisit } from "@/lib/visits";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -58,6 +59,22 @@ export default async function TributePage({ params }: PageProps) {
     notFound();
   }
 
+  try {
+    const requestHeaders = await headers();
+    await recordTributeVisit({
+      tributeSlug: tribute.slug,
+      path: `/${canonicalSlug}`,
+      ip:
+        requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+        requestHeaders.get("x-real-ip")?.trim() ||
+        "unknown",
+      userAgent: requestHeaders.get("user-agent") ?? "",
+      referer: requestHeaders.get("referer") ?? "",
+    });
+  } catch {
+    // Visit tracking must never break the public tribute page render.
+  }
+
   const approvedMessages = await getApprovedMessages(tribute.slug);
   const visibleMessages = approvedMessages.length > 0 ? approvedMessages : tribute.messages;
   const familyEmail = tribute.contactEmail || process.env.NEXT_PUBLIC_FAMILY_EMAIL || "";
@@ -81,7 +98,6 @@ export default async function TributePage({ params }: PageProps) {
 
   return (
     <main className="page-shell tribute-page-shell" style={pageStyle}>
-      <TributeVisitTracker tributeSlug={tribute.slug} />
       <div className="tribute-page">
         <section className="hero-section" id="tribute-top">
           <p className="hero-kicker">In Loving Memory</p>
