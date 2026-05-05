@@ -10,6 +10,7 @@ type MessageFeedProps = {
 
 export function MessageFeed({ messages }: MessageFeedProps) {
   const [activeMessage, setActiveMessage] = useState<TributeMessage | null>(null);
+  const [activeMessageOrigin, setActiveMessageOrigin] = useState<"stream" | "library">("stream");
   const [showLibrary, setShowLibrary] = useState(false);
   const [query, setQuery] = useState("");
   const [isInteracting, setIsInteracting] = useState(false);
@@ -48,7 +49,17 @@ export function MessageFeed({ messages }: MessageFeedProps) {
 
   function openMessageFromLibrary(message: TributeMessage) {
     setShowLibrary(false);
+    setActiveMessageOrigin("library");
     setActiveMessage(message);
+  }
+
+  function closeActiveMessage() {
+    const shouldReturnToLibrary = activeMessageOrigin === "library";
+    setActiveMessage(null);
+    setActiveMessageOrigin("stream");
+    if (shouldReturnToLibrary) {
+      setShowLibrary(true);
+    }
   }
 
   function scrollMessages(direction: "left" | "right") {
@@ -160,7 +171,10 @@ export function MessageFeed({ messages }: MessageFeedProps) {
               <button
                 className="message-more-button"
                 type="button"
-                onClick={() => setActiveMessage(message)}
+                onClick={() => {
+                  setActiveMessageOrigin("stream");
+                  setActiveMessage(message);
+                }}
               >
                 See more
               </button>
@@ -178,7 +192,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
           role="dialog"
           aria-modal="true"
           aria-labelledby="message-modal-title"
-          onClick={() => setActiveMessage(null)}
+          onClick={closeActiveMessage}
         >
           <div className="message-modal-card" onClick={(event) => event.stopPropagation()}>
             <div className="message-modal-head">
@@ -195,7 +209,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                 className="message-modal-close"
                 type="button"
                 aria-label="Close memory"
-                onClick={() => setActiveMessage(null)}
+                onClick={closeActiveMessage}
               >
                 ×
               </button>
