@@ -2797,6 +2797,9 @@ textarea {
   display: grid;
   gap: 12px;
   margin-top: 12px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding-right: 6px;
 }
 
 .console-visit-item {
@@ -2814,6 +2817,20 @@ textarea {
   margin-bottom: 0;
 }
 
+.console-visit-list::-webkit-scrollbar {
+  width: 10px;
+}
+
+.console-visit-list::-webkit-scrollbar-track {
+  background: rgba(244, 235, 218, 0.45);
+  border-radius: 999px;
+}
+
+.console-visit-list::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 106, 0.55);
+  border-radius: 999px;
+}
+
 @media (max-width: 640px) {
   .tribute-media-grid-count-2 {
     grid-template-columns: 1fr;
@@ -2829,5 +2846,9 @@ textarea {
 
   .tribute-stream-thumbnail {
     min-height: 180px;
+  }
+
+  .console-visit-list {
+    max-height: 420px;
   }
 }
