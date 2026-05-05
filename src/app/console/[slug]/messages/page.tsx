@@ -5,6 +5,7 @@ import { NoticeToast } from "@/components/notice-toast";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { getTributeThemePreset } from "@/data/tributes";
 import { requireAdminSession } from "@/lib/admin";
+import { getFamilyPrivateMessagesForAdmin } from "@/lib/family-private-messages";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord } from "@/lib/tributes-store";
 
@@ -33,6 +34,14 @@ export default async function ConsoleMessagesPage({
     messages = await getMessagesForAdmin(slug);
   } catch (error) {
     messagesError = error instanceof Error ? error.message : "Unable to load moderation data.";
+  }
+  let privateMessagesError: string | null = null;
+  let privateMessages = [] as Awaited<ReturnType<typeof getFamilyPrivateMessagesForAdmin>>;
+  try {
+    privateMessages = await getFamilyPrivateMessagesForAdmin(slug);
+  } catch (error) {
+    privateMessagesError =
+      error instanceof Error ? error.message : "Unable to load private family messages.";
   }
   const redirectTo = `/console/${slug}/messages`;
   const shellStyle = {
@@ -90,6 +99,44 @@ export default async function ConsoleMessagesPage({
             <ModerationQueue messages={messages} redirectTo={redirectTo} />
           )
         ) : null}
+
+        <article className="form-card dashboard-section-header">
+          <p className="card-label">Private Inbox</p>
+          <h2>Private cards and direct messages for {tribute.name}</h2>
+          <p className="subtle-note">
+            These are private submissions sent through Card and Message actions.
+          </p>
+        </article>
+
+        {privateMessagesError ? (
+          <article className="form-card">
+            <h3>Private inbox not ready</h3>
+            <p>{privateMessagesError}</p>
+          </article>
+        ) : privateMessages.length === 0 ? (
+          <article className="form-card">
+            <h3>No private messages yet</h3>
+            <p>Private card and message submissions will appear here.</p>
+          </article>
+        ) : (
+          <section className="admin-grid">
+            {privateMessages.map((message) => (
+              <article className="moderation-row" key={message.id}>
+                <div className="moderation-row-main">
+                  <div className="moderation-row-meta">
+                    <p className="card-label">Private submission</p>
+                    <p className="subtle-note">
+                      {new Date(message.created_at).toLocaleString("en-US")}
+                    </p>
+                  </div>
+                  <p className="message-author">{message.sender_name}</p>
+                  <p className="subtle-note">{message.sender_email}</p>
+                  <p className="message-modal-copy">{message.message}</p>
+                </div>
+              </article>
+            ))}
+          </section>
+        )}
       </section>
     </main>
   );

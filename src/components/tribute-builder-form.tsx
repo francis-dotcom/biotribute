@@ -800,13 +800,14 @@ export function TributeBuilderForm({
                   name={`videoUrl-${index}`}
                   type="url"
                   value={videoUrls[index]}
-                  onChange={(event) =>
+                  onChange={(event) => {
+                    const nextValue = event.currentTarget.value;
                     setVideoUrls((current) =>
                       current.map((value, currentIndex) =>
-                        currentIndex === index ? event.currentTarget.value : value
+                        currentIndex === index ? nextValue : value
                       )
-                    )
-                  }
+                    );
+                  }}
                   placeholder="https://www.youtube.com/watch?v=..."
                 />
               </label>
@@ -816,13 +817,14 @@ export function TributeBuilderForm({
                   name={`videoDescription-${index}`}
                   type="text"
                   value={videoDescriptions[index]}
-                  onChange={(event) =>
+                  onChange={(event) => {
+                    const nextValue = event.currentTarget.value;
                     setVideoDescriptions((current) =>
                       current.map((value, currentIndex) =>
-                        currentIndex === index ? event.currentTarget.value : value
+                        currentIndex === index ? nextValue : value
                       )
-                    )
-                  }
+                    );
+                  }}
                   placeholder={`Short description for video ${index + 1}`}
                 />
               </label>

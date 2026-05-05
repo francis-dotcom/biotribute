@@ -10,6 +10,16 @@ export type CreateFamilyPrivateMessageInput = {
   website?: string;
 };
 
+export type StoredFamilyPrivateMessageRow = {
+  id: string;
+  tribute_slug: string;
+  recipient_email: string;
+  sender_name: string;
+  sender_email: string;
+  message: string;
+  created_at: string;
+};
+
 type InsertFamilyPrivateMessageResult = {
   emailNotified: boolean;
 };
@@ -39,6 +49,35 @@ function isMissingTableError(error: { code?: string; message?: string } | null) 
 
 export function isFamilyPrivateMessageStoreConfigured() {
   return isSupabaseConfigured();
+}
+
+export async function getFamilyPrivateMessagesForAdmin(tributeSlug: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [] as StoredFamilyPrivateMessageRow[];
+  }
+
+  const { data, error } = await supabase
+    .from("family_private_messages")
+    .select("*")
+    .eq("tribute_slug", tributeSlug)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    if (isMissingTableError(error)) {
+      throw new Error(
+        "Private family message table is missing. Run the family_private_messages migration.",
+      );
+    }
+
+    throw new Error("Unable to load private family messages.");
+  }
+
+  if (!data) {
+    return [] as StoredFamilyPrivateMessageRow[];
+  }
+
+  return data as StoredFamilyPrivateMessageRow[];
 }
 
 function getSiteUrl() {
