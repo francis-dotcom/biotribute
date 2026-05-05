@@ -245,6 +245,13 @@ export default async function TributePage({ params }: PageProps) {
                   tributeName={tribute.name}
                   storeConfigured={familyMessageStoreConfigured}
                 />
+                <DonationDetailsModal
+                  accountName={tribute.donationAccountName}
+                  accountNumber={tribute.donationAccountNumber}
+                  bankName={tribute.donationBankName}
+                  phone={tribute.donationPhone}
+                  triggerClassName="support-action-pill support-action-pill-solid-yellow"
+                />
                 <FamilyMessageModal
                   recipientEmail={familyEmail}
                   tributeSlug={tribute.slug}
@@ -254,8 +261,8 @@ export default async function TributePage({ params }: PageProps) {
                 />
               </div>
               <p className="support-actions-copy">
-                Send a tribute card or write a direct private message to the family
-                representative.
+                Send a tribute card, make a donation, or write a direct private message
+                to the family representative.
               </p>
             </article>
             <article className="form-card">
