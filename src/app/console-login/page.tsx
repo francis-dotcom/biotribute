@@ -3,14 +3,15 @@ import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin";
 
 type ConsoleLoginPageProps = {
-  searchParams: Promise<{ error?: string; next?: string }>;
+  searchParams: Promise<{ error?: string; next?: string; force?: string }>;
 };
 
 export default async function ConsoleLoginPage({ searchParams }: ConsoleLoginPageProps) {
-  const { error, next } = await searchParams;
+  const { error, next, force } = await searchParams;
   const nextPath = next && next.startsWith("/") ? next : "/console/SirFemiOgini";
+  const forcePrompt = force === "1";
 
-  if (await isAdminAuthenticated()) {
+  if (!forcePrompt && (await isAdminAuthenticated())) {
     redirect(nextPath);
   }
 
@@ -30,6 +31,11 @@ export default async function ConsoleLoginPage({ searchParams }: ConsoleLoginPag
           <p className="subtle-note">
             This signs you into the private BioTributes console on this browser.
           </p>
+          {forcePrompt ? (
+            <p className="subtle-note">
+              Please re-enter your password to continue to the console.
+            </p>
+          ) : null}
           {error ? <p className="form-status">{error}</p> : null}
           <form className="login-form" action="/api/admin/session" method="post">
             <input type="hidden" name="next" value={nextPath} />

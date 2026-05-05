@@ -27,7 +27,10 @@ export default function HomePage() {
           <Link className="button-primary" href={`/${featuredTribute.slug}`}>
             View Product Demo
           </Link>
-          <a className="button-secondary" href="/console/SirFemiOgini">
+          <a
+            className="button-secondary"
+            href="/console-login?next=%2Fconsole%2FSirFemiOgini&force=1"
+          >
             Open Console
           </a>
         </div>
@@ -132,7 +135,10 @@ export default function HomePage() {
           <Link className="button-primary" href={`/${featuredTribute.slug}`}>
             Open Tribute Demo
           </Link>
-          <a className="button-secondary" href="/console/SirFemiOgini">
+          <a
+            className="button-secondary"
+            href="/console-login?next=%2Fconsole%2FSirFemiOgini&force=1"
+          >
             Go to Console
           </a>
         </div>
