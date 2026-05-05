@@ -31,7 +31,7 @@ export type TributeGalleryItem = {
   imageUrl: string;
 };
 
-export type TributeTheme = "ivory" | "sage" | "sky" | "midnight";
+export type TributeTheme = "ivory" | "sage" | "sky";
 export type TributeLivestreamDisplayMode = "video" | "image-url" | "uploaded-image";
 
 export type TributeThemePreset = {
@@ -258,27 +258,6 @@ export const tributeThemePresets: TributeThemePreset[] = [
       "--gold-soft": "#e6eef7",
       "--violet-soft": "#eef3f8",
       "--violet-deep": "#59718e",
-    },
-  },
-  {
-    id: "midnight",
-    name: "Midnight Remembrance",
-    description: "A dark memorial palette with candle-gold accents and muted blue slate surfaces.",
-    variables: {
-      "--bg": "#0f141c",
-      "--bg-2": "#19212d",
-      "--panel": "rgba(27, 35, 47, 0.84)",
-      "--panel-solid": "#1b232f",
-      "--text": "#edf2f7",
-      "--muted": "#b6c0cc",
-      "--muted-2": "#d5dbe4",
-      "--muted-3": "#93a0b1",
-      "--line": "#334154",
-      "--gold": "#d6b15c",
-      "--gold-deep": "#b88e35",
-      "--gold-soft": "#2d3745",
-      "--violet-soft": "#243041",
-      "--violet-deep": "#8da6c6",
     },
   },
 ];
