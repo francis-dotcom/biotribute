@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GalleryDashboardManager } from "@/components/gallery-dashboard-manager";
 import { ThemeConsoleForm } from "@/components/theme-console-form";
 import { TributeBuilderForm } from "@/components/tribute-builder-form";
+import { VisitorDetailsPanel } from "@/components/visitor-details-panel";
 import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
@@ -215,22 +216,7 @@ export default async function ConsolePage({
           </article>
           <article className="soft-card">
             <p className="card-label">Recent Visits</p>
-            {visitStatsError ? <p>{visitStatsError}</p> : null}
-            {!visitStatsError && recentVisits.length === 0 ? <p>No visits recorded yet.</p> : null}
-            {!visitStatsError && recentVisits.length > 0 ? (
-              <div className="console-visit-list">
-                {recentVisits.map((visit) => (
-                  <div className="console-visit-item" key={`${visit.visitorHash}-${visit.createdAt}`}>
-                    <p>
-                      <strong>{new Date(visit.createdAt).toLocaleString("en-US")}</strong>
-                    </p>
-                    <p>Path: {visit.path}</p>
-                    <p>Visitor: {visit.visitorHash.slice(0, 10)}...</p>
-                    <p>Referer: {visit.referer?.trim() ? visit.referer : "Direct / unknown"}</p>
-                  </div>
-                ))}
-              </div>
-            ) : null}
+            <VisitorDetailsPanel visits={recentVisits} error={visitStatsError} />
           </article>
         </div>
       </section>

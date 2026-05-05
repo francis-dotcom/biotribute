@@ -2817,6 +2817,19 @@ textarea {
   margin-bottom: 0;
 }
 
+.console-visit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.console-visit-filters .button-secondary.is-active {
+  border-color: rgba(200, 169, 106, 0.7);
+  background: rgba(244, 235, 218, 0.85);
+  color: var(--text);
+}
+
 .console-visit-list::-webkit-scrollbar {
   width: 10px;
 }
