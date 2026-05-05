@@ -59,7 +59,7 @@ export default async function TributePage({ params }: PageProps) {
   const visibleMessages = approvedMessages.length > 0 ? approvedMessages : tribute.messages;
   const familyEmail = tribute.contactEmail || process.env.NEXT_PUBLIC_FAMILY_EMAIL || "";
   const storeConfigured = isMessageStoreConfigured();
-  const themePreset = getTributeThemePreset("midnight");
+  const themePreset = getTributeThemePreset(tribute.theme);
   const galleryLoop =
     tribute.galleryImages.length > 0
       ? [...tribute.galleryImages, ...tribute.galleryImages]
