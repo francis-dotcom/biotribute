@@ -160,6 +160,23 @@ textarea {
   margin-top: 24px;
 }
 
+.landing-proof {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.landing-proof span {
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gold-soft) 68%, white);
+  color: var(--muted-2);
+  font: 600 0.82rem/1.2 var(--font-sans);
+}
+
 .button-primary,
 .button-secondary {
   display: inline-flex;
@@ -245,6 +262,17 @@ textarea {
   padding: 20px;
 }
 
+.landing-checklist {
+  margin: 12px 0 0;
+  padding-left: 18px;
+  color: var(--muted-2);
+  font: 0.92rem/1.65 var(--font-sans);
+}
+
+.landing-checklist li + li {
+  margin-top: 4px;
+}
+
 .landing-card h2 {
   margin-bottom: 8px;
   font-size: 1.3rem;
@@ -260,6 +288,28 @@ textarea {
   margin: 0;
   color: var(--muted-2);
   font: 1rem/1.7 var(--font-sans);
+}
+
+.landing-solid-cta {
+  margin-top: 18px;
+  padding: 22px;
+  border: 1px solid rgba(229, 229, 234, 0.82);
+  border-radius: var(--radius-lg);
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--gold-soft) 48%, transparent), transparent 48%),
+    rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-sm);
+}
+
+.landing-solid-cta h2 {
+  margin: 0 0 8px;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+}
+
+.landing-solid-cta p {
+  margin: 0;
+  color: var(--muted-2);
+  font: 0.98rem/1.65 var(--font-sans);
 }
 
 .tribute-page {
