@@ -2537,41 +2537,36 @@ textarea {
   }
 
   .tribute-footer {
-    align-items: stretch;
-    flex-direction: column;
-    gap: 8px;
+    align-items: center;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 12px;
   }
 
   .footer-links {
-    width: 100%;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    gap: 0;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 10px;
   }
 
   .footer-links a {
-    flex: 1;
-  }
-
-  .footer-links a:nth-child(1) {
     text-align: left;
   }
 
-  .footer-links a:nth-child(2) {
-    text-align: center;
-  }
-
-  .footer-links a:nth-child(3) {
+  .footer-credit {
+    width: auto;
+    align-items: center;
     text-align: right;
   }
 
-  .footer-credit {
-    align-items: center;
-    text-align: center;
+  .footer-credit-line {
+    display: none;
   }
 
   .footer-credit-brand {
-    font-size: 0.68rem;
+    font-size: 0.62rem;
   }
 
   .support-action-list {
