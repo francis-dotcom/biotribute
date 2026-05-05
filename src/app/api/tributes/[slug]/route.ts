@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { isAdminAuthenticated } from "@/lib/admin";
 import { saveTributeRecord } from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
@@ -57,6 +58,10 @@ const tributeSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   try {
     const payload = tributeSchema.parse(await request.json());
     await saveTributeRecord(payload);

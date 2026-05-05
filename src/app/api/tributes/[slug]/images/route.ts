@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getTributeBySlug } from "@/data/tributes";
+import { isAdminAuthenticated } from "@/lib/admin";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 const BUCKET_NAME = "tribute-media";
@@ -138,6 +139,10 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   try {
     const { slug } = await context.params;
     const formData = await request.formData();
@@ -265,6 +270,10 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   try {
     const { slug } = await context.params;
     const payload = (await request.json()) as { galleryIds?: string[] };
@@ -321,6 +330,10 @@ export async function DELETE(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+
   try {
     const { slug } = await context.params;
     const payload = (await request.json()) as {
