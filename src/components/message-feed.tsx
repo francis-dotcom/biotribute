@@ -46,6 +46,11 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     return [...seed, ...seed];
   }, [filteredMessages, isSearching]);
 
+  function openMessageFromLibrary(message: TributeMessage) {
+    setShowLibrary(false);
+    setActiveMessage(message);
+  }
+
   function scrollMessages(direction: "left" | "right") {
     if (isSearching) {
       return;
@@ -246,7 +251,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
                     key={message.id}
                     className="messages-library-item"
                     type="button"
-                    onClick={() => setActiveMessage(message)}
+                    onClick={() => openMessageFromLibrary(message)}
                   >
                     <div className="messages-library-item-top">
                       <span
