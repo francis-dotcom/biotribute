@@ -168,10 +168,7 @@ export default async function TributePage({ params }: PageProps) {
             <h2>Moments in Memory</h2>
             <span className="section-accent" />
             <div className="gallery-card gallery-card-full">
-              <p>
-                A gentle space for family photos, celebration moments, and the scenes
-                that made his life recognizable to everyone who loved him.
-              </p>
+              <p>{tribute.galleryIntro?.trim()}</p>
               <div className="gallery-stream" aria-hidden="true">
                 {galleryLoop.length > 0 ? (
                   <div className="gallery-track">

@@ -55,6 +55,7 @@ export type TributeRecord = {
   lifeStory: string[];
   timeline: TributeTimelineEntry[];
   contributors: TributeContributor[];
+  galleryIntro?: string;
   galleryNote: string;
   galleryImages: TributeGalleryItem[];
   showGallerySection: boolean;
@@ -128,6 +129,8 @@ export const tributes: TributeRecord[] = [
         copy: "Guests can leave messages, submit memories, and contribute support as the page grows."
       }
     ],
+    galleryIntro:
+      "A gentle space for family photos, celebration moments, and the scenes that made his life recognizable to everyone who loved him.",
     galleryNote:
       "No photos have been added yet. Family members and invited contributors will be able to upload memories here.",
     galleryImages: [],

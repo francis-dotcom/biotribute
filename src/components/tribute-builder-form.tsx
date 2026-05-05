@@ -280,6 +280,7 @@ export function TributeBuilderForm({
       theme: String(formData.get("theme") ?? tribute.theme),
       heroImageUrl: heroImageUrl.trim(),
       backgroundImageUrl: backgroundImageUrl.trim(),
+      galleryIntro: String(formData.get("galleryIntro") ?? ""),
       galleryNote: String(formData.get("galleryNote") ?? ""),
       lifeStory: String(formData.get("lifeStory") ?? ""),
       supportNote: String(formData.get("supportNote") ?? ""),
@@ -779,6 +780,10 @@ export function TributeBuilderForm({
             Open Images tab
           </a>
         </div>
+        <label className="field-block">
+          <span>Gallery intro text</span>
+          <textarea name="galleryIntro" defaultValue={tribute.galleryIntro ?? ""} />
+        </label>
         <label className="field-block">
           <span>Empty state note</span>
           <textarea name="galleryNote" defaultValue={tribute.galleryNote} />

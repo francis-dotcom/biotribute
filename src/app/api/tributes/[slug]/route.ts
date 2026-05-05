@@ -32,6 +32,7 @@ const tributeSchema = z.object({
   theme: z.enum(["ivory", "sage", "sky"]),
   heroImageUrl: z.string().trim().optional(),
   backgroundImageUrl: z.string().trim().optional(),
+  galleryIntro: z.string().trim().optional(),
   galleryNote: z.string().trim(),
   lifeStory: z.string().trim().min(1),
   supportNote: z.string().trim().optional(),

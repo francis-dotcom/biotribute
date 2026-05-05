@@ -69,6 +69,7 @@ export type TributeBuilderInput = {
   theme: TributeTheme;
   heroImageUrl?: string;
   backgroundImageUrl?: string;
+  galleryIntro?: string;
   galleryNote: string;
   lifeStory: string;
   supportNote?: string;
@@ -183,6 +184,7 @@ function extractUrlsFromText(value: string | null) {
 type SupportNoteMetadata = {
   honorificTitle?: string;
   positionTitle?: string;
+  galleryIntro?: string;
   showGallerySection?: boolean;
   showVideoSection?: boolean;
   showLivestreamSection?: boolean;
@@ -247,6 +249,10 @@ function parseSupportNoteMetadata(value: string | null) {
       positionTitle:
         typeof parsed.positionTitle === "string"
           ? parsed.positionTitle.trim() || undefined
+          : undefined,
+      galleryIntro:
+        typeof parsed.galleryIntro === "string"
+          ? parsed.galleryIntro.trim() || undefined
           : undefined,
       showGallerySection: parsed.showGallerySection,
       showVideoSection: parsed.showVideoSection,
@@ -386,6 +392,10 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
         name: row.name,
         copy: row.copy,
       })) ?? fallback?.contributors ?? [],
+    galleryIntro:
+      supportNoteMetadata?.galleryIntro ??
+      fallback?.galleryIntro ??
+      "A gentle space for family photos, celebration moments, and the scenes that made his life recognizable to everyone who loved him.",
     galleryNote: tributeRow.gallery_note,
     galleryImages:
       (galleryItemRows as GalleryItemRow[] | null)?.map((row) => ({
@@ -488,6 +498,7 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
   const supportNoteMetadata: SupportNoteMetadata = {
     honorificTitle: input.honorificTitle?.trim() || undefined,
     positionTitle: input.positionTitle?.trim() || undefined,
+    galleryIntro: input.galleryIntro?.trim() || undefined,
     showGallerySection: input.showGallerySection ?? true,
     showVideoSection: input.showVideoSection ?? true,
     showLivestreamSection: input.showLivestreamSection ?? true,
