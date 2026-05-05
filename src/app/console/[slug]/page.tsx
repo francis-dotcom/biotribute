@@ -7,7 +7,11 @@ import { TributeBuilderForm } from "@/components/tribute-builder-form";
 import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
-import { getTributeVisitStats, type TributeVisitStats } from "@/lib/visits";
+import {
+  getTributeVisitStats,
+  isVisitStoreConfigured,
+  type TributeVisitStats,
+} from "@/lib/visits";
 import { getTributeThemePreset, tributeThemePresets } from "@/data/tributes";
 
 type ConsolePageProps = {
@@ -30,6 +34,7 @@ export default async function ConsolePage({
     pageViews: 0,
     uniqueVisitors: 0,
   };
+  let visitStatsError: string | null = null;
   try {
     messages = await getMessagesForAdmin(slug);
   } catch {
@@ -37,11 +42,13 @@ export default async function ConsolePage({
   }
   try {
     visitStats = await getTributeVisitStats(slug);
-  } catch {
+  } catch (error) {
     visitStats = {
       pageViews: 0,
       uniqueVisitors: 0,
     };
+    visitStatsError =
+      error instanceof Error ? error.message : "Visitor tracking is unavailable right now.";
   }
   const approved = messages.filter((message) => message.status === "approved").length;
   const latestByEmail = new Map<typeof messages[number]["email"], typeof messages[number]>();
@@ -62,6 +69,7 @@ export default async function ConsolePage({
   ).length;
   const activeTheme = getTributeThemePreset(tribute.theme);
   const storeConfigured = isTributeStoreConfigured();
+  const visitStoreConfigured = isVisitStoreConfigured();
   const shellStyle = {
     ...activeTheme.variables,
   } as CSSProperties;
@@ -139,9 +147,14 @@ export default async function ConsolePage({
           <div className="dashboard-row-main">
             <p className="card-label">Visitors</p>
             <h2>{visitStats.pageViews}</h2>
-            <p>
-              {visitStats.uniqueVisitors} unique visitors tracked. Last visit: {lastVisitedLabel}.
-            </p>
+            {visitStoreConfigured ? (
+              <p>
+                {visitStats.uniqueVisitors} unique visitors tracked. Last visit: {lastVisitedLabel}.
+              </p>
+            ) : (
+              <p>Visitor tracking is not configured because Supabase is not connected.</p>
+            )}
+            {visitStatsError ? <p>{visitStatsError}</p> : null}
           </div>
           <Link className="button-secondary" href={`/${tribute.slug}`}>
             Open Public Page
