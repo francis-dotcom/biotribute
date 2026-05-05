@@ -433,6 +433,34 @@ textarea {
   position: relative;
 }
 
+.hero-view-count {
+  position: absolute;
+  top: 20px;
+  right: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.94);
+  color: var(--muted-2);
+  font: 600 0.76rem/1 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  box-shadow: var(--shadow-xs);
+}
+
+.hero-view-count-label {
+  color: var(--muted-3);
+}
+
+.hero-view-count strong {
+  color: var(--text);
+  font-size: 0.86rem;
+  letter-spacing: 0.03em;
+}
+
 .hero-kicker {
   margin: 0 0 18px;
   color: var(--muted-3);
@@ -2595,6 +2623,13 @@ textarea {
   .hero-section {
     padding-top: 38px;
     padding-bottom: 32px;
+  }
+
+  .hero-view-count {
+    top: 14px;
+    right: 16px;
+    padding: 6px 10px;
+    font-size: 0.72rem;
   }
 
   .hero-kicker {

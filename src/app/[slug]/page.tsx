@@ -18,7 +18,7 @@ import { getTributeThemePreset } from "@/data/tributes";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
 import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
 import { getTributeRecord, resolveCanonicalTributeSlug } from "@/lib/tributes-store";
-import { recordTributeVisit } from "@/lib/visits";
+import { getTributeVisitStats, recordTributeVisit } from "@/lib/visits";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -76,6 +76,14 @@ export default async function TributePage({ params }: PageProps) {
     // Visit tracking must never break the public tribute page render.
   }
 
+  let pageViewsCount: number | null = null;
+  try {
+    const visitStats = await getTributeVisitStats(tribute.slug);
+    pageViewsCount = visitStats.pageViews;
+  } catch {
+    // Visit stats are optional on public page and must not break rendering.
+  }
+
   const approvedMessages = await getApprovedMessages(tribute.slug);
   const visibleMessages = approvedMessages.length > 0 ? approvedMessages : tribute.messages;
   const familyEmail = tribute.contactEmail || process.env.NEXT_PUBLIC_FAMILY_EMAIL || "";
@@ -102,6 +110,12 @@ export default async function TributePage({ params }: PageProps) {
       <TributeVisitTracker tributeSlug={tribute.slug} />
       <div className="tribute-page">
         <section className="hero-section" id="tribute-top">
+          {pageViewsCount !== null ? (
+            <div className="hero-view-count" aria-label={`${pageViewsCount} page views`}>
+              <span className="hero-view-count-label">Views</span>
+              <strong>{pageViewsCount.toLocaleString()}</strong>
+            </div>
+          ) : null}
           <p className="hero-kicker">In Loving Memory</p>
           <div className="hero-avatar-wrap">
             <div
