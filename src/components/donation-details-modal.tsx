@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MarkdownInline } from "@/components/markdown-text";
 
 type DonationDetailsModalProps = {
@@ -22,6 +22,15 @@ export function DonationDetailsModal({
 }: DonationDetailsModalProps) {
   const [open, setOpen] = useState(false);
   const hasDetails = Boolean(accountName || accountNumber || bankName || phone);
+
+  useEffect(() => {
+    function openDonationModal() {
+      setOpen(true);
+    }
+
+    window.addEventListener("biotribute:open-donation-modal", openDonationModal);
+    return () => window.removeEventListener("biotribute:open-donation-modal", openDonationModal);
+  }, []);
 
   return (
     <>

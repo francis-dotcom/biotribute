@@ -64,8 +64,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
   }
 
   function jumpToDonate() {
-    const section = document.getElementById("support-section");
-    section?.scrollIntoView({ behavior: "smooth", block: "start" });
+    window.dispatchEvent(new CustomEvent("biotribute:open-donation-modal"));
   }
 
   useEffect(() => {
