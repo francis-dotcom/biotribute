@@ -29,7 +29,7 @@ const tributeSchema = z.object({
   years: z.string().trim().min(1),
   tagline: z.string().trim().min(1),
   organizer: z.string().trim().min(1),
-  theme: z.enum(["ivory", "sage", "sky"]),
+  theme: z.enum(["ivory", "sage", "sky", "midnight"]),
   heroImageUrl: z.string().trim().optional(),
   backgroundImageUrl: z.string().trim().optional(),
   galleryNote: z.string().trim(),
