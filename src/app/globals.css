@@ -1423,6 +1423,10 @@ textarea {
   color: #705728;
 }
 
+.donation-modal-card .donation-detail-row .donation-contact-note {
+  color: #2c6bcc;
+}
+
 .donation-detail-row strong {
   color: var(--text);
   font: 700 1rem/1.4 var(--font-sans);

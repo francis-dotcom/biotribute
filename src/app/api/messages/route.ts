@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createPendingMessage } from "@/lib/messages";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const requestSchema = z.object({
   tributeSlug: z.string().min(1),
@@ -15,6 +16,24 @@ const requestSchema = z.object({
 type MessageFormField = "author" | "email" | "message";
 
 export async function POST(request: Request) {
+  const rateLimit = consumeRateLimit({
+    key: `api:messages:${getClientIp(request)}`,
+    limit: 6,
+    windowMs: 1000 * 60 * 10,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many message submissions. Please wait and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
+  }
+
   try {
     const json = await request.json();
     const payload = requestSchema.parse(json);

@@ -93,7 +93,9 @@ export function DonationDetailsModal({
                     ) : null}
                     {phone ? (
                       <div className="donation-detail-row">
-                        <span>Text donation details to this number and it will be acknowledged.</span>
+                        <span className="donation-contact-note">
+                          Text donation details to this number and it will be acknowledged.
+                        </span>
                         <strong>
                           <MarkdownInline content={phone} />
                         </strong>

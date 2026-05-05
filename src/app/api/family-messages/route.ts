@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createPendingFamilyPrivateMessage } from "@/lib/family-private-messages";
+import { verifyTurnstileToken } from "@/lib/bot-protection";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 
 const requestSchema = z.object({
   tributeSlug: z.string().trim().min(1),
@@ -9,14 +11,41 @@ const requestSchema = z.object({
   senderEmail: z.string().trim().email().max(160),
   message: z.string().trim().min(12).max(5000),
   website: z.string().optional(),
+  turnstileToken: z.string().optional(),
 });
 
 type FamilyMessageField = "senderName" | "senderEmail" | "message";
 
 export async function POST(request: Request) {
+  const rateLimit = consumeRateLimit({
+    key: `api:family-messages:${getClientIp(request)}`,
+    limit: 4,
+    windowMs: 1000 * 60 * 10,
+  });
+
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many private messages. Please wait and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
+  }
+
   try {
     const json = await request.json();
     const payload = requestSchema.parse(json);
+    const botCheckPassed = await verifyTurnstileToken(payload.turnstileToken);
+
+    if (!botCheckPassed) {
+      return NextResponse.json(
+        { error: "Please complete bot verification before sending your private message." },
+        { status: 400 },
+      );
+    }
 
     const result = await createPendingFamilyPrivateMessage(payload);
 

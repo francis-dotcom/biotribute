@@ -17,6 +17,7 @@ export function FamilyMessageModal({
   organizer,
   storeConfigured,
 }: FamilyMessageModalProps) {
+  const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
   const [isOpen, setIsOpen] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -52,7 +53,17 @@ export function FamilyMessageModal({
       senderEmail: String(formData.get("email") ?? ""),
       message: String(formData.get("message") ?? ""),
       website: String(formData.get("website") ?? ""),
+      turnstileToken: String(formData.get("cf-turnstile-response") ?? ""),
     };
+
+    if (turnstileSiteKey && !payload.turnstileToken.trim()) {
+      setToast({
+        message: "Please complete bot verification before sending your private message.",
+        tone: "error",
+      });
+      setPending(false);
+      return;
+    }
 
     const response = await fetch("/api/family-messages", {
       method: "POST",
@@ -160,6 +171,13 @@ export function FamilyMessageModal({
                 <span>Website</span>
                 <input name="website" type="text" tabIndex={-1} autoComplete="off" />
               </label>
+
+              {turnstileSiteKey ? (
+                <div className="field-block">
+                  <span>Bot Verification</span>
+                  <div className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                </div>
+              ) : null}
 
               <button className="button-primary" type="submit" disabled={pending}>
                 {pending ? "Sending..." : "Send Message"}
