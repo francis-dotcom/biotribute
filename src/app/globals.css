@@ -160,6 +160,53 @@ textarea {
   margin-top: 24px;
 }
 
+.product-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border: 1px solid rgba(229, 229, 234, 0.82);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.product-nav-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.product-nav-links a {
+  color: var(--muted-2);
+  font: 600 0.86rem var(--font-sans);
+  text-decoration: none;
+}
+
+.product-nav-links a:hover {
+  color: var(--gold-deep);
+}
+
+.product-hero {
+  text-align: left;
+}
+
+.product-hero .landing-copy {
+  margin-left: 0;
+}
+
+.product-hero .landing-actions {
+  justify-content: flex-start;
+}
+
+.product-proof-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
 .landing-proof {
   display: flex;
   flex-wrap: wrap;
@@ -310,6 +357,21 @@ textarea {
   margin: 0;
   color: var(--muted-2);
   font: 0.98rem/1.65 var(--font-sans);
+}
+
+.workflow-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.workflow-card {
+  padding: 16px;
+}
+
+.workflow-card h3 {
+  margin: 0 0 6px;
 }
 
 .tribute-page {

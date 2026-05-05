@@ -79,6 +79,7 @@ export default async function ConsolePage({
   const shellStyle = {
     ...activeTheme.variables,
   } as CSSProperties;
+  const sessionUniqueVisitors = new Set(recentVisits.map((visit) => visit.visitorHash)).size;
   const lastVisitedLabel = visitStats.lastVisitedAt
     ? new Date(visitStats.lastVisitedAt).toLocaleString("en-US", {
         month: "short",
@@ -216,7 +217,15 @@ export default async function ConsolePage({
           </article>
           <article className="soft-card">
             <p className="card-label">Recent Visits</p>
-            <VisitorDetailsPanel visits={recentVisits} error={visitStatsError} />
+            <VisitorDetailsPanel
+              visits={recentVisits}
+              error={visitStatsError}
+              note={
+                !visitStatsError && sessionUniqueVisitors < visitStats.uniqueVisitors
+                  ? "Detailed timing and page-session data is available only for visits recorded after session tracking was enabled."
+                  : null
+              }
+            />
           </article>
         </div>
       </section>

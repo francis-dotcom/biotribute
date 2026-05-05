@@ -6,83 +6,134 @@ const featuredTribute = tributes[0];
 export default function HomePage() {
   return (
     <main className="landing-shell">
-      <section className="landing-hero">
+      <section className="product-nav">
         <p className="landing-kicker">bioTributes</p>
-        <h1>Honor Their Life. Share Their Legacy.</h1>
-        <p className="landing-copy">
-          Preserve a loved one&apos;s story with a memorial page designed to feel
-          personal, calm, and easy to share across family and community.
-        </p>
-        <div className="landing-proof">
-          <span>Mobile-first tribute route</span>
-          <span>Owner console for content + media</span>
-          <span>Moderated messages before publish</span>
-        </div>
-        <div className="landing-actions">
-          <Link className="button-primary" href={`/${featuredTribute.slug}`}>
-            View Tribute Demo
-          </Link>
-          <a className="button-secondary" href="#next-steps">
-            Launch Plan
-          </a>
+        <div className="product-nav-links">
+          <a href="#features">Features</a>
+          <a href="#workflow">How it works</a>
+          <a href="#launch-plan">Launch plan</a>
         </div>
       </section>
 
-      <section className="landing-grid">
+      <section className="landing-hero product-hero">
+        <p className="card-label">Memorial Platform</p>
+        <h1>A real memorial product, not just a tribute mockup.</h1>
+        <p className="landing-copy">
+          bioTributes gives families a calm public tribute page, a private owner
+          console, moderated guest submissions, and launch-ready workflows from one
+          product surface.
+        </p>
+        <div className="landing-actions">
+          <Link className="button-primary" href={`/${featuredTribute.slug}`}>
+            View Product Demo
+          </Link>
+          <a className="button-secondary" href="/console/SirFemiOgini">
+            Open Console
+          </a>
+        </div>
+        <div className="product-proof-grid">
+          <article className="landing-card">
+            <p className="card-label">Public experience</p>
+            <h2>Mobile-first tribute route</h2>
+            <p>Fast, readable, shareable page with story, media, and support actions.</p>
+          </article>
+          <article className="landing-card">
+            <p className="card-label">Owner console</p>
+            <h2>One place to manage everything</h2>
+            <p>Content, images, timeline, card/messages inbox, and launch settings.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="landing-grid" id="features">
         <article className="landing-card">
-          <p className="card-label">Ready Now</p>
-          <h2>Mobile-first public tribute page</h2>
-          <p>
-            Your current memorial page is now represented as a real route under the
-            app instead of a static mockup.
-          </p>
-          <ul className="landing-checklist">
-            <li>Shareable public URL per tribute</li>
-            <li>Clean sections for story, photos, timeline, and support</li>
-            <li>Message moderation workflow already in place</li>
-          </ul>
+          <p className="card-label">Feature</p>
+          <h2>Theme-aware page builder</h2>
+          <p>Update biography, timeline, media, support note, and featured tributes.</p>
         </article>
         <article className="landing-card">
-          <p className="card-label">Tomorrow’s Launch</p>
-          <h2>Fastest path to live</h2>
-          <p>
-            Deploy this to Vercel, keep content hardcoded for now, then add auth,
-            dashboard, uploads, and payments immediately after launch.
-          </p>
-          <ul className="landing-checklist">
-            <li>Deploy current repo with existing route structure</li>
-            <li>Use console workflow for owner-managed updates</li>
-            <li>Add product layers incrementally after go-live</li>
-          </ul>
+          <p className="card-label">Feature</p>
+          <h2>Moderation queue</h2>
+          <p>Approve or reject public guestbook posts before they appear live.</p>
         </article>
-        <article className="landing-card" id="next-steps">
-          <p className="card-label">Next Build Slice</p>
-          <h2>Productize in stages</h2>
+        <article className="landing-card">
+          <p className="card-label">Feature</p>
+          <h2>Private inbox for family</h2>
+          <p>Card + Message submissions are captured privately in console inbox.</p>
+        </article>
+        <article className="landing-card">
+          <p className="card-label">Feature</p>
+          <h2>Email verification logic</h2>
+          <p>Unverified emails confirm first; verified senders can post immediately.</p>
+        </article>
+        <article className="landing-card">
+          <p className="card-label">Feature</p>
+          <h2>Media persistence</h2>
+          <p>Hero, gallery, video placeholders, and livestream assets stored in Supabase.</p>
+        </article>
+        <article className="landing-card">
+          <p className="card-label">Feature</p>
+          <h2>Launch-ready routing</h2>
+          <p>Canonical route flow with console, dashboard, and public tribute paths.</p>
+        </article>
+      </section>
+
+      <section className="landing-solid-cta" id="workflow">
+        <p className="card-label">How It Works</p>
+        <h2>From setup to launch in 3 clear steps.</h2>
+        <div className="workflow-grid">
+          <article className="soft-card workflow-card">
+            <p className="card-label">Step 1</p>
+            <h3>Build the tribute</h3>
+            <p>Use console to add story, timeline, images, videos, and support details.</p>
+          </article>
+          <article className="soft-card workflow-card">
+            <p className="card-label">Step 2</p>
+            <h3>Review submissions</h3>
+            <p>Moderate public messages and monitor private cards/messages in inbox.</p>
+          </article>
+          <article className="soft-card workflow-card">
+            <p className="card-label">Step 3</p>
+            <h3>Launch and share</h3>
+            <p>Publish the route, share link with family/community, continue updating.</p>
+          </article>
+        </div>
+      </section>
+
+      <section className="landing-grid" id="launch-plan">
+        <article className="landing-card">
+          <p className="card-label">Now</p>
+          <h2>Ship with core workflows</h2>
           <p>
-            Add Supabase for auth and data, Cloudinary for media, and Stripe Checkout
-            for support contributions once the public page is approved.
+            Keep current tribute + console + moderation + private inbox flow as the
+            stable launch slice.
           </p>
-          <ul className="landing-checklist">
-            <li>Auth + role access for family/admin accounts</li>
-            <li>Media pipelines for scalable photo/video upload</li>
-            <li>Payments for tribute cards and contributions</li>
-          </ul>
+        </article>
+        <article className="landing-card">
+          <p className="card-label">Next</p>
+          <h2>Add account system + invitations</h2>
+          <p>Move from single owner to role-based access for family and contributors.</p>
+        </article>
+        <article className="landing-card">
+          <p className="card-label">Then</p>
+          <h2>Scale media + payments</h2>
+          <p>Finalize scalable media pipeline and productized support contributions.</p>
         </article>
       </section>
 
       <section className="landing-solid-cta">
-        <p className="card-label">Launch Focus</p>
-        <h2>Ship the tribute experience first.</h2>
+        <p className="card-label">Final CTA</p>
+        <h2>Ready to make this production solid?</h2>
         <p>
-          Keep launch simple: publish a calm, reliable memorial page now, then layer
-          in advanced features without disrupting the family experience.
+          Start from the working memorial product experience and harden each slice with
+          clear launch checkpoints.
         </p>
         <div className="landing-actions">
           <Link className="button-primary" href={`/${featuredTribute.slug}`}>
-            Open Live Tribute Demo
+            Open Tribute Demo
           </Link>
           <a className="button-secondary" href="/console/SirFemiOgini">
-            Open Owner Console
+            Go to Console
           </a>
         </div>
       </section>

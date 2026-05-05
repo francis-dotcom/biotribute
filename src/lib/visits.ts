@@ -271,21 +271,26 @@ export async function getRecentTributeVisits(
 
 export async function getRecentTributeVisitSessions(
   tributeSlug: string,
-  limit = 40,
+  limit?: number,
 ): Promise<TributeVisitSessionDetail[]> {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
     return [];
   }
 
-  const { data, error } = await supabase
+  let query = supabase
     .from("tribute_visit_page_sessions")
     .select(
       "session_id, visitor_hash, path, referer, first_seen_at, last_seen_at, estimated_duration_seconds, heartbeat_count",
     )
     .eq("tribute_slug", tributeSlug)
-    .order("last_seen_at", { ascending: false })
-    .limit(limit);
+    .order("last_seen_at", { ascending: false });
+
+  if (typeof limit === "number") {
+    query = query.limit(limit);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     if (isMissingVisitSessionTableError(error)) {

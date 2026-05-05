@@ -6,6 +6,7 @@ import type { TributeVisitSessionDetail } from "@/lib/visits";
 type VisitorDetailsPanelProps = {
   visits: TributeVisitSessionDetail[];
   error?: string | null;
+  note?: string | null;
 };
 
 type VisitorSummary = {
@@ -38,7 +39,7 @@ function formatDuration(totalSeconds: number) {
   return `${seconds}s`;
 }
 
-export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps) {
+export function VisitorDetailsPanel({ visits, error, note }: VisitorDetailsPanelProps) {
   const [mode, setMode] = useState<"recent" | "unique">("recent");
 
   const groupedVisitors = useMemo(() => {
@@ -103,6 +104,7 @@ export function VisitorDetailsPanel({ visits, error }: VisitorDetailsPanelProps)
       </div>
 
       {error ? <p>{error}</p> : null}
+      {!error && note ? <p className="subtle-note">{note}</p> : null}
 
       {!error && mode === "recent" ? (
         visits.length > 0 ? (
