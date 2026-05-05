@@ -2080,6 +2080,15 @@ textarea {
   box-shadow: var(--shadow-sm);
 }
 
+.private-inbox-row {
+  border-color: color-mix(in srgb, var(--violet-deep) 28%, white);
+  background: color-mix(in srgb, var(--violet-soft) 50%, white);
+}
+
+.private-inbox-row .card-label {
+  color: var(--violet-deep);
+}
+
 .moderation-row-compact {
   padding: 16px 22px;
 }

@@ -121,7 +121,7 @@ export default async function ConsoleMessagesPage({
         ) : (
           <section className="admin-grid">
             {privateMessages.map((message) => (
-              <article className="moderation-row" key={message.id}>
+              <article className="moderation-row private-inbox-row" key={message.id}>
                 <div className="moderation-row-main">
                   <div className="moderation-row-meta">
                     <p className="card-label">Private submission</p>

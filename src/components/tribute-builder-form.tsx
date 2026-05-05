@@ -799,14 +799,14 @@ export function TributeBuilderForm({
                 <input
                   name={`videoUrl-${index}`}
                   type="url"
-                  value={videoUrls[index]}
+                  value={videoUrls[index] ?? ""}
                   onChange={(event) => {
                     const nextValue = event.currentTarget.value;
-                    setVideoUrls((current) =>
-                      current.map((value, currentIndex) =>
-                        currentIndex === index ? nextValue : value
-                      )
-                    );
+                    setVideoUrls((current) => {
+                      const next = [...current];
+                      next[index] = nextValue;
+                      return next;
+                    });
                   }}
                   placeholder="https://www.youtube.com/watch?v=..."
                 />
@@ -816,14 +816,14 @@ export function TributeBuilderForm({
                 <input
                   name={`videoDescription-${index}`}
                   type="text"
-                  value={videoDescriptions[index]}
+                  value={videoDescriptions[index] ?? ""}
                   onChange={(event) => {
                     const nextValue = event.currentTarget.value;
-                    setVideoDescriptions((current) =>
-                      current.map((value, currentIndex) =>
-                        currentIndex === index ? nextValue : value
-                      )
-                    );
+                    setVideoDescriptions((current) => {
+                      const next = [...current];
+                      next[index] = nextValue;
+                      return next;
+                    });
                   }}
                   placeholder={`Short description for video ${index + 1}`}
                 />
@@ -843,12 +843,12 @@ export function TributeBuilderForm({
                 <p className="subtle-note">
                   {uploadingVideoThumbIndex === index
                     ? "Uploading video placeholder..."
-                    : videoThumbnailUrls[index]?.trim()
+                    : (videoThumbnailUrls[index] ?? "").trim()
                       ? `Video ${index + 1} placeholder saved. Save Draft to apply it.`
                       : `Upload an image to use as the Video ${index + 1} placeholder.`}
                 </p>
               </div>
-              {videoUrls[index].trim() ? (
+              {(videoUrls[index] ?? "").trim() ? (
                 <label className="field-block builder-checkbox">
                   <input
                     type="checkbox"
@@ -858,11 +858,11 @@ export function TributeBuilderForm({
                   <span>{`Display Video ${index + 1} on the public page`}</span>
                 </label>
               ) : null}
-              {videoThumbnailUrls[index]?.trim() ? (
+              {(videoThumbnailUrls[index] ?? "").trim() ? (
                 <div className="field-block">
                   <span>{`Saved Video ${index + 1} placeholder`}</span>
                   <img
-                    src={videoThumbnailUrls[index].trim()}
+                    src={(videoThumbnailUrls[index] ?? "").trim()}
                     alt={`Video ${index + 1} placeholder preview`}
                     className="builder-livestream-preview"
                   />
