@@ -15,3 +15,5 @@ create index if not exists tribute_visits_slug_visitor_idx
   on public.tribute_visits (tribute_slug, visitor_hash);
 
 revoke all on public.tribute_visits from anon, authenticated;
+grant select, insert on public.tribute_visits to service_role;
+grant usage, select on sequence public.tribute_visits_id_seq to service_role;
