@@ -1191,6 +1191,27 @@ textarea {
   width: min(100%, 560px);
 }
 
+.donation-modal-card {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 251, 244, 0.985),
+    rgba(247, 239, 225, 0.975)
+  );
+}
+
+.donation-modal-card .message-modal-kicker {
+  color: #8f6a1f;
+}
+
+.donation-modal-card .message-modal-head h3 {
+  color: #2f2619;
+}
+
+.donation-modal-card .message-modal-close {
+  background: rgba(255, 249, 240, 0.98);
+  color: #5f4b25;
+}
+
 .form-modal-body {
   display: grid;
   gap: 0;
@@ -1376,14 +1397,27 @@ textarea {
   background: rgba(255, 255, 255, 0.94);
 }
 
+.donation-modal-card .donation-detail-row {
+  border-color: rgba(195, 167, 104, 0.26);
+  background: rgba(255, 252, 247, 0.9);
+}
+
 .donation-detail-row span {
   color: var(--muted-2);
   font: 600 0.88rem/1.4 var(--font-sans);
 }
 
+.donation-modal-card .donation-detail-row span {
+  color: #705728;
+}
+
 .donation-detail-row strong {
   color: var(--text);
   font: 700 1rem/1.4 var(--font-sans);
+}
+
+.donation-modal-card .donation-detail-row strong {
+  color: #332816;
 }
 
 .donation-gratitude {
@@ -1392,6 +1426,10 @@ textarea {
   color: var(--gold-deep);
   font: 700 1rem/1.5 var(--font-display);
   letter-spacing: 0.01em;
+}
+
+.donation-modal-card .donation-gratitude {
+  color: #6b521f;
 }
 
 .tribute-footer {

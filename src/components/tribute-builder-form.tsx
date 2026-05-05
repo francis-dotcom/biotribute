@@ -21,6 +21,15 @@ type ContributorDraft = {
   copy: string;
 };
 
+type DraftPersistOverrides = {
+  videoThumbnailUrls?: string[];
+  activeVideoIndex?: number;
+  livestreamDisplayMode?: "video" | "image-url" | "uploaded-image";
+  livestreamThumbnailMode?: "url" | "upload";
+  livestreamThumbnailUrlInput?: string;
+  uploadedLivestreamThumbnailUrl?: string;
+};
+
 function hasStructuredTimeline(entries: TimelineDraft[]) {
   return entries.some((entry) => entry.year.trim() || entry.title.trim());
 }
@@ -60,6 +69,7 @@ export function TributeBuilderForm({
   tribute,
   storeConfigured,
 }: TributeBuilderFormProps) {
+  const formRef = useRef<HTMLFormElement | null>(null);
   const router = useRouter();
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -243,23 +253,22 @@ export function TributeBuilderForm({
     });
   }
 
-  async function handleSubmit(formData: FormData) {
-    if (!storeConfigured) {
-      setStatus("Supabase content storage is not configured yet.");
-      return;
-    }
-
-    setPending(true);
-    setStatus(null);
-
+  async function persistDraft(formData: FormData, overrides?: DraftPersistOverrides) {
+    const nextVideoThumbnailUrls = overrides?.videoThumbnailUrls ?? videoThumbnailUrls;
+    const nextActiveVideoIndex = overrides?.activeVideoIndex ?? activeVideoIndex;
+    const nextLivestreamDisplayMode = overrides?.livestreamDisplayMode ?? livestreamDisplayMode;
+    const nextLivestreamThumbnailMode = overrides?.livestreamThumbnailMode ?? livestreamThumbnailMode;
+    const nextLivestreamThumbnailUrlInput =
+      overrides?.livestreamThumbnailUrlInput ?? livestreamThumbnailUrlInput;
+    const nextUploadedLivestreamThumbnailUrl =
+      overrides?.uploadedLivestreamThumbnailUrl ?? uploadedLivestreamThumbnailUrl;
     const rawLivestreamValue = livestreamUrl.trim();
     const livestreamValue =
-      livestreamDisplayMode === "video" ? rawLivestreamValue : "";
+      nextLivestreamDisplayMode === "video" ? rawLivestreamValue : "";
     const livestreamThumbnailUrl =
-      livestreamThumbnailMode === "upload"
-        ? uploadedLivestreamThumbnailUrl.trim()
-        : livestreamThumbnailUrlInput.trim();
-
+      nextLivestreamThumbnailMode === "upload"
+        ? nextUploadedLivestreamThumbnailUrl.trim()
+        : nextLivestreamThumbnailUrlInput.trim();
     const payload = {
       slug: tribute.slug,
       name: String(formData.get("name") ?? ""),
@@ -281,17 +290,17 @@ export function TributeBuilderForm({
       donationPhone: String(formData.get("donationPhone") ?? ""),
       videoUrls: videoUrls.map((value) => value.trim()).filter(Boolean),
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
-      videoThumbnailUrls: videoThumbnailUrls.map((value) => value.trim()),
-      activeVideoIndex,
+      videoThumbnailUrls: nextVideoThumbnailUrls.map((value) => value.trim()),
+      activeVideoIndex: nextActiveVideoIndex,
       videoNote: videoNote.trim(),
       livestreamUrl: livestreamValue,
       livestreamThumbnailUrl:
-        livestreamDisplayMode === "video"
+        nextLivestreamDisplayMode === "video"
           ? livestreamThumbnailUrl
-          : livestreamDisplayMode === "uploaded-image"
-            ? uploadedLivestreamThumbnailUrl.trim()
-            : livestreamThumbnailUrlInput.trim(),
-      livestreamDisplayMode,
+          : nextLivestreamDisplayMode === "uploaded-image"
+            ? nextUploadedLivestreamThumbnailUrl.trim()
+            : nextLivestreamThumbnailUrlInput.trim(),
+      livestreamDisplayMode: nextLivestreamDisplayMode,
       livestreamNote: livestreamNote.trim(),
       showGallerySection,
       showVideoSection,
@@ -323,9 +332,7 @@ export function TributeBuilderForm({
         featured: formData.get(`supportFeatured-${index}`) === "on",
       })),
     };
-
     const requestPayload = livestreamValue ? payload : { ...payload, livestreamUrl: undefined };
-
     const response = await fetch(`/api/tributes/${tribute.slug}`, {
       method: "POST",
       headers: {
@@ -333,8 +340,20 @@ export function TributeBuilderForm({
       },
       body: JSON.stringify(requestPayload),
     });
-
     const data = (await response.json()) as { error?: string; message?: string };
+    return { response, data };
+  }
+
+  async function handleSubmit(formData: FormData) {
+    if (!storeConfigured) {
+      setStatus("Supabase content storage is not configured yet.");
+      return;
+    }
+
+    setPending(true);
+    setStatus(null);
+
+    const { response, data } = await persistDraft(formData);
 
     setPending(false);
     setStatus(data.message ?? data.error ?? "Unable to save tribute.");
@@ -378,9 +397,25 @@ export function TributeBuilderForm({
       setUploadedLivestreamThumbnailUrl(uploadedUrl);
       setLivestreamDisplayMode("uploaded-image");
       setLivestreamThumbnailMode("upload");
+
+      if (formRef.current && storeConfigured) {
+        const { response: persistResponse, data: persistData } = await persistDraft(
+          new FormData(formRef.current),
+          {
+            livestreamDisplayMode: "uploaded-image",
+            livestreamThumbnailMode: "upload",
+            uploadedLivestreamThumbnailUrl: uploadedUrl,
+          },
+        );
+        if (!persistResponse.ok) {
+          setStatus(persistData.error ?? "Thumbnail uploaded, but auto-save failed.");
+          setUploadingLivestreamThumb(false);
+          return;
+        }
+      }
     }
 
-    setStatus(data.message ?? "Thumbnail uploaded. Click Save Draft to apply it.");
+    setStatus(data.message ?? "Thumbnail uploaded and saved.");
     setUploadingLivestreamThumb(false);
   }
 
@@ -415,17 +450,35 @@ export function TributeBuilderForm({
 
     const uploadedUrl = data.uploads?.[0]?.imageUrl ?? "";
     if (uploadedUrl) {
-      setVideoThumbnailUrls((current) =>
-        current.map((value, currentIndex) => (currentIndex === index ? uploadedUrl : value))
+      const nextVideoThumbnailUrls = videoThumbnailUrls.map((value, currentIndex) =>
+        currentIndex === index ? uploadedUrl : value
       );
+      setVideoThumbnailUrls(nextVideoThumbnailUrls);
+      setActiveVideoIndex(index);
+
+      if (formRef.current && storeConfigured) {
+        const { response: persistResponse, data: persistData } = await persistDraft(
+          new FormData(formRef.current),
+          {
+            videoThumbnailUrls: nextVideoThumbnailUrls,
+            activeVideoIndex: index,
+          },
+        );
+        if (!persistResponse.ok) {
+          setStatus(persistData.error ?? "Video placeholder uploaded, but auto-save failed.");
+          setUploadingVideoThumbIndex(null);
+          return;
+        }
+      }
     }
 
-    setStatus(data.message ?? "Video placeholder uploaded. Click Save Draft to apply it.");
+    setStatus(data.message ?? "Video placeholder uploaded and saved.");
     setUploadingVideoThumbIndex(null);
   }
 
   return (
     <form
+      ref={formRef}
       className="dashboard-section"
       onSubmit={(event) => {
         event.preventDefault();

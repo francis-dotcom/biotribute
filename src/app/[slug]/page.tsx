@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { CSSProperties } from "react";
 import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
-import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
 import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import { MessageFeed } from "@/components/message-feed";
@@ -10,9 +9,11 @@ import { MessageForm } from "@/components/message-form";
 import { ShareTributeIconButton } from "@/components/share-tribute-icon-button";
 import { TimelineSection } from "@/components/timeline-section";
 import { TributeActionBar } from "@/components/tribute-action-bar";
+import { TributeCardModal } from "@/components/tribute-card-modal";
 import { TributeMediaSection } from "@/components/tribute-media-section";
 import { getTributeThemePreset } from "@/data/tributes";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
+import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
 import { getTributeRecord, resolveCanonicalTributeSlug } from "@/lib/tributes-store";
 
 type PageProps = {
@@ -59,6 +60,7 @@ export default async function TributePage({ params }: PageProps) {
   const visibleMessages = approvedMessages.length > 0 ? approvedMessages : tribute.messages;
   const familyEmail = tribute.contactEmail || process.env.NEXT_PUBLIC_FAMILY_EMAIL || "";
   const storeConfigured = isMessageStoreConfigured();
+  const familyMessageStoreConfigured = isFamilyPrivateMessageStoreConfigured();
   const themePreset = getTributeThemePreset(tribute.theme);
   const galleryLoop =
     tribute.galleryImages.length > 0
@@ -84,14 +86,6 @@ export default async function TributePage({ params }: PageProps) {
             <div
               className={tribute.heroImageUrl ? "avatar-placeholder has-image" : "avatar-placeholder"}
               aria-hidden="true"
-            />
-            <DonationDetailsModal
-              accountName={tribute.donationAccountName}
-              accountNumber={tribute.donationAccountNumber}
-              bankName={tribute.donationBankName}
-              phone={tribute.donationPhone}
-              triggerClassName="hero-donation-badge"
-              triggerLabel="Donate"
             />
             <ShareTributeIconButton className="hero-share-icon" />
           </div>
@@ -236,25 +230,23 @@ export default async function TributePage({ params }: PageProps) {
           <div className="support-grid">
             <article className="form-card support-actions-card">
               <div className="support-action-list">
-                <button className="support-action-pill" type="button">
-                  Card
-                </button>
-                <DonationDetailsModal
-                  accountName={tribute.donationAccountName}
-                  accountNumber={tribute.donationAccountNumber}
-                  bankName={tribute.donationBankName}
-                  phone={tribute.donationPhone}
+                <TributeCardModal
+                  recipientEmail={familyEmail}
+                  tributeSlug={tribute.slug}
+                  tributeName={tribute.name}
+                  storeConfigured={familyMessageStoreConfigured}
                 />
                 <FamilyMessageModal
                   recipientEmail={familyEmail}
+                  tributeSlug={tribute.slug}
                   tributeName={tribute.name}
                   organizer={tribute.organizer}
+                  storeConfigured={familyMessageStoreConfigured}
                 />
               </div>
               <p className="support-actions-copy">
-                Support the family in the way that feels right for you. Send a paid
-                tribute card, make a contribution, or write a direct message to the
-                family representative.
+                Send a tribute card or write a direct private message to the family
+                representative.
               </p>
             </article>
             <article className="form-card">

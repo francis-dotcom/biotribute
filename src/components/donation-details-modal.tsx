@@ -35,7 +35,10 @@ export function DonationDetailsModal({
 
       {open ? (
         <div className="message-modal-overlay" onClick={() => setOpen(false)}>
-          <div className="message-modal-card form-modal-card" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="message-modal-card form-modal-card donation-modal-card"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="message-modal-head">
               <div>
                 <p className="message-modal-kicker">Family Support</p>
