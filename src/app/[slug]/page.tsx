@@ -277,7 +277,10 @@ export default async function TributePage({ params }: PageProps) {
             <a href="#messages-section">Contact</a>
           </div>
           <div className="footer-credit">
-            Organized by <strong>Ogini's Family</strong> · Powered by Ogigrid
+            <span className="footer-credit-line">
+              For <strong>Ogini&apos;s Family</strong>
+            </span>
+            <span className="footer-credit-brand">Ogigrid</span>
           </div>
         </footer>
       </div>

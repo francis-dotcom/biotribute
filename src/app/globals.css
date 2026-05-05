@@ -1408,7 +1408,16 @@ textarea {
 
 .footer-credit {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
   text-align: right;
+}
+
+.footer-credit-brand {
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+  opacity: 0.82;
 }
 
 .form-status {
@@ -2528,12 +2537,41 @@ textarea {
   }
 
   .tribute-footer {
-    align-items: flex-start;
+    align-items: stretch;
     flex-direction: column;
+    gap: 8px;
+  }
+
+  .footer-links {
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 0;
+  }
+
+  .footer-links a {
+    flex: 1;
+  }
+
+  .footer-links a:nth-child(1) {
+    text-align: left;
+  }
+
+  .footer-links a:nth-child(2) {
+    text-align: center;
+  }
+
+  .footer-links a:nth-child(3) {
+    text-align: right;
   }
 
   .footer-credit {
+    align-items: center;
     text-align: center;
+  }
+
+  .footer-credit-brand {
+    font-size: 0.68rem;
   }
 
   .support-action-list {
