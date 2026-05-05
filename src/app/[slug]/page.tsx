@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import type { CSSProperties } from "react";
-import { headers } from "next/headers";
 import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
 import { DonationDetailsModal } from "@/components/donation-details-modal";
@@ -18,7 +17,7 @@ import { getTributeThemePreset } from "@/data/tributes";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
 import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
 import { getTributeRecord, resolveCanonicalTributeSlug } from "@/lib/tributes-store";
-import { getTributeVisitStats, recordTributeVisit } from "@/lib/visits";
+import { getTributeVisitStats } from "@/lib/visits";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -58,22 +57,6 @@ export default async function TributePage({ params }: PageProps) {
 
   if (!tribute) {
     notFound();
-  }
-
-  try {
-    const requestHeaders = await headers();
-    await recordTributeVisit({
-      tributeSlug: tribute.slug,
-      path: `/${canonicalSlug}`,
-      ip:
-        requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-        requestHeaders.get("x-real-ip")?.trim() ||
-        "unknown",
-      userAgent: requestHeaders.get("user-agent") ?? "",
-      referer: requestHeaders.get("referer") ?? "",
-    });
-  } catch {
-    // Visit tracking must never break the public tribute page render.
   }
 
   let pageViewsCount: number | null = null;

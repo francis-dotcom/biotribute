@@ -49,6 +49,7 @@ export async function recordTributeVisit(input: {
   ip: string;
   userAgent?: string;
   referer?: string;
+  dedupeHours?: number;
 }) {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
@@ -59,6 +60,36 @@ export async function recordTributeVisit(input: {
   const normalizedUserAgent = input.userAgent?.trim() || "unknown";
   const visitorHash = hashValue(`${normalizedIp}|${normalizedUserAgent}`);
   const ipHash = hashValue(normalizedIp);
+  const dedupeHours = Number.isFinite(input.dedupeHours) ? Math.max(0, Number(input.dedupeHours)) : 0;
+
+  if (dedupeHours > 0) {
+    const sinceIso = new Date(Date.now() - dedupeHours * 60 * 60 * 1000).toISOString();
+    const { data: existingVisit, error: lookupError } = await supabase
+      .from("tribute_visits")
+      .select("id")
+      .eq("tribute_slug", input.tributeSlug)
+      .eq("visitor_hash", visitorHash)
+      .gte("created_at", sinceIso)
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (lookupError) {
+      if (
+        lookupError.code === "PGRST205" ||
+        lookupError.code === "42P01" ||
+        lookupError.message?.toLowerCase().includes("tribute_visits")
+      ) {
+        throw new Error("Visit tracking table is missing. Run the tribute_visits migration.");
+      }
+
+      throw new Error("Unable to evaluate visit cooldown.");
+    }
+
+    if (existingVisit) {
+      return;
+    }
+  }
 
   const { error } = await supabase.from("tribute_visits").insert({
     tribute_slug: input.tributeSlug,
@@ -157,6 +188,15 @@ export async function recordTributeVisitSession(input: RecordTributeVisitSession
 
       throw new Error("Unable to save visit session.");
     }
+
+    await recordTributeVisit({
+      tributeSlug: input.tributeSlug,
+      path: input.path,
+      ip: input.ip,
+      userAgent: input.userAgent,
+      referer: input.referer,
+      dedupeHours: 12,
+    });
 
     return;
   }
