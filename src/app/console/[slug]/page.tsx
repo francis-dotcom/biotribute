@@ -8,8 +8,10 @@ import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
 import {
+  getRecentTributeVisits,
   getTributeVisitStats,
   isVisitStoreConfigured,
+  type TributeVisitDetail,
   type TributeVisitStats,
 } from "@/lib/visits";
 import { getTributeThemePreset, tributeThemePresets } from "@/data/tributes";
@@ -34,6 +36,7 @@ export default async function ConsolePage({
     pageViews: 0,
     uniqueVisitors: 0,
   };
+  let recentVisits: TributeVisitDetail[] = [];
   let visitStatsError: string | null = null;
   try {
     messages = await getMessagesForAdmin(slug);
@@ -42,11 +45,13 @@ export default async function ConsolePage({
   }
   try {
     visitStats = await getTributeVisitStats(slug);
+    recentVisits = await getRecentTributeVisits(slug);
   } catch (error) {
     visitStats = {
       pageViews: 0,
       uniqueVisitors: 0,
     };
+    recentVisits = [];
     visitStatsError =
       error instanceof Error ? error.message : "Visitor tracking is unavailable right now.";
   }
@@ -108,6 +113,7 @@ export default async function ConsolePage({
           <a href="#theme">Theme</a>
           <Link href={`/console/${slug}/messages`}>Approval Page</Link>
           <a href="#media">Video & Live</a>
+          <a href="#visitors">Visitors</a>
           <Link href={`/${tribute.slug}`}>View Public Page</Link>
           <form action="/api/admin/logout" method="post">
             <button className="button-secondary" type="submit">
@@ -156,9 +162,9 @@ export default async function ConsolePage({
             )}
             {visitStatsError ? <p>{visitStatsError}</p> : null}
           </div>
-          <Link className="button-secondary" href={`/${tribute.slug}`}>
-            Open Public Page
-          </Link>
+          <a className="button-secondary" href="#visitors">
+            View Details
+          </a>
         </article>
 
         <article className="dashboard-row">
@@ -195,6 +201,39 @@ export default async function ConsolePage({
           galleryImages={tribute.galleryImages}
         />
       </div>
+
+      <section className="content-section content-section-soft" id="visitors">
+        <p className="section-kicker">Visitors</p>
+        <h2>Visitor Details</h2>
+        <span className="section-accent" />
+        <div className="contributors-grid">
+          <article className="soft-card">
+            <p className="card-label">Summary</p>
+            <h3>{visitStats.pageViews} page views</h3>
+            <p>{visitStats.uniqueVisitors} unique visitors</p>
+            <p>Last visit: {lastVisitedLabel}</p>
+          </article>
+          <article className="soft-card">
+            <p className="card-label">Recent Visits</p>
+            {visitStatsError ? <p>{visitStatsError}</p> : null}
+            {!visitStatsError && recentVisits.length === 0 ? <p>No visits recorded yet.</p> : null}
+            {!visitStatsError && recentVisits.length > 0 ? (
+              <div className="console-visit-list">
+                {recentVisits.map((visit) => (
+                  <div className="console-visit-item" key={`${visit.visitorHash}-${visit.createdAt}`}>
+                    <p>
+                      <strong>{new Date(visit.createdAt).toLocaleString("en-US")}</strong>
+                    </p>
+                    <p>Path: {visit.path}</p>
+                    <p>Visitor: {visit.visitorHash.slice(0, 10)}...</p>
+                    <p>Referer: {visit.referer?.trim() ? visit.referer : "Direct / unknown"}</p>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </article>
+        </div>
+      </section>
 
       <ThemeConsoleForm tribute={tribute} presets={tributeThemePresets} />
     </main>

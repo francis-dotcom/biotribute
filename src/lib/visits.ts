@@ -7,6 +7,13 @@ export type TributeVisitStats = {
   lastVisitedAt?: string;
 };
 
+export type TributeVisitDetail = {
+  visitorHash: string;
+  path: string;
+  referer?: string | null;
+  createdAt: string;
+};
+
 function getVisitHashSecret() {
   return (
     process.env.VISITOR_HASH_SECRET?.trim() ||
@@ -104,4 +111,40 @@ export async function getTributeVisitStats(tributeSlug: string): Promise<Tribute
     uniqueVisitors,
     lastVisitedAt,
   };
+}
+
+export async function getRecentTributeVisits(
+  tributeSlug: string,
+  limit = 20,
+): Promise<TributeVisitDetail[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const { data, error } = await supabase
+    .from("tribute_visits")
+    .select("visitor_hash, path, referer, created_at")
+    .eq("tribute_slug", tributeSlug)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    if (
+      error.code === "PGRST205" ||
+      error.code === "42P01" ||
+      error.message?.toLowerCase().includes("tribute_visits")
+    ) {
+      throw new Error("Visit tracking table is missing. Run the tribute_visits migration.");
+    }
+
+    throw new Error("Unable to load visit details.");
+  }
+
+  return (data ?? []).map((row) => ({
+    visitorHash: row.visitor_hash,
+    path: row.path,
+    referer: row.referer,
+    createdAt: row.created_at,
+  }));
 }

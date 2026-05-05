@@ -2793,6 +2793,27 @@ textarea {
   width: min(100%, 880px);
 }
 
+.console-visit-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.console-visit-item {
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(229, 229, 234, 0.9);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.console-visit-item p {
+  margin: 0 0 6px;
+}
+
+.console-visit-item p:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 640px) {
   .tribute-media-grid-count-2 {
     grid-template-columns: 1fr;
