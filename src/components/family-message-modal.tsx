@@ -71,7 +71,9 @@ export function FamilyMessageModal({
     }
 
     setToast({
-      message: data.message ?? "Private message sent to the family successfully.",
+      message:
+        data.message ??
+        "Confirmation email sent. Until you confirm your email, your message will not be seen by the family.",
       tone: "success",
     });
     setPending(false);
@@ -130,6 +132,8 @@ export function FamilyMessageModal({
             >
               <p className="subtle-note">
                 Send a private note directly to the family representative for {tributeName}.
+                You must confirm your email first; until confirmation, your message will
+                not be seen by the family.
               </p>
 
               <label className="field-block">

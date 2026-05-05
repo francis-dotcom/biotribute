@@ -81,7 +81,9 @@ ${cardMessage}`,
     }
 
     setToast({
-      message: data.message ?? "Tribute card sent to the family successfully.",
+      message:
+        data.message ??
+        "Confirmation email sent. Until you confirm your email, your card will not be seen by the family.",
       tone: "success",
     });
     setPending(false);
@@ -138,7 +140,8 @@ ${cardMessage}`,
               }}
             >
               <p className="subtle-note">
-                Send a featured card message for {tributeName}.
+                Send a featured card message for {tributeName}. You must confirm your
+                email first; until confirmation, your card will not be seen by the family.
               </p>
 
               <label className="field-block">

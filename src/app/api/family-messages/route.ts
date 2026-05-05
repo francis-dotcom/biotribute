@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { createFamilyPrivateMessage } from "@/lib/family-private-messages";
+import { createPendingFamilyPrivateMessage } from "@/lib/family-private-messages";
 
 const requestSchema = z.object({
   tributeSlug: z.string().trim().min(1),
@@ -18,10 +18,12 @@ export async function POST(request: Request) {
     const json = await request.json();
     const payload = requestSchema.parse(json);
 
-    await createFamilyPrivateMessage(payload);
+    const result = await createPendingFamilyPrivateMessage(payload);
 
     return NextResponse.json({
-      message: "Private message sent to the family successfully.",
+      message: result.verificationRequired
+        ? "Your email is not verified yet. The family will not see your message until you verify from your inbox."
+        : "Your email is already verified. Your message was sent to the family immediately.",
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
