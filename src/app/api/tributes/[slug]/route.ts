@@ -2,7 +2,7 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin";
-import { saveTributeRecord } from "@/lib/tributes-store";
+import { getTributeRecord, saveTributeRecord } from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
   year: z.string().trim(),
@@ -21,7 +21,7 @@ const supportAmountSchema = z.object({
   featured: z.boolean().optional(),
 });
 
-const tributeSchema = z.object({
+const fullTributeSchema = z.object({
   slug: z.string().trim().min(1),
   name: z.string().trim().min(1),
   honorificTitle: z.string().trim().optional(),
@@ -58,26 +58,87 @@ const tributeSchema = z.object({
   supportAmounts: z.array(supportAmountSchema),
 });
 
+const themeOnlySchema = z.object({
+  slug: z.string().trim().min(1),
+  theme: z.enum(["ivory", "sage", "sky"]),
+});
+
 export async function POST(request: Request) {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
   try {
-    const payload = tributeSchema.parse(await request.json());
-    await saveTributeRecord(payload);
-    revalidatePath(`/${payload.slug}`);
-    revalidatePath(`/console/${payload.slug}`);
-    revalidatePath(`/dashboard/${payload.slug}`);
-    return NextResponse.json({ message: "Tribute saved to Supabase." });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Please complete the tribute builder fields correctly." },
-        { status: 400 }
-      );
+    const json = await request.json();
+    const fullPayloadResult = fullTributeSchema.safeParse(json);
+
+    if (fullPayloadResult.success) {
+      const payload = fullPayloadResult.data;
+      await saveTributeRecord(payload);
+      revalidatePath(`/${payload.slug}`);
+      revalidatePath(`/console/${payload.slug}`);
+      revalidatePath(`/dashboard/${payload.slug}`);
+      return NextResponse.json({ message: "Tribute saved to Supabase." });
     }
 
+    const themeOnlyResult = themeOnlySchema.safeParse(json);
+    if (themeOnlyResult.success) {
+      const payload = themeOnlyResult.data;
+      const tribute = await getTributeRecord(payload.slug);
+
+      if (!tribute) {
+        return NextResponse.json({ error: "Tribute not found." }, { status: 404 });
+      }
+
+      const mergedPayload = {
+        slug: tribute.slug,
+        name: tribute.name,
+        honorificTitle: tribute.honorificTitle ?? "",
+        positionTitle: tribute.positionTitle ?? "",
+        years: tribute.years,
+        tagline: tribute.tagline,
+        organizer: tribute.organizer,
+        theme: payload.theme,
+        heroImageUrl: tribute.heroImageUrl ?? "",
+        backgroundImageUrl: tribute.backgroundImageUrl ?? "",
+        galleryIntro: tribute.galleryIntro ?? "",
+        galleryNote: tribute.galleryNote,
+        lifeStory: tribute.lifeStory.join("\n\n"),
+        supportNote: tribute.supportNote ?? "",
+        contactEmail: tribute.contactEmail ?? "",
+        donationAccountName: tribute.donationAccountName ?? "",
+        donationAccountNumber: tribute.donationAccountNumber ?? "",
+        donationBankName: tribute.donationBankName ?? "",
+        donationPhone: tribute.donationPhone ?? "",
+        videoUrls: tribute.videoUrls,
+        videoDescriptions: tribute.videoDescriptions,
+        videoThumbnailUrls: tribute.videoThumbnailUrls,
+        activeVideoIndex: tribute.activeVideoIndex ?? 0,
+        videoNote: tribute.videoNote ?? "",
+        livestreamUrl: tribute.livestreamUrl ?? "",
+        livestreamThumbnailUrl: tribute.livestreamThumbnailUrl ?? "",
+        livestreamDisplayMode: tribute.livestreamDisplayMode ?? "video",
+        livestreamNote: tribute.livestreamNote ?? "",
+        showGallerySection: tribute.showGallerySection,
+        showVideoSection: tribute.showVideoSection,
+        showLivestreamSection: tribute.showLivestreamSection,
+        timeline: tribute.timeline,
+        contributors: tribute.contributors,
+        supportAmounts: tribute.supportAmounts,
+      };
+
+      await saveTributeRecord(mergedPayload);
+      revalidatePath(`/${tribute.slug}`);
+      revalidatePath(`/console/${tribute.slug}`);
+      revalidatePath(`/dashboard/${tribute.slug}`);
+      return NextResponse.json({ message: "Theme saved to Supabase." });
+    }
+
+    return NextResponse.json(
+      { error: "Please complete the tribute builder fields correctly." },
+      { status: 400 },
+    );
+  } catch (error) {
     if (
       error instanceof Error &&
       error.message === "Tribute name already taken. Please choose a different name."
