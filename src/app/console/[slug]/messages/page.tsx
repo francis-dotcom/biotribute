@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { notFound } from "next/navigation";
+import { AdminSessionGuard } from "@/components/admin-session-guard";
 import { NoticeToast } from "@/components/notice-toast";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { getTributeThemePreset } from "@/data/tributes";
@@ -50,12 +51,13 @@ export default async function ConsoleMessagesPage({
 
   return (
     <main className="landing-shell console-shell dashboard-theme-shell" style={shellStyle}>
+      <AdminSessionGuard />
       <NoticeToast message={notice} tone={tone} />
       <section className="landing-hero admin-shell dashboard-hero">
         <p className="landing-kicker">bioTributes Console</p>
         <h1>Message Approval</h1>
         <p className="landing-copy">
-          Review and approve guest messages before they appear on {tribute.name}'s public
+          Review and approve guest messages before they appear on {tribute.name}&apos;s public
           tribute page.
         </p>
         <div className="console-quick-links">

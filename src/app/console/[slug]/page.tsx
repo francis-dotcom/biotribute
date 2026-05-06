@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { GalleryDashboardManager } from "@/components/gallery-dashboard-manager";
 import { ThemeConsoleForm } from "@/components/theme-console-form";
 import { TributeBuilderForm } from "@/components/tribute-builder-form";
+import { AdminSessionGuard } from "@/components/admin-session-guard";
 import { VisitorDetailsPanel } from "@/components/visitor-details-panel";
 import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
@@ -92,6 +93,7 @@ export default async function ConsolePage({
 
   return (
     <main className="landing-shell console-shell dashboard-theme-shell" style={shellStyle}>
+      <AdminSessionGuard />
       <section className="landing-hero admin-shell dashboard-hero">
         <Link
           className="console-alert-link"

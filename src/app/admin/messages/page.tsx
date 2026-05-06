@@ -1,4 +1,5 @@
 import { ModerationQueue } from "@/components/moderation-queue";
+import { AdminSessionGuard } from "@/components/admin-session-guard";
 import { NoticeToast } from "@/components/notice-toast";
 import { requireAdminSession } from "@/lib/admin";
 import { getMessagesForAdmin } from "@/lib/messages";
@@ -15,6 +16,7 @@ export default async function AdminMessagesPage({ searchParams }: AdminPageProps
 
   return (
     <main className="landing-shell">
+      <AdminSessionGuard />
       <NoticeToast message={notice} tone={tone} />
       <section className="landing-hero admin-shell">
         <p className="landing-kicker">bioTributes Admin</p>

@@ -25,12 +25,11 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
   }, []);
 
   const batchSize = isMobile ? 2 : 3;
-  const [visibleCount, setVisibleCount] = useState(batchSize);
-
-  useEffect(() => {
-    setVisibleCount(batchSize);
-  }, [batchSize, entries.length]);
-
+  const [visibleCountOverride, setVisibleCountOverride] = useState<number | null>(null);
+  const visibleCount = Math.min(
+    entries.length,
+    Math.max(batchSize, visibleCountOverride ?? batchSize),
+  );
   const visibleEntries = entries.slice(0, visibleCount);
   const hasMoreEntries = visibleCount < entries.length;
 
@@ -65,7 +64,11 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
           <button
             className="button-secondary"
             type="button"
-            onClick={() => setVisibleCount((current) => Math.min(current + batchSize, entries.length))}
+            onClick={() =>
+              setVisibleCountOverride((current) =>
+                Math.min((current ?? batchSize) + batchSize, entries.length),
+              )
+            }
           >
             Load more to read more
           </button>
@@ -76,7 +79,7 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
           <button
             className="button-secondary"
             type="button"
-            onClick={() => setVisibleCount(batchSize)}
+            onClick={() => setVisibleCountOverride(null)}
           >
             Load less
           </button>

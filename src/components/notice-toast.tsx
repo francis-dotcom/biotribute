@@ -8,27 +8,24 @@ type NoticeToastProps = {
 };
 
 export function NoticeToast({ message, tone = "success" }: NoticeToastProps) {
-  const [open, setOpen] = useState(Boolean(message));
+  const [dismissedMessage, setDismissedMessage] = useState<string | null>(null);
+  const isOpen = Boolean(message) && message !== dismissedMessage;
 
   useEffect(() => {
-    setOpen(Boolean(message));
-  }, [message]);
-
-  useEffect(() => {
-    if (!message) {
+    if (!message || !isOpen) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setOpen(false);
+      setDismissedMessage(message);
     }, 4200);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [message]);
+  }, [isOpen, message]);
 
-  if (!message || !open) {
+  if (!message || !isOpen) {
     return null;
   }
 
@@ -42,7 +39,7 @@ export function NoticeToast({ message, tone = "success" }: NoticeToastProps) {
       <button
         className="notice-toast-close"
         type="button"
-        onClick={() => setOpen(false)}
+        onClick={() => setDismissedMessage(message)}
         aria-label="Dismiss notification"
       >
         ×

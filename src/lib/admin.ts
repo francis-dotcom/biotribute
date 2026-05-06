@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export const ADMIN_SESSION_COOKIE = "biotribute_admin_session";
+export const ADMIN_SESSION_MAX_AGE_SECONDS = 60 * 20;
 
 function getAdminSecret() {
   return process.env.BIOTRIBUTE_ADMIN_PASSWORD ?? process.env.BIOTRIBUTE_ADMIN_TOKEN ?? "";

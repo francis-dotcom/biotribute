@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { AdminSessionGuard } from "@/components/admin-session-guard";
 import { DashboardNav } from "@/components/dashboard-nav";
 import { notFound } from "next/navigation";
 import { getTributeThemePreset } from "@/data/tributes";
@@ -25,6 +26,7 @@ export default async function DashboardLayout({ children, params }: DashboardLay
 
   return (
     <main className="landing-shell dashboard-theme-shell" style={shellStyle}>
+      <AdminSessionGuard />
       <section className="landing-hero admin-shell dashboard-hero">
         <p className="landing-kicker">bioTributes Dashboard</p>
         <h1>{tribute.name}</h1>

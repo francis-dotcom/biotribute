@@ -175,6 +175,14 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
       data.message ??
         "Message submitted. Please verify your email from your inbox before your message can be reviewed and shown."
     showToast(successMessage, "success");
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(`biotribute-message-prompt-submitted-${tributeSlug}`, "true");
+      window.dispatchEvent(
+        new CustomEvent("biotribute:message-submitted", {
+          detail: { tributeSlug },
+        }),
+      );
+    }
     setPending(false);
     setOpen(true);
     setFieldErrors({});

@@ -2459,6 +2459,57 @@ textarea {
   font: 700 1.1rem/1 var(--font-sans);
 }
 
+.message-prompt-toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 980;
+  width: min(420px, calc(100vw - 32px));
+  padding: 22px 22px 20px;
+  border: 1px solid rgba(200, 169, 106, 0.26);
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(249, 246, 239, 0.96)),
+    #fff;
+  box-shadow: 0 18px 50px rgba(28, 28, 30, 0.16);
+}
+
+.message-prompt-kicker {
+  margin: 0 0 8px;
+  color: var(--gold-deep);
+  font: 700 0.76rem/1 var(--font-sans);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.message-prompt-toast h3 {
+  margin: 0 0 10px;
+  font-size: clamp(1.25rem, 2vw, 1.5rem);
+}
+
+.message-prompt-toast > p:last-of-type {
+  margin-bottom: 0;
+}
+
+.message-prompt-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.message-prompt-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1.4rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;
@@ -2581,6 +2632,18 @@ textarea {
     right: 12px;
     left: 12px;
     width: auto;
+  }
+
+  .message-prompt-toast {
+    right: 16px;
+    left: 16px;
+    bottom: 16px;
+    width: auto;
+    padding: 20px 18px 18px;
+  }
+
+  .message-prompt-actions {
+    flex-direction: column;
   }
 
   .console-alert-link {

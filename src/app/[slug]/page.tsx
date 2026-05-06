@@ -7,6 +7,7 @@ import { FamilyMessageModal } from "@/components/family-message-modal";
 import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
+import { MessagePromptToast } from "@/components/message-prompt-toast";
 import { ShareTributeIconButton } from "@/components/share-tribute-icon-button";
 import { TimelineSection } from "@/components/timeline-section";
 import { TributeActionBar } from "@/components/tribute-action-bar";
@@ -91,6 +92,7 @@ export default async function TributePage({ params }: PageProps) {
   return (
     <main className="page-shell tribute-page-shell" style={pageStyle}>
       <TributeVisitTracker tributeSlug={tribute.slug} />
+      <MessagePromptToast tributeSlug={tribute.slug} />
       <div className="tribute-page">
         <section className="hero-section" id="tribute-top">
           {pageViewsCount !== null ? (
