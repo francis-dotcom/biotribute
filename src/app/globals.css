@@ -2461,21 +2461,26 @@ textarea {
 
 .message-prompt-toast {
   position: fixed;
-  right: 24px;
+  left: 50%;
   bottom: 24px;
+  transform: translateX(-50%);
   z-index: 980;
-  width: min(420px, calc(100vw - 32px));
-  padding: 22px 22px 20px;
+  width: min(760px, calc(100vw - 32px));
+  padding: 16px 18px;
   border: 1px solid rgba(200, 169, 106, 0.26);
-  border-radius: 28px;
+  border-radius: 24px;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(249, 246, 239, 0.96)),
     #fff;
-  box-shadow: 0 18px 50px rgba(28, 28, 30, 0.16);
+  box-shadow: 0 16px 42px rgba(28, 28, 30, 0.14);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px 18px;
+  align-items: center;
 }
 
 .message-prompt-kicker {
-  margin: 0 0 8px;
+  margin: 0 0 6px;
   color: var(--gold-deep);
   font: 700 0.76rem/1 var(--font-sans);
   letter-spacing: 0.16em;
@@ -2483,8 +2488,8 @@ textarea {
 }
 
 .message-prompt-toast h3 {
-  margin: 0 0 10px;
-  font-size: clamp(1.25rem, 2vw, 1.5rem);
+  margin: 0 0 6px;
+  font-size: clamp(1.05rem, 1.8vw, 1.25rem);
 }
 
 .message-prompt-toast > p:last-of-type {
@@ -2493,19 +2498,20 @@ textarea {
 
 .message-prompt-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 10px;
-  margin-top: 18px;
+  margin-top: 0;
+  justify-content: flex-end;
 }
 
 .message-prompt-close {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 10px;
+  right: 10px;
   border: 0;
   background: transparent;
   color: var(--muted);
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   line-height: 1;
   cursor: pointer;
 }
@@ -2635,15 +2641,19 @@ textarea {
   }
 
   .message-prompt-toast {
-    right: 16px;
     left: 16px;
+    right: 16px;
     bottom: 16px;
     width: auto;
-    padding: 20px 18px 18px;
+    transform: none;
+    padding: 16px 16px 14px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .message-prompt-actions {
     flex-direction: column;
+    justify-content: stretch;
   }
 
   .console-alert-link {
