@@ -2,6 +2,8 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/request-security";
 import { saveTributeRecord, updateTributeTheme } from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
@@ -66,6 +68,26 @@ const themeOnlySchema = z.object({
 export async function POST(request: Request) {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  }
+
+  const rateLimit = await consumeRateLimit({
+    key: `api:tributes:${getClientIp(request)}`,
+    limit: 40,
+    windowMs: 1000 * 60 * 10,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many tribute update requests. Please wait and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
   }
 
   try {

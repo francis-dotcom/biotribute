@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin";
 import { deleteMessage, updateMessageStatus } from "@/lib/messages";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 function buildRedirectUrl(path: string, notice?: string, tone?: "success" | "error") {
   const [pathname, queryString = ""] = path.split("?");
@@ -22,6 +24,19 @@ export async function POST(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  if (!isSameOriginRequest(request)) {
+    redirect("/console-login?error=Invalid%20request%20origin.");
+  }
+
+  const rateLimit = await consumeRateLimit({
+    key: `api:admin-messages:${getClientIp(request)}`,
+    limit: 30,
+    windowMs: 1000 * 60 * 10,
+  });
+  if (!rateLimit.allowed) {
+    redirect("/console-login?error=Too%20many%20admin%20actions.%20Please%20wait%20and%20try%20again.");
+  }
+
   const formData = await request.formData();
   const status = String(formData.get("status") ?? "");
   const action = String(formData.get("action") ?? "");

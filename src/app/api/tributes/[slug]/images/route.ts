@@ -3,6 +3,8 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getTributeBySlug } from "@/data/tributes";
 import { isAdminAuthenticated } from "@/lib/admin";
+import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/request-security";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 const BUCKET_NAME = "tribute-media";
@@ -142,6 +144,25 @@ export async function POST(
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  }
+  const rateLimit = await consumeRateLimit({
+    key: `api:tribute-images-upload:${getClientIp(request)}`,
+    limit: 20,
+    windowMs: 1000 * 60 * 10,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many image upload requests. Please wait and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
+  }
 
   try {
     const { slug } = await context.params;
@@ -273,6 +294,25 @@ export async function PATCH(
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  }
+  const rateLimit = await consumeRateLimit({
+    key: `api:tribute-images-reorder:${getClientIp(request)}`,
+    limit: 40,
+    windowMs: 1000 * 60 * 10,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many image reorder requests. Please wait and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
+  }
 
   try {
     const { slug } = await context.params;
@@ -332,6 +372,25 @@ export async function DELETE(
 ) {
   if (!(await isAdminAuthenticated())) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+  }
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
+  }
+  const rateLimit = await consumeRateLimit({
+    key: `api:tribute-images-delete:${getClientIp(request)}`,
+    limit: 30,
+    windowMs: 1000 * 60 * 10,
+  });
+  if (!rateLimit.allowed) {
+    return NextResponse.json(
+      { error: "Too many image delete requests. Please wait and try again." },
+      {
+        status: 429,
+        headers: {
+          "Retry-After": String(rateLimit.retryAfterSeconds),
+        },
+      },
+    );
   }
 
   try {

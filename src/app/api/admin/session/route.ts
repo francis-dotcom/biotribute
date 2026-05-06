@@ -2,12 +2,19 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { ADMIN_SESSION_COOKIE, getAdminSessionValue } from "@/lib/admin";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import { isSameOriginRequest } from "@/lib/request-security";
 
 function getAdminSecret() {
   return process.env.BIOTRIBUTE_ADMIN_PASSWORD ?? process.env.BIOTRIBUTE_ADMIN_TOKEN ?? "";
 }
 
 export async function POST(request: Request) {
+  if (!isSameOriginRequest(request)) {
+    redirect(
+      `/console-login?error=${encodeURIComponent("Invalid request origin.")}&next=${encodeURIComponent("/console/SirFemiOgini")}`,
+    );
+  }
+
   const rateLimit = await consumeRateLimit({
     key: `api:admin-session:${getClientIp(request)}`,
     limit: 5,

@@ -3,10 +3,10 @@ import { z } from "zod";
 import { createPendingFamilyPrivateMessage } from "@/lib/family-private-messages";
 import { verifyTurnstileToken } from "@/lib/bot-protection";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
+import { getTributeRecord } from "@/lib/tributes-store";
 
 const requestSchema = z.object({
   tributeSlug: z.string().trim().min(1),
-  recipientEmail: z.string().trim().email(),
   senderName: z.string().trim().min(2).max(80),
   senderEmail: z.string().trim().email().max(160),
   message: z.string().trim().min(12).max(5000),
@@ -38,6 +38,15 @@ export async function POST(request: Request) {
   try {
     const json = await request.json();
     const payload = requestSchema.parse(json);
+    const tribute = await getTributeRecord(payload.tributeSlug);
+    const recipientEmail = tribute?.contactEmail?.trim() || process.env.NEXT_PUBLIC_FAMILY_EMAIL?.trim() || "";
+
+    if (!recipientEmail) {
+      return NextResponse.json(
+        { error: "Family contact email is not configured yet." },
+        { status: 400 },
+      );
+    }
     const botCheckPassed = await verifyTurnstileToken(payload.turnstileToken);
 
     if (!botCheckPassed) {
@@ -47,7 +56,10 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await createPendingFamilyPrivateMessage(payload);
+    const result = await createPendingFamilyPrivateMessage({
+      ...payload,
+      recipientEmail,
+    });
 
     return NextResponse.json({
       message: result.verificationRequired
