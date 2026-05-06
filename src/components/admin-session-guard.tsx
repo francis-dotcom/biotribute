@@ -10,11 +10,13 @@ const REFRESH_THROTTLE_MS = 60 * 1000;
 export function AdminSessionGuard() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const lastActivityRef = useRef<number>(Date.now());
+  const lastActivityRef = useRef<number>(0);
   const lastRefreshRef = useRef<number>(0);
   const isLoggingOutRef = useRef(false);
 
   useEffect(() => {
+    lastActivityRef.current = Date.now();
+
     function getNextPath() {
       const query = searchParams.toString();
       return query ? `${pathname}?${query}` : pathname;
