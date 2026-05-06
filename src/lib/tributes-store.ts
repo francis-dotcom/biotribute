@@ -634,3 +634,28 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     }
   }
 }
+
+export async function updateTributeTheme(input: { slug: string; theme: TributeTheme }) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    throw new Error("Tribute store is not configured.");
+  }
+
+  const { data, error } = await supabase
+    .from("tributes")
+    .update({
+      theme: input.theme,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("slug", input.slug)
+    .select("slug")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Unable to save theme: ${error.message || "unknown error"}`);
+  }
+
+  if (!data?.slug) {
+    throw new Error("Tribute not found.");
+  }
+}
