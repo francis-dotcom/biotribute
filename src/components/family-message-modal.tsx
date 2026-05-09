@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NOTICE_TOAST_AUTO_DISMISS_MS } from "@/components/notice-toast";
-import { turnstileNotReadyYetMessage, turnstileSubmitWaitingLabel } from "@/lib/turnstile-user-copy";
+import {
+  turnstileGreenVerifiedNotice,
+  turnstileGreenWaitingNotice,
+  turnstileNotReadyYetMessage,
+  turnstileSubmitWaitingLabel,
+} from "@/lib/turnstile-user-copy";
 
 type FamilyMessageModalProps = {
   recipientEmail?: string;
@@ -70,7 +75,6 @@ export function FamilyMessageModal({
 
       turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
         sitekey: turnstileSiteKey,
-        appearance: "interaction-only",
         callback: (token: string) => setTurnstileToken(token),
         "expired-callback": () => setTurnstileToken(""),
         "error-callback": () => setTurnstileToken(""),
@@ -240,10 +244,14 @@ export function FamilyMessageModal({
                   <span>Bot verification</span>
                   <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
                   {!turnstileToken.trim() ? (
-                    <p className="subtle-note">
-                      Send stays disabled until verification finishes—it usually takes a few seconds.
+                    <p className="form-status-inline is-waiting" role="status">
+                      {turnstileGreenWaitingNotice}
                     </p>
-                  ) : null}
+                  ) : (
+                    <p className="form-status-inline is-success" role="status">
+                      {turnstileGreenVerifiedNotice}
+                    </p>
+                  )}
                 </div>
               ) : null}
 
