@@ -201,6 +201,34 @@ export default async function TributePage({ params }: PageProps) {
           </section>
         ) : null}
 
+        {tribute.showServicePosterSection && tribute.servicePosterImageUrl?.trim() ? (
+          <section className="content-section">
+            <p className="section-kicker">Memorial Program</p>
+            <h2>{tribute.servicePosterTitle?.trim() || "Service Poster"}</h2>
+            <span className="section-accent" />
+            <article className="form-card service-poster-card">
+              <a
+                className="service-poster-link"
+                href={tribute.servicePosterImageUrl.trim()}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <div
+                  role="img"
+                  aria-label={`${tribute.name} service poster`}
+                  className="service-poster-image"
+                  style={{ backgroundImage: `url("${tribute.servicePosterImageUrl.trim()}")` }}
+                />
+              </a>
+              {tribute.servicePosterNote?.trim() ? (
+                <MarkdownText content={tribute.servicePosterNote} className="subtle-note" />
+              ) : (
+                <p className="subtle-note">Open the poster for a full-size view.</p>
+              )}
+            </article>
+          </section>
+        ) : null}
+
         <TributeMediaSection
           videoUrls={tribute.videoUrls}
           videoDescriptions={tribute.videoDescriptions}

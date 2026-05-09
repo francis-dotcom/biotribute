@@ -114,6 +114,7 @@ export default async function ConsolePage({
         <div className="console-quick-links">
           <a href="#details">Details</a>
           <a href="#images">Images</a>
+          <a href="#service-poster">Poster</a>
           <a href="#theme">Theme</a>
           <Link href={`/console/${slug}/messages`}>Approval Page</Link>
           <a href="#media">Video & Live</a>

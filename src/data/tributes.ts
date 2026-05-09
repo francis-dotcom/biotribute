@@ -59,6 +59,10 @@ export type TributeRecord = {
   galleryNote: string;
   galleryImages: TributeGalleryItem[];
   showGallerySection: boolean;
+  servicePosterImageUrl?: string;
+  servicePosterTitle?: string;
+  servicePosterNote?: string;
+  showServicePosterSection: boolean;
   videoUrls: string[];
   videoDescriptions: string[];
   videoThumbnailUrls: string[];
@@ -135,6 +139,11 @@ export const tributes: TributeRecord[] = [
       "No photos have been added yet. Family members and invited contributors will be able to upload memories here.",
     galleryImages: [],
     showGallerySection: true,
+    servicePosterImageUrl: "",
+    servicePosterTitle: "Service Poster",
+    servicePosterNote:
+      "View and share the funeral service program details for wake, mass, interment, and reception.",
+    showServicePosterSection: true,
     videoUrls: [],
     videoDescriptions: [],
     videoThumbnailUrls: [],

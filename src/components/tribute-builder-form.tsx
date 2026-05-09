@@ -24,6 +24,7 @@ type ContributorDraft = {
 type DraftPersistOverrides = {
   videoThumbnailUrls?: string[];
   activeVideoIndex?: number;
+  servicePosterImageUrl?: string;
   livestreamDisplayMode?: "video" | "image-url" | "uploaded-image";
   livestreamThumbnailMode?: "url" | "upload";
   livestreamThumbnailUrlInput?: string;
@@ -74,12 +75,24 @@ export function TributeBuilderForm({
   const [status, setStatus] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
   const [showGallerySection, setShowGallerySection] = useState(tribute.showGallerySection);
+  const [showServicePosterSection, setShowServicePosterSection] = useState(
+    tribute.showServicePosterSection
+  );
   const [showVideoSection, setShowVideoSection] = useState(tribute.showVideoSection);
   const [showLivestreamSection, setShowLivestreamSection] = useState(
     tribute.showLivestreamSection
   );
   const [heroImageUrl, setHeroImageUrl] = useState(tribute.heroImageUrl ?? "");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(tribute.backgroundImageUrl ?? "");
+  const [servicePosterImageUrl, setServicePosterImageUrl] = useState(
+    tribute.servicePosterImageUrl ?? ""
+  );
+  const [servicePosterTitle, setServicePosterTitle] = useState(
+    tribute.servicePosterTitle ?? "Service Poster"
+  );
+  const [servicePosterNote, setServicePosterNote] = useState(tribute.servicePosterNote ?? "");
+  const [uploadingServicePoster, setUploadingServicePoster] = useState(false);
+  const servicePosterInputRef = useRef<HTMLInputElement | null>(null);
   const [videoUrls, setVideoUrls] = useState([
     tribute.videoUrls[0] ?? "",
     tribute.videoUrls[1] ?? "",
@@ -256,6 +269,7 @@ export function TributeBuilderForm({
   async function persistDraft(formData: FormData, overrides?: DraftPersistOverrides) {
     const nextVideoThumbnailUrls = overrides?.videoThumbnailUrls ?? videoThumbnailUrls;
     const nextActiveVideoIndex = overrides?.activeVideoIndex ?? activeVideoIndex;
+    const nextServicePosterImageUrl = overrides?.servicePosterImageUrl ?? servicePosterImageUrl;
     const nextLivestreamDisplayMode = overrides?.livestreamDisplayMode ?? livestreamDisplayMode;
     const nextLivestreamThumbnailMode = overrides?.livestreamThumbnailMode ?? livestreamThumbnailMode;
     const nextLivestreamThumbnailUrlInput =
@@ -282,6 +296,9 @@ export function TributeBuilderForm({
       backgroundImageUrl: backgroundImageUrl.trim(),
       galleryIntro: String(formData.get("galleryIntro") ?? ""),
       galleryNote: String(formData.get("galleryNote") ?? ""),
+      servicePosterImageUrl: nextServicePosterImageUrl.trim(),
+      servicePosterTitle: servicePosterTitle.trim(),
+      servicePosterNote: servicePosterNote.trim(),
       lifeStory: String(formData.get("lifeStory") ?? ""),
       supportNote: String(formData.get("supportNote") ?? ""),
       contactEmail: String(formData.get("contactEmail") ?? ""),
@@ -304,6 +321,7 @@ export function TributeBuilderForm({
       livestreamDisplayMode: nextLivestreamDisplayMode,
       livestreamNote: livestreamNote.trim(),
       showGallerySection,
+      showServicePosterSection,
       showVideoSection,
       showLivestreamSection,
       timeline:
@@ -362,6 +380,58 @@ export function TributeBuilderForm({
     if (response.ok) {
       router.refresh();
     }
+  }
+
+  async function uploadServicePoster(files: FileList | null) {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setUploadingServicePoster(true);
+    setStatus(null);
+
+    const formData = new FormData();
+    formData.append("kind", "service-poster");
+    formData.append("files", files[0]);
+
+    const response = await fetch(`/api/tributes/${tribute.slug}/images`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+      uploads?: { imageUrl: string }[];
+    };
+
+    if (!response.ok) {
+      setStatus(data.error ?? "Unable to upload service poster.");
+      setUploadingServicePoster(false);
+      return;
+    }
+
+    const uploadedUrl = data.uploads?.[0]?.imageUrl ?? "";
+    if (uploadedUrl) {
+      setServicePosterImageUrl(uploadedUrl);
+
+      if (formRef.current && storeConfigured) {
+        const { response: persistResponse, data: persistData } = await persistDraft(
+          new FormData(formRef.current),
+          {
+            servicePosterImageUrl: uploadedUrl,
+          },
+        );
+        if (!persistResponse.ok) {
+          setStatus(persistData.error ?? "Service poster uploaded, but auto-save failed.");
+          setUploadingServicePoster(false);
+          return;
+        }
+      }
+    }
+
+    setStatus(data.message ?? "Service poster uploaded and saved.");
+    setUploadingServicePoster(false);
   }
 
   async function uploadLivestreamThumbnail(files: FileList | null) {
@@ -735,6 +805,15 @@ export function TributeBuilderForm({
           <span className={showGallerySection ? "builder-visibility-chip is-on" : "builder-visibility-chip is-off"}>
             Photos: {showGallerySection ? "ON" : "OFF"}
           </span>
+          <span
+            className={
+              showServicePosterSection
+                ? "builder-visibility-chip is-on"
+                : "builder-visibility-chip is-off"
+            }
+          >
+            Poster: {showServicePosterSection ? "ON" : "OFF"}
+          </span>
           <span className={showVideoSection ? "builder-visibility-chip is-on" : "builder-visibility-chip is-off"}>
             Videos: {showVideoSection ? "ON" : "OFF"}
           </span>
@@ -750,6 +829,15 @@ export function TributeBuilderForm({
             onChange={(event) => setShowGallerySection(event.currentTarget.checked)}
           />
           <span>Show Photo section on public page</span>
+        </label>
+        <label className="field-block builder-checkbox">
+          <input
+            name="showServicePosterSection"
+            type="checkbox"
+            checked={showServicePosterSection}
+            onChange={(event) => setShowServicePosterSection(event.currentTarget.checked)}
+          />
+          <span>Show Service Poster section on public page</span>
         </label>
         <label className="field-block builder-checkbox">
           <input
@@ -788,6 +876,72 @@ export function TributeBuilderForm({
           <span>Empty state note</span>
           <textarea name="galleryNote" defaultValue={tribute.galleryNote} />
         </label>
+      </article>
+
+      <article className="form-card" id="service-poster">
+        <p className="card-label">Service Poster</p>
+        <h3>Funeral program poster</h3>
+        <div className="field-block">
+          <span>Upload service poster image</span>
+          <input
+            ref={servicePosterInputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp,image/avif"
+            onChange={(event) => {
+              void uploadServicePoster(event.currentTarget.files);
+            }}
+          />
+          <p className="subtle-note">
+            {uploadingServicePoster
+              ? "Uploading service poster..."
+              : servicePosterImageUrl.trim()
+                ? "Poster uploaded. Save Draft to keep title, note, and visibility changes."
+                : "Upload one poster image for funeral program details."}
+          </p>
+        </div>
+        {servicePosterImageUrl.trim() ? (
+          <div className="field-block">
+            <span>Saved service poster preview</span>
+            <img
+              src={servicePosterImageUrl.trim()}
+              alt="Service poster preview"
+              className="builder-livestream-preview"
+            />
+          </div>
+        ) : null}
+        <label className="field-block">
+          <span>Section title</span>
+          <input
+            name="servicePosterTitle"
+            type="text"
+            value={servicePosterTitle}
+            onChange={(event) => setServicePosterTitle(event.currentTarget.value)}
+            placeholder="Service Poster"
+          />
+        </label>
+        <label className="field-block">
+          <span>Section note (optional)</span>
+          <textarea
+            name="servicePosterNote"
+            value={servicePosterNote}
+            onChange={(event) => setServicePosterNote(event.currentTarget.value)}
+            placeholder="Optional context shown under the poster."
+          />
+        </label>
+        <div className="builder-inline-actions">
+          <button
+            className="button-secondary dashboard-danger-button"
+            type="button"
+            onClick={() => {
+              setServicePosterImageUrl("");
+              if (servicePosterInputRef.current) {
+                servicePosterInputRef.current.value = "";
+              }
+            }}
+          >
+            Delete Service Poster
+          </button>
+        </div>
       </article>
 
       <article className="form-card" id="media">

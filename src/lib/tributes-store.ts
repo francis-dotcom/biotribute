@@ -71,6 +71,10 @@ export type TributeBuilderInput = {
   backgroundImageUrl?: string;
   galleryIntro?: string;
   galleryNote: string;
+  servicePosterImageUrl?: string;
+  servicePosterTitle?: string;
+  servicePosterNote?: string;
+  showServicePosterSection?: boolean;
   lifeStory: string;
   supportNote?: string;
   videoUrls?: string[];
@@ -186,6 +190,10 @@ type SupportNoteMetadata = {
   positionTitle?: string;
   galleryIntro?: string;
   showGallerySection?: boolean;
+  servicePosterImageUrl?: string;
+  servicePosterTitle?: string;
+  servicePosterNote?: string;
+  showServicePosterSection?: boolean;
   showVideoSection?: boolean;
   showLivestreamSection?: boolean;
   videoUrls?: string[];
@@ -255,6 +263,19 @@ function parseSupportNoteMetadata(value: string | null) {
           ? parsed.galleryIntro.trim() || undefined
           : undefined,
       showGallerySection: parsed.showGallerySection,
+      servicePosterImageUrl:
+        typeof parsed.servicePosterImageUrl === "string"
+          ? parsed.servicePosterImageUrl.trim() || undefined
+          : undefined,
+      servicePosterTitle:
+        typeof parsed.servicePosterTitle === "string"
+          ? parsed.servicePosterTitle.trim() || undefined
+          : undefined,
+      servicePosterNote:
+        typeof parsed.servicePosterNote === "string"
+          ? parsed.servicePosterNote.trim() || undefined
+          : undefined,
+      showServicePosterSection: parsed.showServicePosterSection,
       showVideoSection: parsed.showVideoSection,
       showLivestreamSection: parsed.showLivestreamSection,
       videoUrls: Array.isArray(parsed.videoUrls)
@@ -407,6 +428,18 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
       supportNoteMetadata?.showGallerySection ??
       fallback?.showGallerySection ??
       true,
+    servicePosterImageUrl:
+      supportNoteMetadata?.servicePosterImageUrl ?? fallback?.servicePosterImageUrl,
+    servicePosterTitle:
+      supportNoteMetadata?.servicePosterTitle ??
+      fallback?.servicePosterTitle ??
+      "Service Poster",
+    servicePosterNote:
+      supportNoteMetadata?.servicePosterNote ?? fallback?.servicePosterNote,
+    showServicePosterSection:
+      supportNoteMetadata?.showServicePosterSection ??
+      fallback?.showServicePosterSection ??
+      true,
     videoUrls: parseMultilineValues(
       tributeRow.video_urls ||
         supportNoteMetadata?.videoUrls?.join("\n") ||
@@ -500,6 +533,10 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     positionTitle: input.positionTitle?.trim() || undefined,
     galleryIntro: input.galleryIntro?.trim() || undefined,
     showGallerySection: input.showGallerySection ?? true,
+    servicePosterImageUrl: input.servicePosterImageUrl?.trim() || undefined,
+    servicePosterTitle: input.servicePosterTitle?.trim() || undefined,
+    servicePosterNote: input.servicePosterNote?.trim() || undefined,
+    showServicePosterSection: input.showServicePosterSection ?? true,
     showVideoSection: input.showVideoSection ?? true,
     showLivestreamSection: input.showLivestreamSection ?? true,
     videoUrls: (input.videoUrls ?? []).map((item) => item.trim()).filter(Boolean),

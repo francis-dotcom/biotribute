@@ -8,7 +8,15 @@ import { isSameOriginRequest } from "@/lib/request-security";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 const BUCKET_NAME = "tribute-media";
-const ALLOWED_KINDS = new Set(["hero", "background", "gallery", "livestream-thumb", "video-thumb"]);
+const ALLOWED_KINDS = new Set([
+  "hero",
+  "background",
+  "gallery",
+  "livestream-thumb",
+  "video-thumb",
+  "service-poster",
+]);
+const ALLOWED_DELETE_KINDS = new Set(["hero", "background", "gallery"]);
 const ALLOWED_MIME_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -179,7 +187,14 @@ export async function POST(
       return NextResponse.json({ error: "Choose at least one image to upload." }, { status: 400 });
     }
 
-    if ((kind === "hero" || kind === "background" || kind === "livestream-thumb" || kind === "video-thumb") && files.length !== 1) {
+    if (
+      (kind === "hero" ||
+        kind === "background" ||
+        kind === "livestream-thumb" ||
+        kind === "video-thumb" ||
+        kind === "service-poster") &&
+      files.length !== 1
+    ) {
       return NextResponse.json({ error: "Upload exactly one image for this field." }, { status: 400 });
     }
 
@@ -274,6 +289,8 @@ export async function POST(
           ? "Gallery images uploaded."
           : kind === "livestream-thumb"
             ? "Thumbnail uploaded. Click Save Draft to apply it to the live stream."
+          : kind === "service-poster"
+            ? "Service poster uploaded. Click Save Draft to apply it."
           : "Image uploaded and applied to the tribute.",
       uploads,
     });
@@ -401,7 +418,7 @@ export async function DELETE(
     };
     const kind = payload.kind;
 
-    if (!kind || !ALLOWED_KINDS.has(kind)) {
+    if (!kind || !ALLOWED_DELETE_KINDS.has(kind)) {
       return NextResponse.json({ error: "Invalid delete target." }, { status: 400 });
     }
 

@@ -843,6 +843,31 @@ textarea {
   background-size: cover;
 }
 
+.service-poster-card {
+  display: grid;
+  gap: 14px;
+}
+
+.service-poster-link {
+  display: block;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-xs);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.service-poster-image {
+  width: 100%;
+  min-height: 420px;
+  max-height: min(88vh, 1100px);
+  aspect-ratio: 3 / 5;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-color: rgba(244, 235, 218, 0.32);
+}
+
 .subtle-note {
   margin: 12px 0 0;
   color: var(--muted);
