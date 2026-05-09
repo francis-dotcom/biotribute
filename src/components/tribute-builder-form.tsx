@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { TributeRecord } from "@/data/tributes";
+import { tributeThemePresets, type TributeRecord } from "@/data/tributes";
 
 type TributeBuilderFormProps = {
   tribute: TributeRecord;
@@ -608,10 +608,11 @@ export function TributeBuilderForm({
           <label className="field-block">
             <span>Theme</span>
             <select name="theme" defaultValue={tribute.theme}>
-              <option value="ivory">Ivory Memorial</option>
-              <option value="sage">Sage Garden</option>
-              <option value="sky">Quiet Sky</option>
-              <option value="amethyst">Cool Amethyst</option>
+              {tributeThemePresets.map((preset) => (
+                <option key={preset.id} value={preset.id}>
+                  {preset.name}
+                </option>
+              ))}
             </select>
           </label>
         </article>

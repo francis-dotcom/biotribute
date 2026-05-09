@@ -30,7 +30,8 @@ export default async function TributeThemePage({
         <h2>Visual preference</h2>
         <p className="subtle-note">
           Choose the memorial palette that best reflects the family&apos;s preference.
-          The public tribute page reads from this tribute theme.
+          The public tribute page reads from this tribute theme. {tributeThemePresets.length}{" "}
+          palettes are listed; scroll if cards wrap on a narrow window.
         </p>
       </article>
 

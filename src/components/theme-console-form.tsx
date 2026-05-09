@@ -43,7 +43,8 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
         <p className="card-label">Theme</p>
         <h2>Visual preference</h2>
         <p className="subtle-note">
-          Choose the memorial palette that best reflects the family&apos;s preference.
+          Choose the memorial palette that best reflects the family&apos;s preference ({presets.length}{" "}
+          options). Cards are compact; scroll if needed on small screens. Your content stays when you switch themes.
         </p>
         {status ? <p className="form-status">{status}</p> : null}
       </article>

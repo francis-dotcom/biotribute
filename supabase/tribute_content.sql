@@ -6,7 +6,21 @@ create table if not exists public.tributes (
   years text not null,
   tagline text not null,
   organizer text not null,
-  theme text not null check (theme in ('ivory', 'sage', 'sky', 'amethyst')),
+  theme text not null check (
+    theme in (
+      'ivory',
+      'sage',
+      'sky',
+      'amethyst',
+      'midnight',
+      'candlelight',
+      'rose-quartz',
+      'pearl-coast',
+      'evergreen',
+      'harvest',
+      'charcoal'
+    )
+  ),
   hero_image_url text,
   background_image_url text,
   gallery_note text not null default '',
