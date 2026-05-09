@@ -1650,7 +1650,8 @@ textarea {
   border: 1px solid transparent;
   border-radius: 14px;
   padding: 10px 12px;
-  font-weight: 600;
+  font: 0.92rem/1.6 var(--font-sans);
+  font-weight: 400;
 }
 
 .form-status.is-success {
