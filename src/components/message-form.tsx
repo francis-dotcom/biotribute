@@ -58,6 +58,8 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
           options: {
             sitekey: string;
             appearance?: "always" | "execute" | "interaction-only";
+            size?: "normal" | "compact" | "flexible";
+            theme?: "light" | "dark" | "auto";
             callback?: (token: string) => void;
             "expired-callback"?: () => void;
             "error-callback"?: () => void;
@@ -78,6 +80,9 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
       turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
         sitekey: turnstileSiteKey,
+        appearance: "always",
+        size: "normal",
+        theme: "auto",
         callback: (token: string) => setTurnstileToken(token),
         "expired-callback": () => setTurnstileToken(""),
         "error-callback": () => setTurnstileToken(""),
@@ -335,7 +340,11 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
               {turnstileSiteKey ? (
                 <div className="field-block">
                   <span>Bot verification</span>
-                  <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                  <div
+                    ref={turnstileContainerRef}
+                    className="turnstile-mount"
+                    aria-label="Cloudflare verification"
+                  />
                   {!turnstileToken.trim() ? (
                     <p className="form-status-inline is-waiting" role="status">
                       {turnstileGreenWaitingNotice}

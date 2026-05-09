@@ -1678,6 +1678,13 @@ textarea {
   color: #155239;
 }
 
+/* Explicit turnstile.render() — do not combine with .cf-turnstile; reserve space for iframe */
+.turnstile-mount {
+  min-height: 70px;
+  min-width: 300px;
+  max-width: 100%;
+}
+
 .admin-shell {
   margin-bottom: 18px;
 }
