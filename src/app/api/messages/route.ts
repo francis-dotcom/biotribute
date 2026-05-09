@@ -63,11 +63,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unable to submit message.",
-      },
-      { status: 500 }
-    );
+    console.error("Failed to submit tribute message.", error);
+    return NextResponse.json({ error: "Unable to submit message." }, { status: 500 });
   }
 }

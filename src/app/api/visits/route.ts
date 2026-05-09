@@ -49,9 +49,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid visit payload." }, { status: 400 });
     }
 
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unable to record visit." },
-      { status: 500 },
-    );
+    console.error("Failed to record tribute visit.", error);
+    return NextResponse.json({ error: "Unable to record visit." }, { status: 500 });
   }
 }

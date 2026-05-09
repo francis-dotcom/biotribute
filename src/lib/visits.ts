@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { getVisitHashSecret } from "@/lib/env";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase-admin";
 
 export type TributeVisitStats = {
@@ -24,16 +25,6 @@ export type TributeVisitSessionDetail = {
   estimatedDurationSeconds: number;
   heartbeatCount: number;
 };
-
-function getVisitHashSecret() {
-  return (
-    process.env.VISITOR_HASH_SECRET?.trim() ||
-    process.env.BIOTRIBUTE_ADMIN_PASSWORD?.trim() ||
-    process.env.BIOTRIBUTE_ADMIN_TOKEN?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    "biotribute-visitor-hash"
-  );
-}
 
 function hashValue(value: string) {
   return createHmac("sha256", getVisitHashSecret()).update(value).digest("hex");

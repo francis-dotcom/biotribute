@@ -611,6 +611,7 @@ export function TributeBuilderForm({
               <option value="ivory">Ivory Memorial</option>
               <option value="sage">Sage Garden</option>
               <option value="sky">Quiet Sky</option>
+              <option value="amethyst">Cool Amethyst</option>
             </select>
           </label>
         </article>

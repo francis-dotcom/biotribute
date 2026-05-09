@@ -4,6 +4,7 @@ import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
+import { TRIBUTE_THEME_IDS } from "@/data/tributes";
 import { saveTributeRecord, updateTributeTheme } from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
@@ -31,7 +32,7 @@ const fullTributeSchema = z.object({
   years: z.string().trim().min(1),
   tagline: z.string().trim().min(1),
   organizer: z.string().trim().min(1),
-  theme: z.enum(["ivory", "sage", "sky"]),
+  theme: z.enum(TRIBUTE_THEME_IDS),
   heroImageUrl: z.string().trim().optional(),
   backgroundImageUrl: z.string().trim().optional(),
   galleryIntro: z.string().trim().optional(),
@@ -66,7 +67,7 @@ const fullTributeSchema = z.object({
 
 const themeOnlySchema = z.object({
   slug: z.string().trim().min(1),
-  theme: z.enum(["ivory", "sage", "sky"]),
+  theme: z.enum(TRIBUTE_THEME_IDS),
 });
 
 export async function POST(request: Request) {
@@ -129,11 +130,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: error.message }, { status: 409 });
     }
 
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unable to save tribute.",
-      },
-      { status: 500 }
-    );
+    console.error("Failed to save tribute.", error);
+    return NextResponse.json({ error: "Unable to save tribute." }, { status: 500 });
   }
 }

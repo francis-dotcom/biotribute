@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import type { TributeMessage, TributeMessagePlacement } from "@/data/tributes";
 import { verifyTurnstileToken } from "@/lib/bot-protection";
+import { getSiteUrl } from "@/lib/env";
 
 export type StoredMessageStatus =
   | "pending_unverified"
@@ -82,25 +83,6 @@ function getSupabaseAdmin() {
       persistSession: false,
     },
   });
-}
-
-function getSiteUrl() {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) {
-    return explicit.replace(/\/$/, "");
-  }
-
-  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (productionHost) {
-    return `https://${productionHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
-  }
-
-  const vercelHost = process.env.VERCEL_URL?.trim();
-  if (vercelHost) {
-    return `https://${vercelHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
-  }
-
-  return "";
 }
 
 function getVerificationEmailConfig() {

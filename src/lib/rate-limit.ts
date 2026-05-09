@@ -1,4 +1,5 @@
 import { createHmac } from "node:crypto";
+import { getRateLimitHashSecret } from "@/lib/env";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type RateLimitBucket = {
@@ -14,18 +15,8 @@ type RateLimitResult = {
 
 const buckets = new Map<string, RateLimitBucket>();
 
-function getHashSecret() {
-  return (
-    process.env.RATE_LIMIT_HASH_SECRET?.trim() ||
-    process.env.BIOTRIBUTE_ADMIN_PASSWORD?.trim() ||
-    process.env.BIOTRIBUTE_ADMIN_TOKEN?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    "biotribute-rate-limit"
-  );
-}
-
 function hashKey(key: string) {
-  return createHmac("sha256", getHashSecret()).update(key).digest("hex");
+  return createHmac("sha256", getRateLimitHashSecret()).update(key).digest("hex");
 }
 
 export function getClientIp(request: Request) {

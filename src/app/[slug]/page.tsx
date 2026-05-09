@@ -15,6 +15,7 @@ import { TributeCardModal } from "@/components/tribute-card-modal";
 import { TributeMediaSection } from "@/components/tribute-media-section";
 import { TributeVisitTracker } from "@/components/tribute-visit-tracker";
 import { getTributeThemePreset } from "@/data/tributes";
+import { getFamilyContactEmail } from "@/lib/env";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
 import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
 import { getTributeRecord, resolveCanonicalTributeSlug } from "@/lib/tributes-store";
@@ -70,7 +71,7 @@ export default async function TributePage({ params }: PageProps) {
 
   const approvedMessages = await getApprovedMessages(tribute.slug);
   const visibleMessages = approvedMessages.length > 0 ? approvedMessages : tribute.messages;
-  const familyEmail = tribute.contactEmail || process.env.NEXT_PUBLIC_FAMILY_EMAIL || "";
+  const familyEmail = tribute.contactEmail || getFamilyContactEmail();
   const storeConfigured = isMessageStoreConfigured();
   const familyMessageStoreConfigured = isFamilyPrivateMessageStoreConfigured();
   const themePreset = getTributeThemePreset(tribute.theme);

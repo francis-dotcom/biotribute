@@ -31,7 +31,9 @@ export type TributeGalleryItem = {
   imageUrl: string;
 };
 
-export type TributeTheme = "ivory" | "sage" | "sky";
+/** Theme tokens stored on each tribute row; palettes live in tributeThemePresets. */
+export const TRIBUTE_THEME_IDS = ["ivory", "sage", "sky", "amethyst"] as const;
+export type TributeTheme = (typeof TRIBUTE_THEME_IDS)[number];
 export type TributeLivestreamDisplayMode = "video" | "image-url" | "uploaded-image";
 
 export type TributeThemePreset = {
@@ -270,6 +272,28 @@ export const tributeThemePresets: TributeThemePreset[] = [
       "--gold-soft": "#e6eef7",
       "--violet-soft": "#eef3f8",
       "--violet-deep": "#59718e",
+    },
+  },
+  {
+    id: "amethyst",
+    name: "Cool Amethyst",
+    description:
+      "Cool lavender and dusty plum tones with icy highlights for a modern purple memorial palette.",
+    variables: {
+      "--bg": "#f4f2fa",
+      "--bg-2": "#eae6f5",
+      "--panel": "rgba(255, 255, 255, 0.88)",
+      "--panel-solid": "#faf9ff",
+      "--text": "#211c2e",
+      "--muted": "#635b78",
+      "--muted-2": "#473d5c",
+      "--muted-3": "#766d8f",
+      "--line": "#dad4e8",
+      "--gold": "#9d8dcb",
+      "--gold-deep": "#6e5fa3",
+      "--gold-soft": "#ebe6f9",
+      "--violet-soft": "#e2dcf5",
+      "--violet-deep": "#45306a",
     },
   },
 ];

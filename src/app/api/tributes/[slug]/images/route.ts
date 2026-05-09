@@ -295,12 +295,8 @@ export async function POST(
       uploads,
     });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unable to upload image.",
-      },
-      { status: 500 }
-    );
+    console.error("Failed to upload tribute image.", error);
+    return NextResponse.json({ error: "Unable to upload image." }, { status: 500 });
   }
 }
 
@@ -374,12 +370,8 @@ export async function PATCH(
     revalidateTributePaths(slug);
     return NextResponse.json({ message: "Gallery order updated." });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unable to reorder gallery images.",
-      },
-      { status: 500 }
-    );
+    console.error("Failed to reorder tribute gallery images.", error);
+    return NextResponse.json({ error: "Unable to reorder gallery images." }, { status: 500 });
   }
 }
 
@@ -509,11 +501,7 @@ export async function DELETE(
     revalidateTributePaths(slug);
     return NextResponse.json({ message: "Gallery image removed." });
   } catch (error) {
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unable to delete image.",
-      },
-      { status: 500 }
-    );
+    console.error("Failed to delete tribute image.", error);
+    return NextResponse.json({ error: "Unable to delete image." }, { status: 500 });
   }
 }

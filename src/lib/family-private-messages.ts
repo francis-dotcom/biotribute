@@ -1,4 +1,5 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { getFamilyMessageVerificationSecret, getSiteUrl } from "@/lib/env";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase-admin";
 
 export type CreateFamilyPrivateMessageInput = {
@@ -80,32 +81,8 @@ export async function getFamilyPrivateMessagesForAdmin(tributeSlug: string) {
   return data as StoredFamilyPrivateMessageRow[];
 }
 
-function getSiteUrl() {
-  const explicit = process.env.NEXT_PUBLIC_SITE_URL?.trim();
-  if (explicit) {
-    return explicit.replace(/\/$/, "");
-  }
-
-  const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim();
-  if (productionHost) {
-    return `https://${productionHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
-  }
-
-  const vercelHost = process.env.VERCEL_URL?.trim();
-  if (vercelHost) {
-    return `https://${vercelHost.replace(/^https?:\/\//, "").replace(/\/$/, "")}`;
-  }
-
-  return "";
-}
-
 function getVerificationSecret() {
-  return (
-    process.env.FAMILY_MESSAGE_VERIFICATION_SECRET?.trim() ||
-    process.env.BIOTRIBUTE_ADMIN_TOKEN?.trim() ||
-    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
-    ""
-  );
+  return getFamilyMessageVerificationSecret();
 }
 
 function createVerificationToken(payload: FamilyMessageVerificationPayload) {

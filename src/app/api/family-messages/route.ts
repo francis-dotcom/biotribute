@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createPendingFamilyPrivateMessage } from "@/lib/family-private-messages";
 import { verifyTurnstileToken } from "@/lib/bot-protection";
+import { getFamilyContactEmail } from "@/lib/env";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { getTributeRecord } from "@/lib/tributes-store";
 
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
     const json = await request.json();
     const payload = requestSchema.parse(json);
     const tribute = await getTributeRecord(payload.tributeSlug);
-    const recipientEmail = tribute?.contactEmail?.trim() || process.env.NEXT_PUBLIC_FAMILY_EMAIL?.trim() || "";
+    const recipientEmail = tribute?.contactEmail?.trim() || getFamilyContactEmail();
 
     if (!recipientEmail) {
       return NextResponse.json(
@@ -90,11 +91,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Unable to send private family message.",
-      },
-      { status: 500 },
-    );
+    console.error("Failed to submit private family message.", error);
+    return NextResponse.json({ error: "Unable to send private family message." }, { status: 500 });
   }
 }
