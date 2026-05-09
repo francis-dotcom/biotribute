@@ -1,7 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { TributeRecord, TributeThemePreset } from "@/data/tributes";
+import {
+  themeAccentGhostButtonStyle,
+  themeAccentSelectedButtonStyle,
+  themeCardBodyStyle,
+  themeCardChromeStyle,
+  themeCardHeadingStyle,
+  themePreviewBackdropStyle,
+} from "@/lib/theme-card-styles";
 
 type ThemeConsoleFormProps = {
   tribute: TributeRecord;
@@ -37,6 +45,10 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
     }
   }
 
+  const selectedVariables = useMemo(() => {
+    return presets.find((preset) => preset.id === selectedTheme)?.variables ?? presets[0]?.variables ?? {};
+  }, [presets, selectedTheme]);
+
   return (
     <section className="dashboard-section" id="theme">
       <article className="form-card">
@@ -51,11 +63,17 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
 
       <section className="theme-grid">
         {presets.map((theme) => (
-          <article className="theme-card" key={theme.id}>
+          <article
+            className="theme-card"
+            key={theme.id}
+            style={themeCardChromeStyle(theme.variables)}
+          >
             <div
               className={`theme-preview${theme.id === selectedTheme ? " is-active" : ""}`}
               style={{
-                background: `linear-gradient(180deg, ${theme.variables["--bg"]} 0%, ${theme.variables["--bg-2"]} 100%)`,
+                ...themePreviewBackdropStyle(theme.variables),
+                borderWidth: 1,
+                borderStyle: "solid",
               }}
             >
               <div
@@ -63,16 +81,26 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
                 style={{
                   background: theme.variables["--panel-solid"],
                   borderColor: theme.variables["--line"],
+                  boxShadow:
+                    /^#[0-9a-fA-F]{6}$/i.test(theme.variables["--gold"] ?? "")
+                      ? `0 0 0 1px ${theme.variables["--gold"]}38`
+                      : undefined,
                 }}
               >
                 <div
                   className="theme-preview-dot"
-                  style={{ background: theme.variables["--gold"] }}
+                  style={{
+                    background: theme.variables["--gold"],
+                    boxShadow:
+                      /^#[0-9a-fA-F]{6}$/i.test(theme.variables["--gold-deep"] ?? "")
+                        ? `0 0 0 2px ${theme.variables["--panel-solid"]}, 0 0 14px ${theme.variables["--gold-deep"]}44`
+                        : `0 0 0 2px ${theme.variables["--panel-solid"]}`,
+                  }}
                 />
                 <div className="theme-preview-lines">
                   <span style={{ background: theme.variables["--text"] }} />
                   <span style={{ background: theme.variables["--muted"] }} />
-                  <span style={{ background: theme.variables["--gold-soft"] }} />
+                  <span style={{ background: theme.variables["--gold"] }} />
                 </div>
               </div>
             </div>
@@ -80,11 +108,16 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
             <p className="card-label">
               {theme.id === tribute.theme ? "Current Theme" : "Theme Option"}
             </p>
-            <h3>{theme.name}</h3>
-            <p>{theme.description}</p>
+            <h3 style={themeCardHeadingStyle(theme.variables)}>{theme.name}</h3>
+            <p style={themeCardBodyStyle(theme.variables)}>{theme.description}</p>
             <button
-              className={theme.id === selectedTheme ? "button-primary" : "button-secondary"}
+              className={`theme-picker-swatch-btn${theme.id === selectedTheme ? " is-selected" : ""}`}
               type="button"
+              style={
+                theme.id === selectedTheme
+                  ? themeAccentSelectedButtonStyle(theme.variables)
+                  : themeAccentGhostButtonStyle(theme.variables)
+              }
               onClick={() => {
                 setSelectedTheme(theme.id);
                 setStatus(null);
@@ -97,7 +130,13 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
       </section>
 
       <div className="builder-actions">
-        <button className="button-primary" type="button" onClick={applyTheme} disabled={pending}>
+        <button
+          className="theme-save-accent-btn theme-save-theme-btn-base"
+          type="button"
+          style={themeAccentSelectedButtonStyle(selectedVariables)}
+          onClick={applyTheme}
+          disabled={pending}
+        >
           {pending ? "Saving Theme..." : "Save Theme"}
         </button>
       </div>

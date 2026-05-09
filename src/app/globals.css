@@ -2207,12 +2207,48 @@ textarea {
   width: 38%;
 }
 
-.theme-grid .button-primary,
-.theme-grid .button-secondary {
+.theme-grid .theme-picker-swatch-btn {
   width: 100%;
   min-height: 38px;
   padding: 7px 10px;
   font-size: 0.82rem;
+  font-weight: 600;
+  font-family: var(--font-sans);
+  border-radius: 999px;
+  border-style: solid;
+  border-width: 1px;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    filter 140ms ease;
+}
+
+.theme-grid .theme-picker-swatch-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.theme-grid .theme-picker-swatch-btn:active {
+  transform: translateY(0);
+}
+
+.theme-save-theme-btn-base {
+  border-radius: 999px;
+  border-style: solid;
+  border-width: 1px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.theme-save-accent-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.theme-save-accent-btn:disabled:hover {
+  transform: none;
 }
 
 .theme-grid .theme-card > .card-label {

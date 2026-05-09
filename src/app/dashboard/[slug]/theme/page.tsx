@@ -3,6 +3,12 @@ import {
   getTributeThemePreset,
   tributeThemePresets,
 } from "@/data/tributes";
+import {
+  themeCardBodyStyle,
+  themeCardChromeStyle,
+  themeCardHeadingStyle,
+  themePreviewBackdropStyle,
+} from "@/lib/theme-card-styles";
 import { requireAdminSession } from "@/lib/admin";
 import { getTributeRecord } from "@/lib/tributes-store";
 
@@ -37,11 +43,17 @@ export default async function TributeThemePage({
 
       <section className="theme-grid">
         {tributeThemePresets.map((theme) => (
-          <article className="theme-card" key={theme.id}>
+          <article
+            className="theme-card"
+            key={theme.id}
+            style={themeCardChromeStyle(theme.variables)}
+          >
             <div
               className={`theme-preview${theme.id === activeTheme.id ? " is-active" : ""}`}
               style={{
-                background: `linear-gradient(180deg, ${theme.variables["--bg"]} 0%, ${theme.variables["--bg-2"]} 100%)`,
+                ...themePreviewBackdropStyle(theme.variables),
+                borderWidth: 1,
+                borderStyle: "solid",
               }}
             >
               <div
@@ -49,16 +61,26 @@ export default async function TributeThemePage({
                 style={{
                   background: theme.variables["--panel-solid"],
                   borderColor: theme.variables["--line"],
+                  boxShadow:
+                    /^#[0-9a-fA-F]{6}$/i.test(theme.variables["--gold"] ?? "")
+                      ? `0 0 0 1px ${theme.variables["--gold"]}38`
+                      : undefined,
                 }}
               >
                 <div
                   className="theme-preview-dot"
-                  style={{ background: theme.variables["--gold"] }}
+                  style={{
+                    background: theme.variables["--gold"],
+                    boxShadow:
+                      /^#[0-9a-fA-F]{6}$/i.test(theme.variables["--gold-deep"] ?? "")
+                        ? `0 0 0 2px ${theme.variables["--panel-solid"]}, 0 0 14px ${theme.variables["--gold-deep"]}44`
+                        : `0 0 0 2px ${theme.variables["--panel-solid"]}`,
+                  }}
                 />
                 <div className="theme-preview-lines">
                   <span style={{ background: theme.variables["--text"] }} />
                   <span style={{ background: theme.variables["--muted"] }} />
-                  <span style={{ background: theme.variables["--gold-soft"] }} />
+                  <span style={{ background: theme.variables["--gold"] }} />
                 </div>
               </div>
             </div>
@@ -66,8 +88,8 @@ export default async function TributeThemePage({
             <p className="card-label">
               {theme.id === activeTheme.id ? "Current Theme" : "Theme Option"}
             </p>
-            <h3>{theme.name}</h3>
-            <p>{theme.description}</p>
+            <h3 style={themeCardHeadingStyle(theme.variables)}>{theme.name}</h3>
+            <p style={themeCardBodyStyle(theme.variables)}>{theme.description}</p>
             {theme.id === activeTheme.id ? (
               <div className="dashboard-info-banner">This tribute currently uses this theme.</div>
             ) : (
