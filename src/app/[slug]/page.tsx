@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import type { CSSProperties } from "react";
 import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
 import { DonationDetailsModal } from "@/components/donation-details-modal";
@@ -14,7 +13,8 @@ import { TributeActionBar } from "@/components/tribute-action-bar";
 import { TributeCardModal } from "@/components/tribute-card-modal";
 import { TributeMediaSection } from "@/components/tribute-media-section";
 import { TributeVisitTracker } from "@/components/tribute-visit-tracker";
-import { getTributeThemePreset } from "@/data/tributes";
+import { TributePageThemeMain } from "@/components/tribute-page-theme-main";
+import { getActiveThemeFromRotation } from "@/lib/tribute-theme-rotation";
 import { getFamilyContactEmail } from "@/lib/env";
 import { getApprovedMessages, isMessageStoreConfigured } from "@/lib/messages";
 import { isFamilyPrivateMessageStoreConfigured } from "@/lib/family-private-messages";
@@ -74,24 +74,28 @@ export default async function TributePage({ params }: PageProps) {
   const familyEmail = tribute.contactEmail || getFamilyContactEmail();
   const storeConfigured = isMessageStoreConfigured();
   const familyMessageStoreConfigured = isFamilyPrivateMessageStoreConfigured();
-  const themePreset = getTributeThemePreset(tribute.theme);
   const galleryLoop =
     tribute.galleryImages.length > 0
       ? [...tribute.galleryImages, ...tribute.galleryImages]
       : [];
-  const pageStyle = {
-    ...themePreset.variables,
-    "--tribute-hero-image": tribute.heroImageUrl ? `url("${tribute.heroImageUrl}")` : "none",
-    "--tribute-background-image": tribute.backgroundImageUrl
-      ? `url("${tribute.backgroundImageUrl}")`
-      : tribute.heroImageUrl
-        ? `url("${tribute.heroImageUrl}")`
-        : "none",
-  } as CSSProperties;
+  const initialActiveTheme = getActiveThemeFromRotation(
+    tribute.theme,
+    Boolean(tribute.themeRotationEnabled),
+    tribute.themeRotationIntervalMinutes ?? 1440,
+    tribute.themeRotationThemeIds ?? [],
+  );
   const supportNoteText = tribute.supportNote?.trim();
 
   return (
-    <main className="page-shell tribute-page-shell" style={pageStyle}>
+    <TributePageThemeMain
+      baseThemeId={tribute.theme}
+      initialActiveThemeId={initialActiveTheme}
+      rotationEnabled={Boolean(tribute.themeRotationEnabled)}
+      rotationIntervalMinutes={tribute.themeRotationIntervalMinutes ?? 1440}
+      rotationThemeIds={tribute.themeRotationThemeIds ?? []}
+      heroImageUrl={tribute.heroImageUrl}
+      backgroundImageUrl={tribute.backgroundImageUrl}
+    >
       <TributeVisitTracker tributeSlug={tribute.slug} />
       <MessagePromptToast tributeSlug={tribute.slug} />
       <div className="tribute-page">
@@ -337,6 +341,6 @@ export default async function TributePage({ params }: PageProps) {
           </div>
         </footer>
       </div>
-    </main>
+    </TributePageThemeMain>
   );
 }

@@ -5,7 +5,7 @@ import { isAdminAuthenticated } from "@/lib/admin";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
 import { TRIBUTE_THEME_IDS } from "@/data/tributes";
-import { saveTributeRecord, updateTributeTheme } from "@/lib/tributes-store";
+import { saveTributeRecord, updateTributeTheme, updateTributeThemeConsole } from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
   year: z.string().trim(),
@@ -60,10 +60,27 @@ const fullTributeSchema = z.object({
   showGallerySection: z.boolean().optional(),
   showVideoSection: z.boolean().optional(),
   showLivestreamSection: z.boolean().optional(),
+  themeRotationEnabled: z.boolean().optional(),
+  themeRotationIntervalMinutes: z.number().int().min(1).max(10080).optional(),
+  themeRotationThemeIds: z.array(z.enum(TRIBUTE_THEME_IDS)).optional(),
   timeline: z.array(timelineSchema),
   contributors: z.array(contributorSchema),
   supportAmounts: z.array(supportAmountSchema),
 });
+
+const themeConsoleSchema = z
+  .object({
+    slug: z.string().trim().min(1),
+    theme: z.enum(TRIBUTE_THEME_IDS),
+    themeRotationEnabled: z.boolean(),
+    themeRotationIntervalMinutes: z.number().int().min(1).max(10080),
+    themeRotationThemeIds: z.array(z.enum(TRIBUTE_THEME_IDS)),
+  })
+  .refine(
+    (data) =>
+      !data.themeRotationEnabled || data.themeRotationThemeIds.filter(Boolean).length >= 2,
+    { message: "Pick at least two themes for rotation." },
+  );
 
 const themeOnlySchema = z.object({
   slug: z.string().trim().min(1),
@@ -106,6 +123,22 @@ export async function POST(request: Request) {
       revalidatePath(`/console/${payload.slug}`);
       revalidatePath(`/dashboard/${payload.slug}`);
       return NextResponse.json({ message: "Tribute saved to Supabase." });
+    }
+
+    const themeConsoleResult = themeConsoleSchema.safeParse(json);
+    if (themeConsoleResult.success) {
+      const payload = themeConsoleResult.data;
+      await updateTributeThemeConsole({
+        slug: payload.slug,
+        theme: payload.theme,
+        themeRotationEnabled: payload.themeRotationEnabled,
+        themeRotationIntervalMinutes: payload.themeRotationIntervalMinutes,
+        themeRotationThemeIds: payload.themeRotationThemeIds,
+      });
+      revalidatePath(`/${payload.slug}`);
+      revalidatePath(`/console/${payload.slug}`);
+      revalidatePath(`/dashboard/${payload.slug}`);
+      return NextResponse.json({ message: "Theme saved to Supabase." });
     }
 
     const themeOnlyResult = themeOnlySchema.safeParse(json);

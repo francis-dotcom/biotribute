@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { NOTICE_TOAST_AUTO_DISMISS_MS } from "@/components/notice-toast";
 
 type TributeCardModalProps = {
   recipientEmail?: string;
@@ -35,7 +36,7 @@ export function TributeCardModal({
       return;
     }
 
-    const timeout = window.setTimeout(() => setToast(null), 4500);
+    const timeout = window.setTimeout(() => setToast(null), NOTICE_TOAST_AUTO_DISMISS_MS);
     return () => window.clearTimeout(timeout);
   }, [toast]);
 

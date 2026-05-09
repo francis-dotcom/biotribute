@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 
+/** Shared auto-dismiss duration for all `notice-toast` usage across the app. */
+export const NOTICE_TOAST_AUTO_DISMISS_MS = 7000;
+
 type NoticeToastProps = {
   message?: string;
   tone?: "success" | "error";
@@ -12,13 +15,19 @@ export function NoticeToast({ message, tone = "success" }: NoticeToastProps) {
   const isOpen = Boolean(message) && message !== dismissedMessage;
 
   useEffect(() => {
+    if (!message) {
+      setDismissedMessage(null);
+    }
+  }, [message]);
+
+  useEffect(() => {
     if (!message || !isOpen) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       setDismissedMessage(message);
-    }, 4200);
+    }, NOTICE_TOAST_AUTO_DISMISS_MS);
 
     return () => {
       window.clearTimeout(timeoutId);

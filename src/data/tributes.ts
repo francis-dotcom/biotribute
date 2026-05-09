@@ -96,6 +96,10 @@ export type TributeRecord = {
   donationBankName?: string;
   donationPhone?: string;
   supportNote?: string;
+  /** When true, public page cycles through `themeRotationThemeIds` on an interval. Stored in support-note metadata. */
+  themeRotationEnabled?: boolean;
+  themeRotationIntervalMinutes?: number;
+  themeRotationThemeIds?: TributeTheme[];
 };
 
 export const tributes: TributeRecord[] = [

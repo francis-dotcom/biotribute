@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { TributeRecord, TributeThemePreset } from "@/data/tributes";
+import type { TributeRecord, TributeTheme, TributeThemePreset } from "@/data/tributes";
+import { normalizeRotationThemeIds } from "@/lib/tribute-theme-rotation";
 import {
   themeAccentGhostButtonStyle,
   themeAccentSelectedButtonStyle,
@@ -16,12 +17,39 @@ type ThemeConsoleFormProps = {
   presets: TributeThemePreset[];
 };
 
+function defaultRotationPool(
+  tribute: TributeRecord,
+  presets: TributeThemePreset[],
+): TributeTheme[] {
+  const stored = tribute.themeRotationThemeIds ?? [];
+  if (stored.length >= 2) {
+    return normalizeRotationThemeIds(stored);
+  }
+  const other = presets.find((p) => p.id !== tribute.theme)?.id;
+  return normalizeRotationThemeIds(other ? [tribute.theme, other] : [tribute.theme]);
+}
+
 export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
   const [selectedTheme, setSelectedTheme] = useState(tribute.theme);
+  const [rotationEnabled, setRotationEnabled] = useState(
+    tribute.themeRotationEnabled ?? false,
+  );
+  const [intervalMinutes, setIntervalMinutes] = useState(
+    tribute.themeRotationIntervalMinutes ?? 1440,
+  );
+  const [rotationIds, setRotationIds] = useState<TributeTheme[]>(() =>
+    defaultRotationPool(tribute, presets),
+  );
   const [pending, setPending] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
 
   async function applyTheme() {
+    const pool = normalizeRotationThemeIds(rotationIds);
+    if (rotationEnabled && pool.length < 2) {
+      setStatus("Choose at least two themes for rotation, or turn rotation off.");
+      return;
+    }
+
     setPending(true);
     setStatus(null);
 
@@ -33,21 +61,47 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
       body: JSON.stringify({
         slug: tribute.slug,
         theme: selectedTheme,
+        themeRotationEnabled: rotationEnabled,
+        themeRotationIntervalMinutes: Math.max(1, Math.min(10080, Math.round(intervalMinutes))),
+        themeRotationThemeIds: pool,
       }),
     });
 
     const data = (await response.json()) as { error?: string; message?: string };
     setPending(false);
-    setStatus(data.message ?? data.error ?? "Unable to save theme.");
 
-    if (response.ok) {
-      window.location.reload();
+    if (!response.ok) {
+      setStatus(data.error ?? data.message ?? "Unable to save theme.");
+      return;
     }
+
+    setStatus(data.message ?? "Saved.");
+    window.location.reload();
+  }
+
+  function toggleRotationTheme(id: TributeTheme) {
+    setRotationIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter((x) => x !== id);
+      }
+      return [...prev, id];
+    });
   }
 
   const selectedVariables = useMemo(() => {
     return presets.find((preset) => preset.id === selectedTheme)?.variables ?? presets[0]?.variables ?? {};
   }, [presets, selectedTheme]);
+
+  const intervalPreset = (minutes: number) => (
+    <button
+      key={minutes}
+      className="theme-rotation-preset-btn"
+      type="button"
+      onClick={() => setIntervalMinutes(minutes)}
+    >
+      {minutes < 60 ? `${minutes} min` : minutes < 1440 ? `${minutes / 60} hr` : "24 hr"}
+    </button>
+  );
 
   return (
     <section className="dashboard-section" id="theme">
@@ -55,8 +109,8 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
         <p className="card-label">Theme</p>
         <h2>Visual preference</h2>
         <p className="subtle-note">
-          Choose the memorial palette that best reflects the family&apos;s preference ({presets.length}{" "}
-          options). Cards are compact; scroll if needed on small screens. Your content stays when you switch themes.
+          Choose the memorial palette ({presets.length} options). Your content stays when you switch
+          themes.
         </p>
         {status ? <p className="form-status">{status}</p> : null}
       </article>
@@ -128,6 +182,72 @@ export function ThemeConsoleForm({ tribute, presets }: ThemeConsoleFormProps) {
           </article>
         ))}
       </section>
+
+      <article className="form-card theme-rotation-card">
+        <p className="card-label">Timed rotation</p>
+        <h3>Public page theme schedule</h3>
+        <p className="subtle-note">
+          Optionally cycle through several palettes on the live memorial page. Visitors all see the
+          same theme at the same moment (shared clock). The “Saved theme” above is still stored as
+          the default when rotation is off.
+        </p>
+
+        <label className="checkbox-row">
+          <input
+            type="checkbox"
+            checked={rotationEnabled}
+            onChange={(e) => {
+              setRotationEnabled(e.target.checked);
+              setStatus(null);
+            }}
+          />
+          <span>Rotate themes automatically</span>
+        </label>
+
+        {rotationEnabled ? (
+          <div className="theme-rotation-fields">
+            <div className="form-field">
+              <label htmlFor="theme-rotation-interval">Interval (minutes)</label>
+              <input
+                id="theme-rotation-interval"
+                type="number"
+                min={1}
+                max={10080}
+                step={1}
+                value={intervalMinutes}
+                onChange={(e) => setIntervalMinutes(Number(e.target.value) || 1)}
+              />
+              <p className="subtle-note theme-rotation-presets">
+                Quick: {[5, 15, 60, 1440].map((m) => intervalPreset(m))}
+              </p>
+            </div>
+
+            <div className="form-field">
+              <p className="card-label">Themes in rotation (pick at least two)</p>
+              <ul className="theme-rotation-checklist">
+                {presets.map((p) => {
+                  const checked = rotationIds.includes(p.id);
+                  return (
+                    <li key={p.id}>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleRotationTheme(p.id)}
+                        />
+                        <span>{p.name}</span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+              <p className="subtle-note">
+                Order follows the order you check themes (re-check to move to end).
+              </p>
+            </div>
+          </div>
+        ) : null}
+      </article>
 
       <div className="builder-actions">
         <button

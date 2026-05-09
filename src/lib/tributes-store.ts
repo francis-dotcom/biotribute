@@ -9,6 +9,7 @@ import {
   type TributeTheme,
   type TributeTimelineEntry,
 } from "@/data/tributes";
+import { normalizeRotationThemeIds } from "@/lib/tribute-theme-rotation";
 import { getSupabaseAdmin, isSupabaseConfigured } from "@/lib/supabase-admin";
 
 type TributeRow = {
@@ -97,6 +98,9 @@ export type TributeBuilderInput = {
   donationAccountNumber?: string;
   donationBankName?: string;
   donationPhone?: string;
+  themeRotationEnabled?: boolean;
+  themeRotationIntervalMinutes?: number;
+  themeRotationThemeIds?: TributeTheme[];
 };
 
 export function isTributeStoreConfigured() {
@@ -210,6 +214,9 @@ type SupportNoteMetadata = {
   donationAccountNumber?: string;
   donationBankName?: string;
   donationPhone?: string;
+  themeRotationEnabled?: boolean;
+  themeRotationIntervalMinutes?: number;
+  themeRotationThemeIds?: TributeTheme[];
 };
 
 const VISIBILITY_MARKER = "<!--biotribute:visibility:";
@@ -323,6 +330,16 @@ function parseSupportNoteMetadata(value: string | null) {
         typeof parsed.donationPhone === "string"
           ? parsed.donationPhone.trim() || undefined
           : undefined,
+      themeRotationEnabled:
+        typeof parsed.themeRotationEnabled === "boolean" ? parsed.themeRotationEnabled : undefined,
+      themeRotationIntervalMinutes:
+        typeof parsed.themeRotationIntervalMinutes === "number" &&
+        Number.isFinite(parsed.themeRotationIntervalMinutes)
+          ? Math.max(1, Math.min(10080, Math.round(parsed.themeRotationIntervalMinutes)))
+          : undefined,
+      themeRotationThemeIds: Array.isArray(parsed.themeRotationThemeIds)
+        ? normalizeRotationThemeIds(parsed.themeRotationThemeIds as string[])
+        : undefined,
     };
   } catch {
     return null;
@@ -496,6 +513,9 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
       supportNoteMetadata?.donationBankName ?? fallback?.donationBankName,
     donationPhone:
       supportNoteMetadata?.donationPhone ?? fallback?.donationPhone,
+    themeRotationEnabled: supportNoteMetadata?.themeRotationEnabled ?? false,
+    themeRotationIntervalMinutes: supportNoteMetadata?.themeRotationIntervalMinutes ?? 1440,
+    themeRotationThemeIds: normalizeRotationThemeIds(supportNoteMetadata?.themeRotationThemeIds),
     supportNote:
       tributeRow.support_note === null
         ? fallback?.supportNote
@@ -528,6 +548,14 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     throw new Error("Tribute name already taken. Please choose a different name.");
   }
 
+  const { data: existingTribute } = await supabase
+    .from("tributes")
+    .select("support_note")
+    .eq("slug", input.slug)
+    .maybeSingle();
+
+  const existingMeta = parseSupportNoteMetadata(existingTribute?.support_note ?? null);
+
   const supportNoteMetadata: SupportNoteMetadata = {
     honorificTitle: input.honorificTitle?.trim() || undefined,
     positionTitle: input.positionTitle?.trim() || undefined,
@@ -553,6 +581,15 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     donationAccountNumber: input.donationAccountNumber?.trim() || undefined,
     donationBankName: input.donationBankName?.trim() || undefined,
     donationPhone: input.donationPhone?.trim() || undefined,
+    themeRotationEnabled:
+      input.themeRotationEnabled ?? existingMeta?.themeRotationEnabled ?? false,
+    themeRotationIntervalMinutes:
+      input.themeRotationIntervalMinutes ??
+      existingMeta?.themeRotationIntervalMinutes ??
+      1440,
+    themeRotationThemeIds: normalizeRotationThemeIds(
+      input.themeRotationThemeIds ?? existingMeta?.themeRotationThemeIds,
+    ),
   };
 
   const supportNoteWithVisibility = withVisibilityInSupportNote(input.supportNote, supportNoteMetadata);
@@ -672,6 +709,62 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
   }
 }
 
+export async function updateTributeThemeConsole(input: {
+  slug: string;
+  theme: TributeTheme;
+  themeRotationEnabled: boolean;
+  themeRotationIntervalMinutes: number;
+  themeRotationThemeIds: TributeTheme[];
+}) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    throw new Error("Tribute store is not configured.");
+  }
+
+  const { data: row, error: fetchError } = await supabase
+    .from("tributes")
+    .select("support_note")
+    .eq("slug", input.slug)
+    .maybeSingle();
+
+  if (fetchError) {
+    throw new Error(`Unable to save theme: ${fetchError.message || "unknown error"}`);
+  }
+
+  if (!row) {
+    throw new Error("Tribute not found.");
+  }
+
+  const existingMeta = parseSupportNoteMetadata(row.support_note ?? null);
+  const baseNote = stripVisibilityMarker(row.support_note);
+  const merged: SupportNoteMetadata = {
+    ...(existingMeta ?? {}),
+    themeRotationEnabled: input.themeRotationEnabled,
+    themeRotationIntervalMinutes: input.themeRotationIntervalMinutes,
+    themeRotationThemeIds: normalizeRotationThemeIds(input.themeRotationThemeIds),
+  };
+
+  const { data, error } = await supabase
+    .from("tributes")
+    .update({
+      theme: input.theme,
+      support_note: withVisibilityInSupportNote(baseNote, merged),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("slug", input.slug)
+    .select("slug")
+    .maybeSingle();
+
+  if (error) {
+    throw new Error(`Unable to save theme: ${error.message || "unknown error"}`);
+  }
+
+  if (!data?.slug) {
+    throw new Error("Tribute not found.");
+  }
+}
+
+/** Updates only the `theme` column; leaves support-note metadata (including rotation) unchanged. */
 export async function updateTributeTheme(input: { slug: string; theme: TributeTheme }) {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
