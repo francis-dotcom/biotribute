@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NOTICE_TOAST_AUTO_DISMISS_MS } from "@/components/notice-toast";
+import { turnstileNotReadyYetMessage, turnstileSubmitWaitingLabel } from "@/lib/turnstile-user-copy";
 
 type MessageFormProps = {
   tributeSlug: string;
@@ -143,8 +144,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
     };
 
     if (turnstileSiteKey && !payload.turnstileToken.trim()) {
-      const message = "Please complete bot verification before submitting.";
-      showToast(message, "error");
+      showToast(turnstileNotReadyYetMessage, "error");
       setPending(false);
       return;
     }
@@ -330,13 +330,26 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
               {turnstileSiteKey ? (
                 <div className="field-block">
-                  <span>Bot Verification</span>
+                  <span>Bot verification</span>
                   <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                  {!turnstileToken.trim() ? (
+                    <p className="subtle-note">
+                      Send stays disabled until verification finishes—it usually takes a few seconds.
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
-              <button className="button-primary" type="submit" disabled={pending}>
-                {pending ? "Submitting..." : "Submit Message"}
+              <button
+                className="button-primary"
+                type="submit"
+                disabled={pending || (Boolean(turnstileSiteKey) && !turnstileToken.trim())}
+              >
+                {pending
+                  ? "Submitting..."
+                  : turnstileSiteKey && !turnstileToken.trim()
+                    ? turnstileSubmitWaitingLabel
+                    : "Submit Message"}
               </button>
 
               <p className="subtle-note">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NOTICE_TOAST_AUTO_DISMISS_MS } from "@/components/notice-toast";
+import { turnstileNotReadyYetMessage, turnstileSubmitWaitingLabel } from "@/lib/turnstile-user-copy";
 
 type TributeCardModalProps = {
   recipientEmail?: string;
@@ -130,7 +131,7 @@ ${cardMessage}`,
 
     if (turnstileSiteKey && !payload.turnstileToken.trim()) {
       setToast({
-        message: "Please complete bot verification before sending your card.",
+        message: turnstileNotReadyYetMessage,
         tone: "error",
       });
       setPending(false);
@@ -255,13 +256,26 @@ ${cardMessage}`,
 
               {turnstileSiteKey ? (
                 <div className="field-block">
-                  <span>Bot Verification</span>
+                  <span>Bot verification</span>
                   <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                  {!turnstileToken.trim() ? (
+                    <p className="subtle-note">
+                      Send stays disabled until verification finishes—it usually takes a few seconds.
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
-              <button className="button-primary" type="submit" disabled={pending}>
-                {pending ? "Sending..." : "Send Card"}
+              <button
+                className="button-primary"
+                type="submit"
+                disabled={pending || (Boolean(turnstileSiteKey) && !turnstileToken.trim())}
+              >
+                {pending
+                  ? "Sending..."
+                  : turnstileSiteKey && !turnstileToken.trim()
+                    ? turnstileSubmitWaitingLabel
+                    : "Send Card"}
               </button>
             </form>
           </div>

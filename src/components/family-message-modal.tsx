@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { NOTICE_TOAST_AUTO_DISMISS_MS } from "@/components/notice-toast";
+import { turnstileNotReadyYetMessage, turnstileSubmitWaitingLabel } from "@/lib/turnstile-user-copy";
 
 type FamilyMessageModalProps = {
   recipientEmail?: string;
@@ -120,7 +121,7 @@ export function FamilyMessageModal({
 
     if (turnstileSiteKey && !payload.turnstileToken.trim()) {
       setToast({
-        message: "Please complete bot verification before sending your private message.",
+        message: turnstileNotReadyYetMessage,
         tone: "error",
       });
       setPending(false);
@@ -236,13 +237,26 @@ export function FamilyMessageModal({
 
               {turnstileSiteKey ? (
                 <div className="field-block">
-                  <span>Bot Verification</span>
+                  <span>Bot verification</span>
                   <div ref={turnstileContainerRef} className="cf-turnstile" data-sitekey={turnstileSiteKey} />
+                  {!turnstileToken.trim() ? (
+                    <p className="subtle-note">
+                      Send stays disabled until verification finishes—it usually takes a few seconds.
+                    </p>
+                  ) : null}
                 </div>
               ) : null}
 
-              <button className="button-primary" type="submit" disabled={pending}>
-                {pending ? "Sending..." : "Send Message"}
+              <button
+                className="button-primary"
+                type="submit"
+                disabled={pending || (Boolean(turnstileSiteKey) && !turnstileToken.trim())}
+              >
+                {pending
+                  ? "Sending..."
+                  : turnstileSiteKey && !turnstileToken.trim()
+                    ? turnstileSubmitWaitingLabel
+                    : "Send Message"}
               </button>
 
               {status ? <p className="form-status">{status}</p> : null}
