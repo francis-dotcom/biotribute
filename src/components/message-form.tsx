@@ -51,6 +51,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
           container: HTMLElement,
           options: {
             sitekey: string;
+            appearance?: "always" | "execute" | "interaction-only";
             callback?: (token: string) => void;
             "expired-callback"?: () => void;
             "error-callback"?: () => void;
@@ -71,6 +72,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
       turnstileWidgetIdRef.current = turnstile.render(turnstileContainerRef.current, {
         sitekey: turnstileSiteKey,
+        appearance: "interaction-only",
         callback: (token: string) => setTurnstileToken(token),
         "expired-callback": () => setTurnstileToken(""),
         "error-callback": () => setTurnstileToken(""),
