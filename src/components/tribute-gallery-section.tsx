@@ -25,6 +25,8 @@ export function TributeGallerySection({
   galleryNote,
 }: TributeGallerySectionProps) {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [isStripInteracting, setIsStripInteracting] = useState(false);
+  const stripRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
 
@@ -105,6 +107,19 @@ export function TributeGallerySection({
     });
   }
 
+  function scrollGallery(direction: "left" | "right") {
+    const strip = stripRef.current;
+    if (!strip) {
+      return;
+    }
+
+    const amount = Math.max(260, strip.clientWidth * 0.8);
+    strip.scrollBy({
+      left: direction === "right" ? amount : -amount,
+      behavior: "smooth",
+    });
+  }
+
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     const viewport = viewportRef.current;
     if (!viewport) {
@@ -173,23 +188,57 @@ export function TributeGallerySection({
         <div className="gallery-card gallery-card-full">
           <p>{galleryIntro?.trim()}</p>
           {galleryImages.length > 0 ? (
-            <div className="tribute-gallery-strip" role="list" aria-label="Photo gallery">
-              {galleryImages.map((image, index) => (
+            <>
+              <div className="messages-scroll-actions tribute-gallery-scroll-actions" role="group" aria-label="Scroll gallery images">
                 <button
-                  key={image.id}
-                  className="tribute-gallery-button tribute-gallery-strip-button"
+                  className="messages-scroll-button"
                   type="button"
-                  role="listitem"
-                  aria-label={`Open gallery image ${index + 1} of ${galleryImages.length}`}
-                  onClick={() => setActiveIndex(index)}
+                  aria-label="Scroll gallery left"
+                  onClick={() => scrollGallery("left")}
                 >
-                  <span
-                    className="gallery-item has-image tribute-gallery-strip-item"
-                    style={{ backgroundImage: `url("${image.imageUrl}")` }}
-                  />
+                  ←
                 </button>
-              ))}
-            </div>
+                <button
+                  className="messages-scroll-button"
+                  type="button"
+                  aria-label="Scroll gallery right"
+                  onClick={() => scrollGallery("right")}
+                >
+                  →
+                </button>
+              </div>
+              <div
+                className="messages-stream tribute-gallery-stream"
+                ref={stripRef}
+                onMouseEnter={() => setIsStripInteracting(true)}
+                onMouseLeave={() => setIsStripInteracting(false)}
+                onTouchStart={() => setIsStripInteracting(true)}
+                onTouchEnd={() => setIsStripInteracting(false)}
+                onTouchCancel={() => setIsStripInteracting(false)}
+              >
+                <div
+                  className={`messages-track tribute-gallery-track is-auto-scrolling${isStripInteracting ? " is-paused" : ""}`}
+                  role="list"
+                  aria-label="Photo gallery"
+                >
+                  {[...galleryImages, ...galleryImages].map((image, index) => (
+                    <button
+                      key={`${image.id}-${index}`}
+                      className="tribute-gallery-button tribute-gallery-strip-button"
+                      type="button"
+                      role="listitem"
+                      aria-label={`Open gallery image ${(index % galleryImages.length) + 1} of ${galleryImages.length}`}
+                      onClick={() => setActiveIndex(index % galleryImages.length)}
+                    >
+                      <span
+                        className="gallery-item has-image tribute-gallery-strip-item"
+                        style={{ backgroundImage: `url("${image.imageUrl}")` }}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
           ) : (
             <>
               <div className="gallery-stream" aria-hidden="true">
