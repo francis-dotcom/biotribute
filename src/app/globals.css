@@ -851,6 +851,8 @@ textarea {
 }
 
 .tribute-gallery-button {
+  display: block;
+  width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
@@ -859,6 +861,7 @@ textarea {
 }
 
 .tribute-gallery-grid-item {
+  display: block;
   width: 100%;
 }
 
