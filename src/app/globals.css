@@ -843,6 +843,91 @@ textarea {
   background-size: cover;
 }
 
+.tribute-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.tribute-gallery-button {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+}
+
+.tribute-gallery-grid-item {
+  width: 100%;
+}
+
+.tribute-gallery-lightbox {
+  padding: 24px;
+}
+
+.tribute-gallery-lightbox-card {
+  width: min(1200px, calc(100vw - 32px));
+  max-width: 1200px;
+}
+
+.tribute-gallery-lightbox-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+}
+
+.tribute-gallery-arrow {
+  width: 48px;
+  height: 48px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  background: rgba(33, 20, 13, 0.82);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.tribute-gallery-arrow:hover {
+  transform: translateY(-1px);
+  background: rgba(33, 20, 13, 0.94);
+}
+
+.tribute-gallery-viewport {
+  max-height: min(76vh, 860px);
+  overflow: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 48%),
+    rgba(20, 12, 10, 0.96);
+  cursor: grab;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable both-edges;
+}
+
+.tribute-gallery-viewport:active {
+  cursor: grabbing;
+}
+
+.tribute-gallery-full-image {
+  display: block;
+  width: auto;
+  max-width: none;
+  min-width: 100%;
+  min-height: min(76vh, 860px);
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.tribute-gallery-lightbox-note {
+  margin-top: 14px;
+}
+
 .service-poster-card {
   display: grid;
   gap: 14px;
@@ -3246,6 +3331,39 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .tribute-gallery-lightbox {
+    padding: 12px;
+  }
+
+  .tribute-gallery-lightbox-body {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .tribute-gallery-arrow {
+    width: 44px;
+    height: 44px;
+  }
+
+  .tribute-gallery-arrow-left {
+    justify-self: start;
+    order: 2;
+  }
+
+  .tribute-gallery-arrow-right {
+    justify-self: end;
+    order: 3;
+  }
+
+  .tribute-gallery-viewport {
+    order: 1;
+    max-height: 62vh;
+  }
+
+  .tribute-gallery-full-image {
+    min-height: 62vh;
+  }
+
   .tribute-media-grid-count-2 {
     grid-template-columns: 1fr;
   }

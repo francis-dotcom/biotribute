@@ -11,6 +11,7 @@ import { ShareTributeIconButton } from "@/components/share-tribute-icon-button";
 import { TimelineSection } from "@/components/timeline-section";
 import { TributeActionBar } from "@/components/tribute-action-bar";
 import { TributeCardModal } from "@/components/tribute-card-modal";
+import { TributeGallerySection } from "@/components/tribute-gallery-section";
 import { TributeMediaSection } from "@/components/tribute-media-section";
 import { TributeVisitTracker } from "@/components/tribute-visit-tracker";
 import { TributePageThemeMain } from "@/components/tribute-page-theme-main";
@@ -74,10 +75,6 @@ export default async function TributePage({ params }: PageProps) {
   const familyEmail = tribute.contactEmail || getFamilyContactEmail();
   const storeConfigured = isMessageStoreConfigured();
   const familyMessageStoreConfigured = isFamilyPrivateMessageStoreConfigured();
-  const galleryLoop =
-    tribute.galleryImages.length > 0
-      ? [...tribute.galleryImages, ...tribute.galleryImages]
-      : [];
   const initialActiveTheme = getActiveThemeFromRotation(
     tribute.theme,
     Boolean(tribute.themeRotationEnabled),
@@ -169,41 +166,11 @@ export default async function TributePage({ params }: PageProps) {
         </section>
 
         {tribute.showGallerySection ? (
-          <section className="content-section content-section-soft">
-            <p className="section-kicker">Photo Gallery</p>
-            <h2>Moments in Memory</h2>
-            <span className="section-accent" />
-            <div className="gallery-card gallery-card-full">
-              <p>{tribute.galleryIntro?.trim()}</p>
-              <div className="gallery-stream" aria-hidden="true">
-                {galleryLoop.length > 0 ? (
-                  <div className="gallery-track">
-                    {galleryLoop.map((image, index) => (
-                      <div
-                        className="gallery-item has-image"
-                        key={`${image.id}-${index}`}
-                        style={{ backgroundImage: `url("${image.imageUrl}")` }}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="gallery-track">
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                    <div className="gallery-item" />
-                  </div>
-                )}
-              </div>
-              {tribute.galleryImages.length === 0 ? (
-                <MarkdownText content={tribute.galleryNote} className="subtle-note" />
-              ) : null}
-            </div>
-          </section>
+          <TributeGallerySection
+            galleryIntro={tribute.galleryIntro}
+            galleryImages={tribute.galleryImages}
+            galleryNote={tribute.galleryNote}
+          />
         ) : null}
 
         {tribute.showServicePosterSection && tribute.servicePosterImageUrl?.trim() ? (
