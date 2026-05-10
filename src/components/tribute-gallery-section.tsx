@@ -29,6 +29,7 @@ export function TributeGallerySection({
   const stripRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
+  const stripResumeTimeoutRef = useRef<number | null>(null);
 
   const activeImage = activeIndex === null ? null : galleryImages[activeIndex] ?? null;
   const activeImageNumber = activeIndex === null ? 0 : activeIndex + 1;
@@ -86,6 +87,14 @@ export function TributeGallerySection({
     viewport.scrollTo({ left: 0, top: 0 });
     dragStateRef.current = null;
   }, [activeIndex]);
+
+  useEffect(() => {
+    return () => {
+      if (stripResumeTimeoutRef.current !== null) {
+        window.clearTimeout(stripResumeTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const strip = stripRef.current;
@@ -151,11 +160,21 @@ export function TributeGallerySection({
       return;
     }
 
+    setIsStripInteracting(true);
+    if (stripResumeTimeoutRef.current !== null) {
+      window.clearTimeout(stripResumeTimeoutRef.current);
+    }
+
     const amount = Math.max(260, strip.clientWidth * 0.8);
     strip.scrollBy({
       left: direction === "right" ? amount : -amount,
       behavior: "smooth",
     });
+
+    stripResumeTimeoutRef.current = window.setTimeout(() => {
+      setIsStripInteracting(false);
+      stripResumeTimeoutRef.current = null;
+    }, 1400);
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
