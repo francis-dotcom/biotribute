@@ -887,6 +887,11 @@ textarea {
   margin: 14px 0 8px;
 }
 
+.messages-stream.tribute-gallery-stream {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
 .tribute-gallery-stream {
   margin-top: 0;
   overflow-x: auto;
@@ -3416,6 +3421,10 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .messages-stream.tribute-gallery-stream {
+    overscroll-behavior-x: contain;
+  }
+
   .tribute-gallery-scroll-actions {
     display: none;
   }

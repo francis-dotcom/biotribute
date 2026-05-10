@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import { MarkdownText } from "@/components/markdown-text";
 import type { TributeRecord } from "@/data/tributes";
@@ -25,13 +25,30 @@ type StripDragState = {
   moved: boolean;
 };
 
+/** Narrow viewports rely on OS scroll + touch-action; wide viewports keep auto-scroll & pointer-drag. Matches CSS breakpoint that hides arrow buttons (~640px). */
+function useMobileGalleryStripNativeScroll() {
+  const [preferNativeTouch, setPreferNativeTouch] = useState(false);
+
+  useLayoutEffect(() => {
+    const mq = window.matchMedia("(max-width: 640px)");
+    function apply() {
+      setPreferNativeTouch(mq.matches);
+    }
+    apply();
+    mq.addEventListener("change", apply);
+    return () => mq.removeEventListener("change", apply);
+  }, []);
+
+  return preferNativeTouch;
+}
+
 export function TributeGallerySection({
   galleryIntro,
   galleryImages,
   galleryNote,
 }: TributeGallerySectionProps) {
+  const stripPreferNativeTouch = useMobileGalleryStripNativeScroll();
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [isStripInteracting, setIsStripInteracting] = useState(false);
   const stripRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
@@ -107,7 +124,12 @@ export function TributeGallerySection({
 
   useEffect(() => {
     const strip = stripRef.current;
-    if (!strip || galleryImages.length < 2 || activeIndex !== null) {
+    if (
+      !strip ||
+      galleryImages.length < 2 ||
+      activeIndex !== null ||
+      stripPreferNativeTouch
+    ) {
       return;
     }
 
@@ -143,7 +165,7 @@ export function TributeGallerySection({
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [galleryImages.length, activeIndex]);
+  }, [galleryImages.length, activeIndex, stripPreferNativeTouch]);
 
   function showPreviousImage() {
     setActiveIndex((current) => {
@@ -166,13 +188,15 @@ export function TributeGallerySection({
   }
 
   function scrollGallery(direction: "left" | "right") {
+    if (stripPreferNativeTouch) {
+      return;
+    }
     const strip = stripRef.current;
     if (!strip) {
       return;
     }
 
     autoScrollPausedRef.current = true;
-    setIsStripInteracting(true);
     if (stripResumeTimeoutRef.current !== null) {
       window.clearTimeout(stripResumeTimeoutRef.current);
     }
@@ -185,31 +209,35 @@ export function TributeGallerySection({
 
     stripResumeTimeoutRef.current = window.setTimeout(() => {
       autoScrollPausedRef.current = false;
-      setIsStripInteracting(false);
       stripResumeTimeoutRef.current = null;
     }, 1400);
   }
 
   function resumeStripAutoScroll(delayMs = 900) {
+    if (stripPreferNativeTouch) {
+      autoScrollPausedRef.current = false;
+      return;
+    }
     if (stripResumeTimeoutRef.current !== null) {
       window.clearTimeout(stripResumeTimeoutRef.current);
     }
 
     stripResumeTimeoutRef.current = window.setTimeout(() => {
       autoScrollPausedRef.current = false;
-      setIsStripInteracting(false);
       stripResumeTimeoutRef.current = null;
     }, delayMs);
   }
 
   function handleStripPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    if (stripPreferNativeTouch) {
+      return;
+    }
     const strip = stripRef.current;
     if (!strip) {
       return;
     }
 
     autoScrollPausedRef.current = true;
-    setIsStripInteracting(true);
     suppressStripClickRef.current = false;
     stripDragStateRef.current = {
       startX: event.clientX,
@@ -220,6 +248,9 @@ export function TributeGallerySection({
   }
 
   function handleStripPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    if (stripPreferNativeTouch) {
+      return;
+    }
     const strip = stripRef.current;
     const dragState = stripDragStateRef.current;
     if (!strip || !dragState) {
@@ -236,6 +267,9 @@ export function TributeGallerySection({
   }
 
   function handleStripPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    if (stripPreferNativeTouch) {
+      return;
+    }
     const strip = stripRef.current;
     if (strip?.hasPointerCapture(event.pointerId)) {
       strip.releasePointerCapture(event.pointerId);
@@ -246,6 +280,34 @@ export function TributeGallerySection({
     window.setTimeout(() => {
       suppressStripClickRef.current = false;
     }, 0);
+  }
+
+  function handleStripMouseEnterPause() {
+    if (stripPreferNativeTouch) {
+      return;
+    }
+    autoScrollPausedRef.current = true;
+  }
+
+  function handleStripMouseLeaveResume() {
+    if (stripPreferNativeTouch) {
+      return;
+    }
+    autoScrollPausedRef.current = false;
+  }
+
+  function handleStripTouchInterrupt() {
+    if (stripPreferNativeTouch) {
+      return;
+    }
+    autoScrollPausedRef.current = false;
+  }
+
+  function handleStripTouchPause() {
+    if (stripPreferNativeTouch) {
+      return;
+    }
+    autoScrollPausedRef.current = true;
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -307,6 +369,20 @@ export function TributeGallerySection({
     }
   }
 
+  const stripSyntheticHandlers = stripPreferNativeTouch
+    ? {}
+    : {
+        onPointerDown: handleStripPointerDown,
+        onPointerMove: handleStripPointerMove,
+        onPointerUp: handleStripPointerUp,
+        onPointerCancel: handleStripPointerUp,
+        onMouseEnter: handleStripMouseEnterPause,
+        onMouseLeave: handleStripMouseLeaveResume,
+        onTouchStart: handleStripTouchPause,
+        onTouchEnd: handleStripTouchInterrupt,
+        onTouchCancel: handleStripTouchInterrupt,
+      };
+
   return (
     <>
       <section className="content-section content-section-soft">
@@ -338,30 +414,7 @@ export function TributeGallerySection({
               <div
                 className="messages-stream tribute-gallery-stream"
                 ref={stripRef}
-                onPointerDown={handleStripPointerDown}
-                onPointerMove={handleStripPointerMove}
-                onPointerUp={handleStripPointerUp}
-                onPointerCancel={handleStripPointerUp}
-                onMouseEnter={() => {
-                  autoScrollPausedRef.current = true;
-                  setIsStripInteracting(true);
-                }}
-                onMouseLeave={() => {
-                  autoScrollPausedRef.current = false;
-                  setIsStripInteracting(false);
-                }}
-                onTouchStart={() => {
-                  autoScrollPausedRef.current = true;
-                  setIsStripInteracting(true);
-                }}
-                onTouchEnd={() => {
-                  autoScrollPausedRef.current = false;
-                  setIsStripInteracting(false);
-                }}
-                onTouchCancel={() => {
-                  autoScrollPausedRef.current = false;
-                  setIsStripInteracting(false);
-                }}
+                {...stripSyntheticHandlers}
               >
                 <div
                   className="messages-track tribute-gallery-track"
@@ -376,7 +429,7 @@ export function TributeGallerySection({
                       role="listitem"
                       aria-label={`Open gallery image ${(index % galleryImages.length) + 1} of ${galleryImages.length}`}
                       onClick={() => {
-                        if (suppressStripClickRef.current) {
+                        if (!stripPreferNativeTouch && suppressStripClickRef.current) {
                           return;
                         }
 
@@ -396,7 +449,6 @@ export function TributeGallerySection({
             <>
               <div className="gallery-stream" aria-hidden="true">
                 <div className="gallery-track">
-                  <div className="gallery-item" />
                   <div className="gallery-item" />
                   <div className="gallery-item" />
                   <div className="gallery-item" />
