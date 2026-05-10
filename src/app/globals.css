@@ -892,6 +892,8 @@ textarea {
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-x;
 }
 
 .tribute-gallery-track {
@@ -1133,6 +1135,8 @@ textarea {
 .timeline-item {
   position: relative;
   padding-left: 52px;
+  padding-top: 18px;
+  padding-bottom: 18px;
 }
 
 .timeline-item::before {
@@ -3412,6 +3416,10 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .tribute-gallery-scroll-actions {
+    display: none;
+  }
+
   .tribute-gallery-strip-item {
     width: 200px;
   }
