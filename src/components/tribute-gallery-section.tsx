@@ -19,6 +19,12 @@ type DragState = {
   scrollTop: number;
 };
 
+type StripDragState = {
+  startX: number;
+  scrollLeft: number;
+  moved: boolean;
+};
+
 export function TributeGallerySection({
   galleryIntro,
   galleryImages,
@@ -29,8 +35,10 @@ export function TributeGallerySection({
   const stripRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
+  const stripDragStateRef = useRef<StripDragState | null>(null);
   const stripResumeTimeoutRef = useRef<number | null>(null);
   const autoScrollPausedRef = useRef(false);
+  const suppressStripClickRef = useRef(false);
 
   const activeImage = activeIndex === null ? null : galleryImages[activeIndex] ?? null;
   const activeImageNumber = activeIndex === null ? 0 : activeIndex + 1;
@@ -182,6 +190,64 @@ export function TributeGallerySection({
     }, 1400);
   }
 
+  function resumeStripAutoScroll(delayMs = 900) {
+    if (stripResumeTimeoutRef.current !== null) {
+      window.clearTimeout(stripResumeTimeoutRef.current);
+    }
+
+    stripResumeTimeoutRef.current = window.setTimeout(() => {
+      autoScrollPausedRef.current = false;
+      setIsStripInteracting(false);
+      stripResumeTimeoutRef.current = null;
+    }, delayMs);
+  }
+
+  function handleStripPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    const strip = stripRef.current;
+    if (!strip) {
+      return;
+    }
+
+    autoScrollPausedRef.current = true;
+    setIsStripInteracting(true);
+    suppressStripClickRef.current = false;
+    stripDragStateRef.current = {
+      startX: event.clientX,
+      scrollLeft: strip.scrollLeft,
+      moved: false,
+    };
+    strip.setPointerCapture(event.pointerId);
+  }
+
+  function handleStripPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const strip = stripRef.current;
+    const dragState = stripDragStateRef.current;
+    if (!strip || !dragState) {
+      return;
+    }
+
+    const deltaX = event.clientX - dragState.startX;
+    if (Math.abs(deltaX) > 4) {
+      dragState.moved = true;
+      suppressStripClickRef.current = true;
+    }
+
+    strip.scrollLeft = dragState.scrollLeft - deltaX;
+  }
+
+  function handleStripPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    const strip = stripRef.current;
+    if (strip?.hasPointerCapture(event.pointerId)) {
+      strip.releasePointerCapture(event.pointerId);
+    }
+
+    stripDragStateRef.current = null;
+    resumeStripAutoScroll();
+    window.setTimeout(() => {
+      suppressStripClickRef.current = false;
+    }, 0);
+  }
+
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
     const viewport = viewportRef.current;
     if (!viewport) {
@@ -272,6 +338,10 @@ export function TributeGallerySection({
               <div
                 className="messages-stream tribute-gallery-stream"
                 ref={stripRef}
+                onPointerDown={handleStripPointerDown}
+                onPointerMove={handleStripPointerMove}
+                onPointerUp={handleStripPointerUp}
+                onPointerCancel={handleStripPointerUp}
                 onMouseEnter={() => {
                   autoScrollPausedRef.current = true;
                   setIsStripInteracting(true);
@@ -305,7 +375,13 @@ export function TributeGallerySection({
                       type="button"
                       role="listitem"
                       aria-label={`Open gallery image ${(index % galleryImages.length) + 1} of ${galleryImages.length}`}
-                      onClick={() => setActiveIndex(index % galleryImages.length)}
+                      onClick={() => {
+                        if (suppressStripClickRef.current) {
+                          return;
+                        }
+
+                        setActiveIndex(index % galleryImages.length);
+                      }}
                     >
                       <span
                         className="gallery-item has-image tribute-gallery-strip-item"
