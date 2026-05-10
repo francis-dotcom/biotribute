@@ -30,6 +30,7 @@ export function TributeGallerySection({
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
   const stripResumeTimeoutRef = useRef<number | null>(null);
+  const autoScrollPausedRef = useRef(false);
 
   const activeImage = activeIndex === null ? null : galleryImages[activeIndex] ?? null;
   const activeImageNumber = activeIndex === null ? 0 : activeIndex + 1;
@@ -98,7 +99,7 @@ export function TributeGallerySection({
 
   useEffect(() => {
     const strip = stripRef.current;
-    if (!strip || galleryImages.length < 2 || isStripInteracting || activeIndex !== null) {
+    if (!strip || galleryImages.length < 2 || activeIndex !== null) {
       return;
     }
 
@@ -119,9 +120,11 @@ export function TributeGallerySection({
       previousTimestamp = timestamp;
       const halfWidth = strip.scrollWidth / 2;
 
-      strip.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
-      if (strip.scrollLeft >= halfWidth) {
-        strip.scrollLeft -= halfWidth;
+      if (!autoScrollPausedRef.current) {
+        strip.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
+        if (strip.scrollLeft >= halfWidth) {
+          strip.scrollLeft -= halfWidth;
+        }
       }
 
       frameId = window.requestAnimationFrame(step);
@@ -132,7 +135,7 @@ export function TributeGallerySection({
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [galleryImages.length, isStripInteracting, activeIndex]);
+  }, [galleryImages.length, activeIndex]);
 
   function showPreviousImage() {
     setActiveIndex((current) => {
@@ -160,18 +163,20 @@ export function TributeGallerySection({
       return;
     }
 
+    autoScrollPausedRef.current = true;
     setIsStripInteracting(true);
     if (stripResumeTimeoutRef.current !== null) {
       window.clearTimeout(stripResumeTimeoutRef.current);
     }
 
     const amount = Math.max(260, strip.clientWidth * 0.8);
-    strip.scrollBy({
-      left: direction === "right" ? amount : -amount,
+    strip.scrollTo({
+      left: strip.scrollLeft + (direction === "right" ? amount : -amount),
       behavior: "smooth",
     });
 
     stripResumeTimeoutRef.current = window.setTimeout(() => {
+      autoScrollPausedRef.current = false;
       setIsStripInteracting(false);
       stripResumeTimeoutRef.current = null;
     }, 1400);
@@ -267,11 +272,26 @@ export function TributeGallerySection({
               <div
                 className="messages-stream tribute-gallery-stream"
                 ref={stripRef}
-                onMouseEnter={() => setIsStripInteracting(true)}
-                onMouseLeave={() => setIsStripInteracting(false)}
-                onTouchStart={() => setIsStripInteracting(true)}
-                onTouchEnd={() => setIsStripInteracting(false)}
-                onTouchCancel={() => setIsStripInteracting(false)}
+                onMouseEnter={() => {
+                  autoScrollPausedRef.current = true;
+                  setIsStripInteracting(true);
+                }}
+                onMouseLeave={() => {
+                  autoScrollPausedRef.current = false;
+                  setIsStripInteracting(false);
+                }}
+                onTouchStart={() => {
+                  autoScrollPausedRef.current = true;
+                  setIsStripInteracting(true);
+                }}
+                onTouchEnd={() => {
+                  autoScrollPausedRef.current = false;
+                  setIsStripInteracting(false);
+                }}
+                onTouchCancel={() => {
+                  autoScrollPausedRef.current = false;
+                  setIsStripInteracting(false);
+                }}
               >
                 <div
                   className="messages-track tribute-gallery-track"
