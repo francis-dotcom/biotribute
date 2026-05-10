@@ -38,6 +38,7 @@ export function TimelineSection({ entries }: TimelineSectionProps) {
       <div className="timeline-list">
         {visibleEntries.map((entry, index) => (
           <article className="timeline-item" key={`${entry.year}-${entry.title}-${index}`}>
+            <span className="timeline-marker" aria-hidden="true" />
             {entry.year.trim() ? (
               <p className="timeline-year">
                 <MarkdownInline content={entry.year} />
