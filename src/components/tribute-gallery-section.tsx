@@ -173,18 +173,18 @@ export function TributeGallerySection({
         <div className="gallery-card gallery-card-full">
           <p>{galleryIntro?.trim()}</p>
           {galleryImages.length > 0 ? (
-            <div className="tribute-gallery-grid" role="list" aria-label="Photo gallery">
+            <div className="tribute-gallery-strip" role="list" aria-label="Photo gallery">
               {galleryImages.map((image, index) => (
                 <button
                   key={image.id}
-                  className="tribute-gallery-button"
+                  className="tribute-gallery-button tribute-gallery-strip-button"
                   type="button"
                   role="listitem"
                   aria-label={`Open gallery image ${index + 1} of ${galleryImages.length}`}
                   onClick={() => setActiveIndex(index)}
                 >
                   <span
-                    className="gallery-item has-image tribute-gallery-grid-item"
+                    className="gallery-item has-image tribute-gallery-strip-item"
                     style={{ backgroundImage: `url("${image.imageUrl}")` }}
                   />
                 </button>

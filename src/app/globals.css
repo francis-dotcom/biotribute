@@ -843,16 +843,19 @@ textarea {
   background-size: cover;
 }
 
-.tribute-gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+.tribute-gallery-strip {
+  display: flex;
   gap: 14px;
   margin-top: 18px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-gutter: stable;
 }
 
 .tribute-gallery-button {
   display: block;
-  width: 100%;
   padding: 0;
   border: 0;
   background: transparent;
@@ -860,9 +863,29 @@ textarea {
   text-align: left;
 }
 
-.tribute-gallery-grid-item {
+.tribute-gallery-strip-button {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+}
+
+.tribute-gallery-strip-item {
   display: block;
-  width: 100%;
+  width: 240px;
+  aspect-ratio: 6 / 5;
+}
+
+.tribute-gallery-strip::-webkit-scrollbar {
+  height: 10px;
+}
+
+.tribute-gallery-strip::-webkit-scrollbar-track {
+  background: rgba(244, 235, 218, 0.45);
+  border-radius: 999px;
+}
+
+.tribute-gallery-strip::-webkit-scrollbar-thumb {
+  background: rgba(200, 169, 106, 0.55);
+  border-radius: 999px;
 }
 
 .tribute-gallery-lightbox {
@@ -3334,6 +3357,10 @@ textarea {
 }
 
 @media (max-width: 640px) {
+  .tribute-gallery-strip-item {
+    width: 200px;
+  }
+
   .tribute-gallery-lightbox {
     padding: 12px;
   }
