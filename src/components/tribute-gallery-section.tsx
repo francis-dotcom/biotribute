@@ -25,7 +25,7 @@ type StripDragState = {
   moved: boolean;
 };
 
-/** Narrow viewports rely on OS scroll + touch-action; wide viewports keep auto-scroll & pointer-drag. Matches CSS breakpoint that hides arrow buttons (~640px). */
+/** Narrow viewports: native horizontal scroll + auto-scroll (paused while finger is down). Wide: auto-scroll + pointer-drag. Matches ~640px where arrow buttons hide. */
 function useMobileGalleryStripNativeScroll() {
   const [preferNativeTouch, setPreferNativeTouch] = useState(false);
 
@@ -124,12 +124,7 @@ export function TributeGallerySection({
 
   useEffect(() => {
     const strip = stripRef.current;
-    if (
-      !strip ||
-      galleryImages.length < 2 ||
-      activeIndex !== null ||
-      stripPreferNativeTouch
-    ) {
+    if (!strip || galleryImages.length < 2 || activeIndex !== null) {
       return;
     }
 
@@ -165,7 +160,7 @@ export function TributeGallerySection({
     return () => {
       window.cancelAnimationFrame(frameId);
     };
-  }, [galleryImages.length, activeIndex, stripPreferNativeTouch]);
+  }, [galleryImages.length, activeIndex]);
 
   function showPreviousImage() {
     setActiveIndex((current) => {
@@ -188,36 +183,22 @@ export function TributeGallerySection({
   }
 
   function scrollGallery(direction: "left" | "right") {
-    if (stripPreferNativeTouch) {
-      return;
-    }
     const strip = stripRef.current;
     if (!strip) {
       return;
     }
 
-    autoScrollPausedRef.current = true;
-    if (stripResumeTimeoutRef.current !== null) {
-      window.clearTimeout(stripResumeTimeoutRef.current);
-    }
-
+    pauseStripAutoScrollNow();
     const amount = Math.max(260, strip.clientWidth * 0.8);
     strip.scrollTo({
       left: strip.scrollLeft + (direction === "right" ? amount : -amount),
       behavior: "smooth",
     });
 
-    stripResumeTimeoutRef.current = window.setTimeout(() => {
-      autoScrollPausedRef.current = false;
-      stripResumeTimeoutRef.current = null;
-    }, 1400);
+    resumeStripAutoScroll(1400);
   }
 
   function resumeStripAutoScroll(delayMs = 900) {
-    if (stripPreferNativeTouch) {
-      autoScrollPausedRef.current = false;
-      return;
-    }
     if (stripResumeTimeoutRef.current !== null) {
       window.clearTimeout(stripResumeTimeoutRef.current);
     }
@@ -226,6 +207,15 @@ export function TributeGallerySection({
       autoScrollPausedRef.current = false;
       stripResumeTimeoutRef.current = null;
     }, delayMs);
+  }
+
+  /** Pause RAF auto-scroll immediately and cancel any pending resume (e.g. touch / drag start). */
+  function pauseStripAutoScrollNow() {
+    autoScrollPausedRef.current = true;
+    if (stripResumeTimeoutRef.current !== null) {
+      window.clearTimeout(stripResumeTimeoutRef.current);
+      stripResumeTimeoutRef.current = null;
+    }
   }
 
   function handleStripPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -237,7 +227,7 @@ export function TributeGallerySection({
       return;
     }
 
-    autoScrollPausedRef.current = true;
+    pauseStripAutoScrollNow();
     suppressStripClickRef.current = false;
     stripDragStateRef.current = {
       startX: event.clientX,
@@ -286,7 +276,7 @@ export function TributeGallerySection({
     if (stripPreferNativeTouch) {
       return;
     }
-    autoScrollPausedRef.current = true;
+    pauseStripAutoScrollNow();
   }
 
   function handleStripMouseLeaveResume() {
@@ -300,14 +290,14 @@ export function TributeGallerySection({
     if (stripPreferNativeTouch) {
       return;
     }
-    autoScrollPausedRef.current = false;
+    resumeStripAutoScroll(600);
   }
 
   function handleStripTouchPause() {
     if (stripPreferNativeTouch) {
       return;
     }
-    autoScrollPausedRef.current = true;
+    pauseStripAutoScrollNow();
   }
 
   function handlePointerDown(event: ReactPointerEvent<HTMLDivElement>) {
@@ -370,7 +360,11 @@ export function TributeGallerySection({
   }
 
   const stripSyntheticHandlers = stripPreferNativeTouch
-    ? {}
+    ? {
+        onTouchStart: pauseStripAutoScrollNow,
+        onTouchEnd: () => resumeStripAutoScroll(1700),
+        onTouchCancel: () => resumeStripAutoScroll(1700),
+      }
     : {
         onPointerDown: handleStripPointerDown,
         onPointerMove: handleStripPointerMove,
