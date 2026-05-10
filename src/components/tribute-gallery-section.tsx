@@ -87,6 +87,44 @@ export function TributeGallerySection({
     dragStateRef.current = null;
   }, [activeIndex]);
 
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip || galleryImages.length < 2 || isStripInteracting || activeIndex !== null) {
+      return;
+    }
+
+    let frameId = 0;
+    let previousTimestamp = 0;
+    const pixelsPerSecond = 28;
+
+    const step = (timestamp: number) => {
+      if (!strip.isConnected) {
+        return;
+      }
+
+      if (previousTimestamp === 0) {
+        previousTimestamp = timestamp;
+      }
+
+      const elapsed = timestamp - previousTimestamp;
+      previousTimestamp = timestamp;
+      const halfWidth = strip.scrollWidth / 2;
+
+      strip.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
+      if (strip.scrollLeft >= halfWidth) {
+        strip.scrollLeft -= halfWidth;
+      }
+
+      frameId = window.requestAnimationFrame(step);
+    };
+
+    frameId = window.requestAnimationFrame(step);
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
+  }, [galleryImages.length, isStripInteracting, activeIndex]);
+
   function showPreviousImage() {
     setActiveIndex((current) => {
       if (current === null || galleryImages.length === 0) {
@@ -217,7 +255,7 @@ export function TributeGallerySection({
                 onTouchCancel={() => setIsStripInteracting(false)}
               >
                 <div
-                  className={`messages-track tribute-gallery-track is-auto-scrolling${isStripInteracting ? " is-paused" : ""}`}
+                  className="messages-track tribute-gallery-track"
                   role="list"
                   aria-label="Photo gallery"
                 >
