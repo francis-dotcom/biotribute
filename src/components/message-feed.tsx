@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import type { TributeMessage } from "@/data/tributes";
+
+/** Same horizontal rate as RAF auto-scroll in `tribute-gallery-section` (`pixelsPerSecond`). */
+const GALLERY_STRIP_PX_PER_SEC = 28;
 
 type MessageFeedProps = {
   messages: TributeMessage[];
@@ -14,7 +17,9 @@ export function MessageFeed({ messages }: MessageFeedProps) {
   const [showLibrary, setShowLibrary] = useState(false);
   const [query, setQuery] = useState("");
   const [isInteracting, setIsInteracting] = useState(false);
+  const [marqueeDurationSec, setMarqueeDurationSec] = useState<number | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
+  const marqueeTrackRef = useRef<HTMLDivElement | null>(null);
   const isSearching = query.trim().length > 0;
 
   const filteredMessages = useMemo(() => {
@@ -91,6 +96,37 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     trackRef.current?.scrollTo({ left: 0, behavior: "smooth" });
   }, [isSearching]);
 
+  useLayoutEffect(() => {
+    if (isSearching) {
+      return;
+    }
+
+    const el = marqueeTrackRef.current;
+    if (!el) {
+      return;
+    }
+
+    function measure() {
+      const w = el.scrollWidth;
+      if (w <= 0) {
+        return;
+      }
+
+      const sec = w / (2 * GALLERY_STRIP_PX_PER_SEC);
+      setMarqueeDurationSec(Math.max(sec, 12));
+    }
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [isSearching, visibleMessages.length]);
+
+  const marqueeStyle: CSSProperties | undefined =
+    !isSearching && marqueeDurationSec != null
+      ? { "--message-marquee-duration": `${marqueeDurationSec}s` }
+      : undefined;
+
   return (
     <>
       <div className="messages-toolbar">
@@ -146,7 +182,9 @@ export function MessageFeed({ messages }: MessageFeedProps) {
         onTouchCancel={() => setIsInteracting(false)}
       >
         <div
+          ref={marqueeTrackRef}
           className={`messages-track${isSearching ? " is-searching" : " is-auto-scrolling"}${isInteracting ? " is-paused" : ""}`}
+          style={marqueeStyle}
         >
           {visibleMessages.map((message, index) => (
             <article className="message-mini-card" key={`${message.id}-${index}`}>
