@@ -1339,7 +1339,7 @@ textarea {
 }
 
 .messages-track.is-auto-scrolling {
-  animation: tribute-scroll 85s linear infinite;
+  animation: tribute-scroll 180s linear infinite;
 }
 
 .messages-track.is-paused {
