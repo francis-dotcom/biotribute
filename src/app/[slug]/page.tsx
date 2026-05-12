@@ -26,11 +26,6 @@ type PageProps = {
   params: Promise<{ slug: string }>;
 };
 
-const heroServiceCards = [
-  { label: "Wakeep", month: "JUN", day: "10" },
-  { label: "Funeral", month: "JUN", day: "11" },
-] as const;
-
 export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -122,19 +117,6 @@ export default async function TributePage({ params }: PageProps) {
               triggerClassName="hero-donation-badge"
               triggerLabel="Donate"
             />
-            <div className="hero-service-panel" aria-label="Memorial schedule highlights">
-              {heroServiceCards.map((card) => (
-                <article className="hero-service-card" key={card.label}>
-                  <div className="hero-service-calendar" aria-hidden="true">
-                    <span className="hero-service-calendar-top">{card.month}</span>
-                    <span className="hero-service-calendar-day">{card.day}</span>
-                  </div>
-                  <div className="hero-service-copy">
-                    <strong>{card.label}</strong>
-                  </div>
-                </article>
-              ))}
-            </div>
             <ShareTributeIconButton className="hero-share-icon" />
           </div>
           <div className="hero-divider" aria-hidden="true">
