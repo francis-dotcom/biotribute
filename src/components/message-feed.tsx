@@ -105,11 +105,6 @@ export function MessageFeed({ messages }: MessageFeedProps) {
       return;
     }
 
-    const el = marqueeTrackRef.current;
-    if (!el) {
-      return;
-    }
-
     function measure() {
       const node = marqueeTrackRef.current;
       if (!node) {
@@ -125,9 +120,14 @@ export function MessageFeed({ messages }: MessageFeedProps) {
       setMarqueeDurationSec(Math.max(sec, 12));
     }
 
+    const node = marqueeTrackRef.current;
+    if (!node) {
+      return;
+    }
+
     measure();
     const ro = new ResizeObserver(measure);
-    ro.observe(el);
+    ro.observe(node);
     return () => ro.disconnect();
   }, [isSearching, visibleMessages.length]);
 
