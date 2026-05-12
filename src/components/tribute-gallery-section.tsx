@@ -78,6 +78,7 @@ export function TributeGallerySection({
   const dragStateRef = useRef<DragState | null>(null);
   const stripDragStateRef = useRef<StripDragState | null>(null);
   const stripResumeTimeoutRef = useRef<number | null>(null);
+  const programmaticStripScrollResetFrameRef = useRef<number | null>(null);
   const autoScrollPausedRef = useRef(false);
   const programmaticStripScrollRef = useRef(false);
   const suppressStripClickRef = useRef(false);
@@ -149,6 +150,9 @@ export function TributeGallerySection({
       if (stripResumeTimeoutRef.current !== null) {
         window.clearTimeout(stripResumeTimeoutRef.current);
       }
+      if (programmaticStripScrollResetFrameRef.current !== null) {
+        window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
+      }
     };
   }, []);
 
@@ -194,8 +198,12 @@ export function TributeGallerySection({
         if (strip.scrollLeft >= halfWidth) {
           strip.scrollLeft -= halfWidth;
         }
-        queueMicrotask(() => {
+        if (programmaticStripScrollResetFrameRef.current !== null) {
+          window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
+        }
+        programmaticStripScrollResetFrameRef.current = window.requestAnimationFrame(() => {
           programmaticStripScrollRef.current = false;
+          programmaticStripScrollResetFrameRef.current = null;
         });
       }
 
@@ -207,6 +215,11 @@ export function TributeGallerySection({
     return () => {
       strip.removeEventListener("scroll", onUserScroll);
       window.cancelAnimationFrame(frameId);
+      if (programmaticStripScrollResetFrameRef.current !== null) {
+        window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
+        programmaticStripScrollResetFrameRef.current = null;
+      }
+      programmaticStripScrollRef.current = false;
     };
   }, [galleryImages.length, activeIndex]);
 
