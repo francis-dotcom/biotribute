@@ -445,11 +445,7 @@ export function TributeGallerySection({
   }
 
   const stripSyntheticHandlers = stripUsesNativeGesturesOnly
-    ? {
-        onTouchStart: pauseStripAutoScrollNow,
-        onTouchEnd: () => resumeStripAutoScroll(1700),
-        onTouchCancel: () => resumeStripAutoScroll(1700),
-      }
+    ? {}
     : {
         onPointerDown: handleStripPointerDown,
         onPointerMove: handleStripPointerMove,
