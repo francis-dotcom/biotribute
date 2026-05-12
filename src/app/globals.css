@@ -531,6 +531,61 @@ textarea {
   cursor: pointer;
 }
 
+.hero-service-panel {
+  position: absolute;
+  top: 46px;
+  right: -214px;
+  display: grid;
+  gap: 10px;
+  width: 166px;
+}
+
+.hero-service-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(149, 111, 17, 0.16);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 24px rgba(28, 28, 30, 0.08);
+}
+
+.hero-service-calendar {
+  width: 48px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(190, 31, 31, 0.22);
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(28, 28, 30, 0.08);
+  flex: 0 0 auto;
+}
+
+.hero-service-calendar-top {
+  display: block;
+  padding: 5px 6px 4px;
+  background: linear-gradient(180deg, #c34c46 0%, #a12f2a 100%);
+  color: #fff;
+  font: 800 0.62rem/1 var(--font-sans);
+  letter-spacing: 0.12em;
+  text-align: center;
+}
+
+.hero-service-calendar-day {
+  display: block;
+  padding: 5px 4px 6px;
+  color: #161616;
+  font: 800 1.55rem/1 var(--font-sans);
+  text-align: center;
+}
+
+.hero-service-copy strong {
+  display: block;
+  color: var(--text);
+  font: 700 0.88rem/1.2 var(--font-sans);
+  letter-spacing: 0.02em;
+}
+
 .hero-donation-badge:hover {
   transform: translateY(-1px);
   filter: brightness(1.02);
@@ -3151,8 +3206,28 @@ textarea {
     transform: translateX(50%);
   }
 
+  .hero-service-panel {
+    position: static;
+    width: min(260px, calc(100vw - 48px));
+    margin: 62px auto 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .hero-service-card {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+    padding: 8px 6px 10px;
+    text-align: center;
+  }
+
+  .hero-service-copy strong {
+    font-size: 0.76rem;
+  }
+
   .hero-avatar-wrap {
-    margin-bottom: 58px;
+    margin-bottom: 18px;
   }
 
   .hero-share-icon {
