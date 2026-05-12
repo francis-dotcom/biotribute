@@ -901,38 +901,6 @@ textarea {
   touch-action: pan-x;
 }
 
-.messages-stream.tribute-gallery-stream.tribute-gallery-stream--css-marquee {
-  overflow: hidden;
-  touch-action: manipulation;
-  -webkit-overflow-scrolling: auto;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tribute-gallery-track--css-marquee {
-    animation: none !important;
-  }
-}
-
-.tribute-gallery-track--css-marquee {
-  animation: tribute-gallery-strip-marquee 52s linear infinite;
-  will-change: transform;
-}
-
-.tribute-gallery-stream--marquee-suppress .tribute-gallery-track--css-marquee,
-.tribute-gallery-stream--marquee-user-pause .tribute-gallery-track--css-marquee {
-  animation-play-state: paused;
-}
-
-@keyframes tribute-gallery-strip-marquee {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-
-  to {
-    transform: translate3d(-50%, 0, 0);
-  }
-}
-
 .tribute-gallery-stream::-webkit-scrollbar {
   height: 10px;
 }
