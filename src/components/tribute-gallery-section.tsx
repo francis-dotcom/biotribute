@@ -85,6 +85,11 @@ export function TributeGallerySection({
   const activeImage = activeIndex === null ? null : galleryImages[activeIndex] ?? null;
   const activeImageNumber = activeIndex === null ? 0 : activeIndex + 1;
 
+  function closeActiveImage() {
+    autoScrollPausedRef.current = false;
+    setActiveIndex(null);
+  }
+
   useEffect(() => {
     if (activeIndex === null) {
       return;
@@ -92,7 +97,7 @@ export function TributeGallerySection({
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setActiveIndex(null);
+        closeActiveImage();
         return;
       }
 
@@ -152,6 +157,8 @@ export function TributeGallerySection({
     if (!strip || galleryImages.length < 2 || activeIndex !== null) {
       return;
     }
+
+    autoScrollPausedRef.current = false;
 
     function onUserScroll() {
       if (programmaticStripScrollRef.current) {
@@ -527,7 +534,7 @@ export function TributeGallerySection({
           role="dialog"
           aria-modal="true"
           aria-label="Gallery image viewer"
-          onClick={() => setActiveIndex(null)}
+          onClick={closeActiveImage}
         >
           <div
             className="message-modal-card tribute-gallery-lightbox-card"
@@ -542,7 +549,7 @@ export function TributeGallerySection({
                 className="message-modal-close"
                 type="button"
                 aria-label="Close gallery image viewer"
-                onClick={() => setActiveIndex(null)}
+                onClick={closeActiveImage}
               >
                 Close
               </button>
