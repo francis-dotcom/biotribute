@@ -2,7 +2,11 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
-import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
+import type {
+  PointerEvent as ReactPointerEvent,
+  TouchEvent as ReactTouchEvent,
+  WheelEvent as ReactWheelEvent,
+} from "react";
 import { MarkdownText } from "@/components/markdown-text";
 import type { TributeRecord } from "@/data/tributes";
 
@@ -107,6 +111,14 @@ export function TributeGallerySection({
   const galleryMarqueeTrackRef = useRef<HTMLDivElement | null>(null);
   const galleryIosScrollbarTrackRef = useRef<HTMLDivElement | null>(null);
   const galleryIosScrollbarThumbRef = useRef<HTMLDivElement | null>(null);
+  const iosMarqueeTouchArmRef = useRef<{ startX: number; startY: number; paused: boolean } | null>(
+    null,
+  );
+  const iosScrollbarPointerRef = useRef<{
+    pointerId: number;
+    startX: number;
+    dragging: boolean;
+  } | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
   const stripDragStateRef = useRef<StripDragState | null>(null);
@@ -503,25 +515,57 @@ export function TributeGallerySection({
     }
 
     scrollbarTrack.setPointerCapture(event.pointerId);
-    seekIosGalleryMarqueeFromClientX(event.clientX);
+    iosScrollbarPointerRef.current = {
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      dragging: false,
+    };
   }
 
   function handleIosGalleryScrollbarPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
     const scrollbarTrack = galleryIosScrollbarTrackRef.current;
+    const drag = iosScrollbarPointerRef.current;
 
-    if (!scrollbarTrack?.hasPointerCapture(event.pointerId)) {
+    if (
+      !scrollbarTrack?.hasPointerCapture(event.pointerId) ||
+      !drag ||
+      drag.pointerId !== event.pointerId
+    ) {
       return;
+    }
+
+    if (!drag.dragging) {
+      if (Math.abs(event.clientX - drag.startX) < 6) {
+        return;
+      }
+
+      drag.dragging = true;
     }
 
     seekIosGalleryMarqueeFromClientX(event.clientX);
   }
 
-  function handleIosGalleryScrollbarPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+  function finishIosGalleryScrollbarPointer(event: ReactPointerEvent<HTMLDivElement>, seekTap: boolean) {
     const scrollbarTrack = galleryIosScrollbarTrackRef.current;
+    const drag = iosScrollbarPointerRef.current;
 
     if (scrollbarTrack?.hasPointerCapture(event.pointerId)) {
       scrollbarTrack.releasePointerCapture(event.pointerId);
     }
+
+    if (seekTap && drag?.pointerId === event.pointerId && !drag.dragging) {
+      seekIosGalleryMarqueeFromClientX(event.clientX);
+    }
+
+    iosScrollbarPointerRef.current = null;
+  }
+
+  function handleIosGalleryScrollbarPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    finishIosGalleryScrollbarPointer(event, true);
+  }
+
+  function handleIosGalleryScrollbarPointerCancel(event: ReactPointerEvent<HTMLDivElement>) {
+    finishIosGalleryScrollbarPointer(event, false);
   }
 
   function resumeStripAutoScroll(delayMs = 900) {
@@ -704,14 +748,49 @@ export function TributeGallerySection({
     }
   }
 
+  function handleIosMarqueeStripTouchStart(event: ReactTouchEvent<HTMLDivElement>) {
+    const t = event.touches[0];
+
+    if (!t) {
+      return;
+    }
+
+    iosMarqueeTouchArmRef.current = {
+      startX: t.clientX,
+      startY: t.clientY,
+      paused: false,
+    };
+  }
+
+  function handleIosMarqueeStripTouchMove(event: ReactTouchEvent<HTMLDivElement>) {
+    const arm = iosMarqueeTouchArmRef.current;
+    const t = event.touches[0];
+
+    if (!arm || !t || arm.paused) {
+      return;
+    }
+
+    const dx = Math.abs(t.clientX - arm.startX);
+    const dy = Math.abs(t.clientY - arm.startY);
+
+    if (dx > 14 || dy > 14) {
+      arm.paused = true;
+      setGalleryStripInteracting(true);
+    }
+  }
+
+  function handleIosMarqueeStripTouchEnd() {
+    iosMarqueeTouchArmRef.current = null;
+    setGalleryStripInteracting(false);
+  }
+
   const stripSyntheticHandlers = iosGalleryCssMarqueeMode
     ? {
-        /** Same pause pattern as `MessageFeed`: holding touch pauses CSS marquee on WKWebKit. */
-        onTouchStart: () => setGalleryStripInteracting(true),
-        onTouchEnd: () => setGalleryStripInteracting(false),
-        onTouchCancel: () => setGalleryStripInteracting(false),
-        onMouseEnter: () => setGalleryStripInteracting(true),
-        onMouseLeave: () => setGalleryStripInteracting(false),
+        /** Pause marquee only after a small drag — light taps open photos without freezing the strip. */
+        onTouchStart: handleIosMarqueeStripTouchStart,
+        onTouchMove: handleIosMarqueeStripTouchMove,
+        onTouchEnd: handleIosMarqueeStripTouchEnd,
+        onTouchCancel: handleIosMarqueeStripTouchEnd,
       }
     : stripUsesNativeGesturesOnly
       ? {
@@ -826,7 +905,7 @@ export function TributeGallerySection({
                     onPointerDown={handleIosGalleryScrollbarPointerDown}
                     onPointerMove={handleIosGalleryScrollbarPointerMove}
                     onPointerUp={handleIosGalleryScrollbarPointerUp}
-                    onPointerCancel={handleIosGalleryScrollbarPointerUp}
+                    onPointerCancel={handleIosGalleryScrollbarPointerCancel}
                   >
                     <div
                       ref={galleryIosScrollbarThumbRef}
