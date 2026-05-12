@@ -163,6 +163,7 @@ export function TributeGallerySection({
     }
 
     autoScrollPausedRef.current = false;
+    const shouldTrackScrollEvents = !stripUsesNativeGesturesOnly;
 
     function onUserScroll() {
       if (programmaticStripScrollRef.current) {
@@ -173,7 +174,9 @@ export function TributeGallerySection({
       resumeStripAutoScroll(2000);
     }
 
-    strip.addEventListener("scroll", onUserScroll, { passive: true });
+    if (shouldTrackScrollEvents) {
+      strip.addEventListener("scroll", onUserScroll, { passive: true });
+    }
 
     let frameId = 0;
     let previousTimestamp = 0;
@@ -213,7 +216,9 @@ export function TributeGallerySection({
     frameId = window.requestAnimationFrame(step);
 
     return () => {
-      strip.removeEventListener("scroll", onUserScroll);
+      if (shouldTrackScrollEvents) {
+        strip.removeEventListener("scroll", onUserScroll);
+      }
       window.cancelAnimationFrame(frameId);
       if (programmaticStripScrollResetFrameRef.current !== null) {
         window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
@@ -221,7 +226,7 @@ export function TributeGallerySection({
       }
       programmaticStripScrollRef.current = false;
     };
-  }, [galleryImages.length, activeIndex]);
+  }, [galleryImages.length, activeIndex, stripUsesNativeGesturesOnly]);
 
   function showPreviousImage() {
     setActiveIndex((current) => {
