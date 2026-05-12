@@ -897,6 +897,53 @@ textarea {
   margin: 14px 0 8px;
 }
 
+.tribute-gallery-mobile-arrows {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 22px;
+  margin-top: 10px;
+  padding-bottom: 2px;
+}
+
+.tribute-gallery-mobile-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(200, 169, 106, 0.52);
+  background:
+    radial-gradient(circle at 30% 22%, rgba(255, 249, 232, 0.98), transparent 55%),
+    linear-gradient(168deg, rgba(255, 252, 245, 0.98), rgba(237, 212, 158, 0.62));
+  color: rgba(102, 74, 26, 0.94);
+  box-shadow:
+    0 3px 10px rgba(47, 58, 49, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    border-color 160ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tribute-gallery-mobile-arrow:active {
+  transform: scale(0.93);
+  border-color: rgba(200, 169, 106, 0.72);
+  box-shadow:
+    0 1px 5px rgba(47, 58, 49, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.tribute-gallery-mobile-arrow-icon {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
 .messages-stream.tribute-gallery-stream {
   overflow-x: auto;
   overflow-y: hidden;

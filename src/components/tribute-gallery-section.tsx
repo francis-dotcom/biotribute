@@ -76,6 +76,20 @@ function useIosLikelyGalleryStripPreferNativeGestures() {
   return prefer;
 }
 
+/** iPhone / iPod only (excludes iPad and Android) — used for under-gallery arrow controls. */
+function useIphoneLikelyPhone() {
+  const [yes, setYes] = useState(false);
+
+  useLayoutEffect(() => {
+    if (typeof navigator === "undefined") {
+      return;
+    }
+    setYes(/iPhone|iPod/i.test(navigator.userAgent));
+  }, []);
+
+  return yes;
+}
+
 export function TributeGallerySection({
   galleryIntro,
   galleryImages,
@@ -83,6 +97,7 @@ export function TributeGallerySection({
 }: TributeGallerySectionProps) {
   const stripPreferNativeTouch = useMobileGalleryStripNativeScroll();
   const stripPreferIosNativeGestures = useIosLikelyGalleryStripPreferNativeGestures();
+  const showGalleryIphoneArrows = useIphoneLikelyPhone();
   /** iOS WKWebKit (all widths): prefer native horizontal pan + RAF pause hints except where `iosGalleryCssMarqueeMode` uses CSS animation like `MessageFeed`. */
   const stripUsesNativeGesturesOnly = stripPreferNativeTouch || stripPreferIosNativeGestures;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -332,8 +347,57 @@ export function TributeGallerySection({
     });
   }
 
+  /** Shift CSS marquee phase on real iOS (same underlying strip as memories carousel). */
+  function nudgeIosGalleryMarquee(direction: "left" | "right") {
+    const track = galleryMarqueeTrackRef.current;
+    if (!track) {
+      return;
+    }
+
+    const animationsList = typeof track.getAnimations === "function" ? track.getAnimations() : [];
+    const anim =
+      animationsList.find((a) => a.playState === "running" || a.playState === "paused") ??
+      animationsList[0];
+
+    if (!anim) {
+      return;
+    }
+
+    let durationMs = Math.max((galleryMarqueeDurationSec ?? 52) * 1000, 1200);
+
+    try {
+      const effect = anim.effect;
+      if (effect && "getTiming" in effect && typeof effect.getTiming === "function") {
+        const raw = effect.getTiming().duration;
+        if (typeof raw === "number" && Number.isFinite(raw)) {
+          durationMs = Math.max(raw, 1200);
+        }
+      }
+    } catch {
+      /* computed timing unavailable */
+    }
+
+    const fraction = 0.11;
+    const stepMs = durationMs * fraction * (direction === "right" ? 1 : -1);
+
+    try {
+      const ct = anim.currentTime;
+      const base = ct === null || Number.isNaN(Number(ct)) ? 0 : Number(ct);
+      let next = base + stepMs;
+      next = ((next % durationMs) + durationMs) % durationMs;
+      anim.currentTime = next;
+    } catch {
+      /* WKWebKit edge cases */
+    }
+  }
+
   function scrollGallery(direction: "left" | "right") {
+    if (galleryImages.length < 2) {
+      return;
+    }
+
     if (iosGalleryCssMarqueeMode) {
+      nudgeIosGalleryMarquee(direction);
       return;
     }
 
@@ -646,6 +710,40 @@ export function TributeGallerySection({
                   ))}
                 </div>
               </div>
+              {galleryImages.length >= 2 && showGalleryIphoneArrows ? (
+                <div
+                  className="tribute-gallery-mobile-arrows"
+                  role="group"
+                  aria-label="Move gallery sideways"
+                >
+                  <button
+                    type="button"
+                    className="tribute-gallery-mobile-arrow"
+                    aria-label="Shift gallery backward"
+                    onClick={() => scrollGallery("left")}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" className="tribute-gallery-mobile-arrow-icon">
+                      <path
+                        fill="currentColor"
+                        d="M14.2 17.3 9 12l5.2-5.3c.5-.5.5-1.3 0-1.8s-1.3-.5-1.8 0l-6 6.2c-.5.5-.5 1.3 0 1.8l6 6.2c.5.5 1.3.5 1.8 0s.5-1.3 0-1.8z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    className="tribute-gallery-mobile-arrow"
+                    aria-label="Shift gallery forward"
+                    onClick={() => scrollGallery("right")}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" className="tribute-gallery-mobile-arrow-icon">
+                      <path
+                        fill="currentColor"
+                        d="M9.8 17.3 15 12 9.8 6.7c-.5-.5-.5-1.3 0-1.8s1.3-.5 1.8 0l6 6.2c.5.5.5 1.3 0 1.8l-6 6.2c-.5.5-1.3.5-1.8 0s-.5-1.3 0-1.8z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ) : null}
             </>
           ) : (
             <>
