@@ -882,6 +882,15 @@ textarea {
   aspect-ratio: 6 / 5;
 }
 
+.tribute-gallery-strip-image {
+  height: auto;
+  object-fit: cover;
+  background: rgba(249, 249, 251, 0.95);
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
 .tribute-gallery-scroll-actions {
   justify-content: flex-end;
   margin: 14px 0 8px;

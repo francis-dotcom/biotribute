@@ -513,9 +513,13 @@ export function TributeGallerySection({
                         setActiveIndex(index % galleryImages.length);
                       }}
                     >
-                      <span
-                        className="gallery-item has-image tribute-gallery-strip-item"
-                        style={{ backgroundImage: `url("${image.imageUrl}")` }}
+                      <img
+                        className="gallery-item tribute-gallery-strip-item tribute-gallery-strip-image"
+                        src={image.imageUrl}
+                        alt={`Gallery memory ${(index % galleryImages.length) + 1}`}
+                        draggable={false}
+                        loading={index < galleryImages.length ? "eager" : "lazy"}
+                        decoding="async"
                       />
                     </button>
                   ))}
