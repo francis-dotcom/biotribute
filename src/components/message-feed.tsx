@@ -11,6 +11,10 @@ type MessageFeedProps = {
   messages: TributeMessage[];
 };
 
+type MessageMarqueeStyle = CSSProperties & {
+  "--message-marquee-duration"?: string;
+};
+
 export function MessageFeed({ messages }: MessageFeedProps) {
   const [activeMessage, setActiveMessage] = useState<TributeMessage | null>(null);
   const [activeMessageOrigin, setActiveMessageOrigin] = useState<"stream" | "library">("stream");
@@ -107,7 +111,12 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     }
 
     function measure() {
-      const w = el.scrollWidth;
+      const node = marqueeTrackRef.current;
+      if (!node) {
+        return;
+      }
+
+      const w = node.scrollWidth;
       if (w <= 0) {
         return;
       }
@@ -122,7 +131,7 @@ export function MessageFeed({ messages }: MessageFeedProps) {
     return () => ro.disconnect();
   }, [isSearching, visibleMessages.length]);
 
-  const marqueeStyle: CSSProperties | undefined =
+  const marqueeStyle: MessageMarqueeStyle | undefined =
     !isSearching && marqueeDurationSec != null
       ? { "--message-marquee-duration": `${marqueeDurationSec}s` }
       : undefined;
