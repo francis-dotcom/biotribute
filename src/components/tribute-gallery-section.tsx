@@ -1,10 +1,23 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import type { PointerEvent as ReactPointerEvent, WheelEvent as ReactWheelEvent } from "react";
 import { MarkdownText } from "@/components/markdown-text";
 import type { TributeRecord } from "@/data/tributes";
+
+/**
+ * Real iOS Safari often emits `scroll` slightly after our RAF `scrollLeft` updates. If we treat those as
+ * user scrolls, autoscroll stays paused. DevTools device mode usually does not show this timing gap.
+ */
+const STRIP_PROGRAMMATIC_SCROLL_GUARD_MS = 280;
+
+/** Matches `GALLERY_STRIP_PX_PER_SEC` in `message-feed.tsx` — keeps marquee speed aligned with memories strip. */
+const TRIBUTE_STRIP_PX_PER_SEC = 28;
+
+type GalleryMarqueeStyle = CSSProperties & {
+  "--message-marquee-duration"?: string;
+};
 
 type TributeGallerySectionProps = {
   galleryIntro?: string;
@@ -70,10 +83,13 @@ export function TributeGallerySection({
 }: TributeGallerySectionProps) {
   const stripPreferNativeTouch = useMobileGalleryStripNativeScroll();
   const stripPreferIosNativeGestures = useIosLikelyGalleryStripPreferNativeGestures();
-  /** iOS WKWebKit (all widths): use browser scroll physics for drags; RAF autoscroll pauses on user scroll via `programmaticStripScrollRef`. */
+  /** iOS WKWebKit (all widths): prefer native horizontal pan + RAF pause hints except where `iosGalleryCssMarqueeMode` uses CSS animation like `MessageFeed`. */
   const stripUsesNativeGesturesOnly = stripPreferNativeTouch || stripPreferIosNativeGestures;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [galleryMarqueeDurationSec, setGalleryMarqueeDurationSec] = useState<number | null>(null);
+  const [galleryStripInteracting, setGalleryStripInteracting] = useState(false);
   const stripRef = useRef<HTMLDivElement | null>(null);
+  const galleryMarqueeTrackRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
   const stripDragStateRef = useRef<StripDragState | null>(null);
@@ -81,10 +97,15 @@ export function TributeGallerySection({
   const programmaticStripScrollResetFrameRef = useRef<number | null>(null);
   const autoScrollPausedRef = useRef(false);
   const programmaticStripScrollRef = useRef(false);
+  const lastProgrammaticStripScrollMsRef = useRef(0);
   const suppressStripClickRef = useRef(false);
 
   const activeImage = activeIndex === null ? null : galleryImages[activeIndex] ?? null;
   const activeImageNumber = activeIndex === null ? 0 : activeIndex + 1;
+
+  /** Same technique as `MessageFeed`: CSS `tribute-scroll` on real iOS — avoids RAF `scrollLeft` quirks (trade-off: no finger-drag scrolling along the strip on iPhone/iPad). */
+  const iosGalleryCssMarqueeMode =
+    stripPreferIosNativeGestures && galleryImages.length >= 2 && activeIndex === null;
 
   function closeActiveImage() {
     autoScrollPausedRef.current = false;
@@ -146,6 +167,44 @@ export function TributeGallerySection({
   }, [activeIndex]);
 
   useEffect(() => {
+    if (activeIndex !== null) {
+      setGalleryStripInteracting(false);
+    }
+  }, [activeIndex]);
+
+  useLayoutEffect(() => {
+    if (!stripPreferIosNativeGestures || galleryImages.length < 2) {
+      setGalleryMarqueeDurationSec(null);
+      return;
+    }
+
+    function measure() {
+      const node = galleryMarqueeTrackRef.current;
+      if (!node) {
+        return;
+      }
+
+      const w = node.scrollWidth;
+      if (w <= 0) {
+        return;
+      }
+
+      const sec = w / (2 * TRIBUTE_STRIP_PX_PER_SEC);
+      setGalleryMarqueeDurationSec(Math.max(sec, 12));
+    }
+
+    const node = galleryMarqueeTrackRef.current;
+    if (!node) {
+      return;
+    }
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(node);
+    return () => ro.disconnect();
+  }, [stripPreferIosNativeGestures, galleryImages.length]);
+
+  useEffect(() => {
     return () => {
       if (stripResumeTimeoutRef.current !== null) {
         window.clearTimeout(stripResumeTimeoutRef.current);
@@ -158,14 +217,19 @@ export function TributeGallerySection({
 
   useEffect(() => {
     const strip = stripRef.current;
-    if (!strip || galleryImages.length < 2 || activeIndex !== null) {
+    if (!strip || galleryImages.length < 2 || activeIndex !== null || stripPreferIosNativeGestures) {
       return;
     }
 
     autoScrollPausedRef.current = false;
 
     function onUserScroll() {
-      if (programmaticStripScrollRef.current) {
+      const now = performance.now();
+
+      if (
+        programmaticStripScrollRef.current ||
+        now - lastProgrammaticStripScrollMsRef.current < STRIP_PROGRAMMATIC_SCROLL_GUARD_MS
+      ) {
         return;
       }
 
@@ -175,9 +239,29 @@ export function TributeGallerySection({
 
     strip.addEventListener("scroll", onUserScroll, { passive: true });
 
+    function onScrollEndAfterUser() {
+      const now = performance.now();
+
+      if (
+        programmaticStripScrollRef.current ||
+        now - lastProgrammaticStripScrollMsRef.current < STRIP_PROGRAMMATIC_SCROLL_GUARD_MS
+      ) {
+        return;
+      }
+
+      resumeStripAutoScroll(550);
+    }
+
+    const scrollEndSupported =
+      stripPreferIosNativeGestures &&
+      typeof (strip as HTMLElement & { onscrollend?: unknown }).onscrollend !== "undefined";
+
+    if (scrollEndSupported) {
+      strip.addEventListener("scrollend", onScrollEndAfterUser, { passive: true });
+    }
+
     let frameId = 0;
     let previousTimestamp = 0;
-    const pixelsPerSecond = 28;
 
     const step = (timestamp: number) => {
       if (!strip.isConnected) {
@@ -193,10 +277,12 @@ export function TributeGallerySection({
 
       if (!autoScrollPausedRef.current) {
         const halfWidth = strip.scrollWidth / 2;
+        lastProgrammaticStripScrollMsRef.current = performance.now();
         programmaticStripScrollRef.current = true;
-        strip.scrollLeft += (pixelsPerSecond * elapsed) / 1000;
+        strip.scrollLeft += (TRIBUTE_STRIP_PX_PER_SEC * elapsed) / 1000;
         if (strip.scrollLeft >= halfWidth) {
           strip.scrollLeft -= halfWidth;
+          lastProgrammaticStripScrollMsRef.current = performance.now();
         }
         if (programmaticStripScrollResetFrameRef.current !== null) {
           window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
@@ -214,6 +300,9 @@ export function TributeGallerySection({
 
     return () => {
       strip.removeEventListener("scroll", onUserScroll);
+      if (scrollEndSupported) {
+        strip.removeEventListener("scrollend", onScrollEndAfterUser);
+      }
       window.cancelAnimationFrame(frameId);
       if (programmaticStripScrollResetFrameRef.current !== null) {
         window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
@@ -221,7 +310,7 @@ export function TributeGallerySection({
       }
       programmaticStripScrollRef.current = false;
     };
-  }, [galleryImages.length, activeIndex]);
+  }, [galleryImages.length, activeIndex, stripPreferIosNativeGestures]);
 
   function showPreviousImage() {
     setActiveIndex((current) => {
@@ -244,6 +333,10 @@ export function TributeGallerySection({
   }
 
   function scrollGallery(direction: "left" | "right") {
+    if (iosGalleryCssMarqueeMode) {
+      return;
+    }
+
     const strip = stripRef.current;
     if (!strip) {
       return;
@@ -439,27 +532,52 @@ export function TributeGallerySection({
     }
   }
 
-  const stripSyntheticHandlers = stripUsesNativeGesturesOnly
+  const stripSyntheticHandlers = iosGalleryCssMarqueeMode
     ? {
-        /** Pause RAF immediately so WKWebKit can scroll the strip instead of fighting scrollLeft each frame. */
-        onTouchStart: pauseStripAutoScrollNow,
-        onTouchEnd: () => resumeStripAutoScroll(1700),
-        onTouchCancel: () => resumeStripAutoScroll(1700),
+        /** Same pause pattern as `MessageFeed`: holding touch pauses CSS marquee on WKWebKit. */
+        onTouchStart: () => setGalleryStripInteracting(true),
+        onTouchEnd: () => setGalleryStripInteracting(false),
+        onTouchCancel: () => setGalleryStripInteracting(false),
+        onMouseEnter: () => setGalleryStripInteracting(true),
+        onMouseLeave: () => setGalleryStripInteracting(false),
       }
-    : {
-        onPointerDown: handleStripPointerDown,
-        onPointerMove: handleStripPointerMove,
-        onPointerUp: handleStripPointerUp,
-        onPointerCancel: handleStripPointerUp,
-        onMouseEnter: handleStripMouseEnterPause,
-        onMouseLeave: handleStripMouseLeaveResume,
-        onTouchStart: handleStripTouchPause,
-        onTouchEnd: handleStripTouchInterrupt,
-        onTouchCancel: handleStripTouchInterrupt,
-      };
+    : stripUsesNativeGesturesOnly
+      ? {
+          onTouchStart: pauseStripAutoScrollNow,
+          onTouchEnd: () => resumeStripAutoScroll(stripPreferIosNativeGestures ? 3200 : 1700),
+          onTouchCancel: () => resumeStripAutoScroll(stripPreferIosNativeGestures ? 3200 : 1700),
+        }
+      : {
+          onPointerDown: handleStripPointerDown,
+          onPointerMove: handleStripPointerMove,
+          onPointerUp: handleStripPointerUp,
+          onPointerCancel: handleStripPointerUp,
+          onMouseEnter: handleStripMouseEnterPause,
+          onMouseLeave: handleStripMouseLeaveResume,
+          onTouchStart: handleStripTouchPause,
+          onTouchEnd: handleStripTouchInterrupt,
+          onTouchCancel: handleStripTouchInterrupt,
+        };
 
-  const stripSurfaceClass = "messages-stream tribute-gallery-stream";
-  const trackSurfaceClass = "messages-track tribute-gallery-track";
+  const stripSurfaceClass = [
+    "messages-stream tribute-gallery-stream",
+    iosGalleryCssMarqueeMode ? "tribute-gallery-stream--ios-marquee" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const trackSurfaceClass = [
+    "messages-track tribute-gallery-track",
+    iosGalleryCssMarqueeMode ? "tribute-gallery-track--ios-marquee" : "",
+    iosGalleryCssMarqueeMode && galleryStripInteracting ? "is-paused" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const galleryMarqueeStyle: GalleryMarqueeStyle | undefined =
+    iosGalleryCssMarqueeMode && galleryMarqueeDurationSec != null
+      ? { "--message-marquee-duration": `${galleryMarqueeDurationSec}s` }
+      : undefined;
 
   return (
     <>
@@ -495,7 +613,9 @@ export function TributeGallerySection({
                 {...stripSyntheticHandlers}
               >
                 <div
+                  ref={galleryMarqueeTrackRef}
                   className={trackSurfaceClass}
+                  style={galleryMarqueeStyle}
                   role="list"
                   aria-label="Photo gallery"
                 >

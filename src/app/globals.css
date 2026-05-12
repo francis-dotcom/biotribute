@@ -925,6 +925,24 @@ textarea {
   border-radius: 999px;
 }
 
+/** Photo gallery on real iPhone/iPad: match memories strip — GPU CSS marquee (`tribute-scroll`) instead of RAF `scrollLeft`. */
+.messages-stream.tribute-gallery-stream.tribute-gallery-stream--ios-marquee {
+  overflow: hidden;
+  touch-action: manipulation;
+  -webkit-overflow-scrolling: auto;
+}
+
+.tribute-gallery-track.tribute-gallery-track--ios-marquee {
+  animation: tribute-scroll var(--message-marquee-duration, 52s) linear infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tribute-gallery-track.tribute-gallery-track--ios-marquee {
+    animation: none !important;
+  }
+}
+
 .tribute-gallery-lightbox {
   padding: 24px;
 }
