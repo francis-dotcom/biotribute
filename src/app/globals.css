@@ -884,8 +884,10 @@ textarea {
 }
 
 .tribute-gallery-strip-image {
-  height: auto;
-  object-fit: cover;
+  display: block;
+  box-sizing: border-box;
+  object-fit: contain;
+  object-position: center center;
   background: rgba(249, 249, 251, 0.95);
   transform: translateZ(0);
   -webkit-transform: translateZ(0);
