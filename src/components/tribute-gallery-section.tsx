@@ -76,7 +76,7 @@ function useIosLikelyGalleryStripPreferNativeGestures() {
   return prefer;
 }
 
-/** iPhone / iPod only (excludes iPad and Android) — used for under-gallery arrow controls. */
+/** iPhone / iPod only (excludes iPad and Android) — under-gallery marquee scrub bar. */
 function useIphoneLikelyPhone() {
   const [yes, setYes] = useState(false);
 
@@ -97,7 +97,7 @@ export function TributeGallerySection({
 }: TributeGallerySectionProps) {
   const stripPreferNativeTouch = useMobileGalleryStripNativeScroll();
   const stripPreferIosNativeGestures = useIosLikelyGalleryStripPreferNativeGestures();
-  const showGalleryIphoneArrows = useIphoneLikelyPhone();
+  const showGalleryIphoneScrollbar = useIphoneLikelyPhone();
   /** iOS WKWebKit (all widths): prefer native horizontal pan + RAF pause hints except where `iosGalleryCssMarqueeMode` uses CSS animation like `MessageFeed`. */
   const stripUsesNativeGesturesOnly = stripPreferNativeTouch || stripPreferIosNativeGestures;
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
@@ -105,6 +105,8 @@ export function TributeGallerySection({
   const [galleryStripInteracting, setGalleryStripInteracting] = useState(false);
   const stripRef = useRef<HTMLDivElement | null>(null);
   const galleryMarqueeTrackRef = useRef<HTMLDivElement | null>(null);
+  const galleryIosScrollbarTrackRef = useRef<HTMLDivElement | null>(null);
+  const galleryIosScrollbarThumbRef = useRef<HTMLDivElement | null>(null);
   const viewportRef = useRef<HTMLDivElement | null>(null);
   const dragStateRef = useRef<DragState | null>(null);
   const stripDragStateRef = useRef<StripDragState | null>(null);
@@ -218,6 +220,56 @@ export function TributeGallerySection({
     ro.observe(node);
     return () => ro.disconnect();
   }, [stripPreferIosNativeGestures, galleryImages.length]);
+
+  /** Sync faux scrollbar thumb with CSS marquee phase (iPhone strip); DOM-only updates in rAF — no React state thrash. */
+  useEffect(() => {
+    if (!showGalleryIphoneScrollbar || !iosGalleryCssMarqueeMode) {
+      return;
+    }
+
+    const THUMB_FRAC = 0.22;
+
+    let frameId = 0;
+
+    const tick = () => {
+      const thumb = galleryIosScrollbarThumbRef.current;
+      const marqueeTrack = galleryMarqueeTrackRef.current;
+      const durationMs = Math.max((galleryMarqueeDurationSec ?? 52) * 1000, 1200);
+
+      let progress = 0;
+
+      try {
+        const animations =
+          typeof marqueeTrack?.getAnimations === "function" ? marqueeTrack.getAnimations() : [];
+        const anim =
+          animations.find((a) => a.playState === "running" || a.playState === "paused") ??
+          animations[0];
+
+        if (anim) {
+          const ct = Number(anim.currentTime ?? 0);
+
+          if (Number.isFinite(ct)) {
+            progress = (((ct % durationMs) + durationMs) % durationMs) / durationMs;
+          }
+        }
+      } catch {
+        /* WKWebKit */
+      }
+
+      if (thumb) {
+        const travelPct = (1 - THUMB_FRAC) * 100;
+
+        thumb.style.left = `${progress * travelPct}%`;
+        thumb.style.width = `${THUMB_FRAC * 100}%`;
+      }
+
+      frameId = window.requestAnimationFrame(tick);
+    };
+
+    frameId = window.requestAnimationFrame(tick);
+
+    return () => window.cancelAnimationFrame(frameId);
+  }, [showGalleryIphoneScrollbar, iosGalleryCssMarqueeMode, galleryMarqueeDurationSec]);
 
   useEffect(() => {
     return () => {
@@ -414,6 +466,62 @@ export function TributeGallerySection({
     });
 
     resumeStripAutoScroll(1400);
+  }
+
+  function seekIosGalleryMarqueeFromClientX(clientX: number) {
+    const scrollbarTrack = galleryIosScrollbarTrackRef.current;
+    const marqueeTrack = galleryMarqueeTrackRef.current;
+
+    if (!scrollbarTrack || !marqueeTrack) {
+      return;
+    }
+
+    const rect = scrollbarTrack.getBoundingClientRect();
+    const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
+    const durationMs = Math.max((galleryMarqueeDurationSec ?? 52) * 1000, 1200);
+
+    try {
+      const animations =
+        typeof marqueeTrack.getAnimations === "function" ? marqueeTrack.getAnimations() : [];
+      const anim =
+        animations.find((a) => a.playState === "running" || a.playState === "paused") ??
+        animations[0];
+
+      if (anim) {
+        anim.currentTime = ratio * durationMs;
+      }
+    } catch {
+      /* WKWebKit */
+    }
+  }
+
+  function handleIosGalleryScrollbarPointerDown(event: ReactPointerEvent<HTMLDivElement>) {
+    const scrollbarTrack = galleryIosScrollbarTrackRef.current;
+
+    if (!scrollbarTrack) {
+      return;
+    }
+
+    scrollbarTrack.setPointerCapture(event.pointerId);
+    seekIosGalleryMarqueeFromClientX(event.clientX);
+  }
+
+  function handleIosGalleryScrollbarPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
+    const scrollbarTrack = galleryIosScrollbarTrackRef.current;
+
+    if (!scrollbarTrack?.hasPointerCapture(event.pointerId)) {
+      return;
+    }
+
+    seekIosGalleryMarqueeFromClientX(event.clientX);
+  }
+
+  function handleIosGalleryScrollbarPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
+    const scrollbarTrack = galleryIosScrollbarTrackRef.current;
+
+    if (scrollbarTrack?.hasPointerCapture(event.pointerId)) {
+      scrollbarTrack.releasePointerCapture(event.pointerId);
+    }
   }
 
   function resumeStripAutoScroll(delayMs = 900) {
@@ -710,38 +818,22 @@ export function TributeGallerySection({
                   ))}
                 </div>
               </div>
-              {galleryImages.length >= 2 && showGalleryIphoneArrows ? (
-                <div
-                  className="tribute-gallery-mobile-arrows"
-                  role="group"
-                  aria-label="Move gallery sideways"
-                >
-                  <button
-                    type="button"
-                    className="tribute-gallery-mobile-arrow"
-                    aria-label="Shift gallery backward"
-                    onClick={() => scrollGallery("left")}
+              {galleryImages.length >= 2 && showGalleryIphoneScrollbar && iosGalleryCssMarqueeMode ? (
+                <div className="tribute-gallery-ios-scrollbar" role="group" aria-label="Photo gallery scrubber">
+                  <div
+                    ref={galleryIosScrollbarTrackRef}
+                    className="tribute-gallery-ios-scrollbar-track"
+                    onPointerDown={handleIosGalleryScrollbarPointerDown}
+                    onPointerMove={handleIosGalleryScrollbarPointerMove}
+                    onPointerUp={handleIosGalleryScrollbarPointerUp}
+                    onPointerCancel={handleIosGalleryScrollbarPointerUp}
                   >
-                    <svg viewBox="0 0 24 24" aria-hidden="true" className="tribute-gallery-mobile-arrow-icon">
-                      <path
-                        fill="currentColor"
-                        d="M14.2 17.3 9 12l5.2-5.3c.5-.5.5-1.3 0-1.8s-1.3-.5-1.8 0l-6 6.2c-.5.5-.5 1.3 0 1.8l6 6.2c.5.5 1.3.5 1.8 0s.5-1.3 0-1.8z"
-                      />
-                    </svg>
-                  </button>
-                  <button
-                    type="button"
-                    className="tribute-gallery-mobile-arrow"
-                    aria-label="Shift gallery forward"
-                    onClick={() => scrollGallery("right")}
-                  >
-                    <svg viewBox="0 0 24 24" aria-hidden="true" className="tribute-gallery-mobile-arrow-icon">
-                      <path
-                        fill="currentColor"
-                        d="M9.8 17.3 15 12 9.8 6.7c-.5-.5-.5-1.3 0-1.8s1.3-.5 1.8 0l6 6.2c.5.5.5 1.3 0 1.8l-6 6.2c-.5.5-1.3.5-1.8 0s-.5-1.3 0-1.8z"
-                      />
-                    </svg>
-                  </button>
+                    <div
+                      ref={galleryIosScrollbarThumbRef}
+                      className="tribute-gallery-ios-scrollbar-thumb"
+                      aria-hidden="true"
+                    />
+                  </div>
                 </div>
               ) : null}
             </>
