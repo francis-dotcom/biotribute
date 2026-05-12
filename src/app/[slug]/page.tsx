@@ -27,9 +27,8 @@ type PageProps = {
 };
 
 const heroServiceCards = [
-  { label: "Wake", month: "MAY", day: "16" },
-  { label: "Keep", month: "MAY", day: "17" },
-  { label: "Burial", month: "MAY", day: "18" },
+  { label: "Wakeep", month: "JUN", day: "10" },
+  { label: "Funeral", month: "JUN", day: "11" },
 ] as const;
 
 export const dynamic = "force-dynamic";
