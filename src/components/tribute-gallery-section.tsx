@@ -20,8 +20,10 @@ type DragState = {
 };
 
 type StripDragState = {
+  pointerId: number;
   startX: number;
   scrollLeft: number;
+  captureActive: boolean;
   moved: boolean;
 };
 
@@ -268,12 +270,14 @@ export function TributeGallerySection({
 
     pauseStripAutoScrollNow();
     suppressStripClickRef.current = false;
+    /** Defer capture until the user exceeds a horizontal drag threshold so taps on thumbnails still synthesize clicks. */
     stripDragStateRef.current = {
+      pointerId: event.pointerId,
       startX: event.clientX,
       scrollLeft: strip.scrollLeft,
+      captureActive: false,
       moved: false,
     };
-    strip.setPointerCapture(event.pointerId);
   }
 
   function handleStripPointerMove(event: ReactPointerEvent<HTMLDivElement>) {
@@ -287,12 +291,21 @@ export function TributeGallerySection({
     }
 
     const deltaX = event.clientX - dragState.startX;
-    if (Math.abs(deltaX) > 4) {
-      dragState.moved = true;
-      suppressStripClickRef.current = true;
+    const activateDragPx = 10;
+
+    if (!dragState.captureActive) {
+      if (Math.abs(deltaX) < activateDragPx) {
+        return;
+      }
+
+      dragState.captureActive = true;
+      strip.setPointerCapture(dragState.pointerId);
     }
 
     strip.scrollLeft = dragState.scrollLeft - deltaX;
+
+    dragState.moved = true;
+    suppressStripClickRef.current = true;
   }
 
   function handleStripPointerUp(event: ReactPointerEvent<HTMLDivElement>) {
@@ -300,12 +313,20 @@ export function TributeGallerySection({
       return;
     }
     const strip = stripRef.current;
+    const dragState = stripDragStateRef.current;
+
     if (strip?.hasPointerCapture(event.pointerId)) {
       strip.releasePointerCapture(event.pointerId);
     }
 
     stripDragStateRef.current = null;
     resumeStripAutoScroll();
+
+    if (!dragState?.moved) {
+      suppressStripClickRef.current = false;
+      return;
+    }
+
     window.setTimeout(() => {
       suppressStripClickRef.current = false;
     }, 0);
