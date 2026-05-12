@@ -163,7 +163,6 @@ export function TributeGallerySection({
     }
 
     autoScrollPausedRef.current = false;
-    const shouldTrackScrollEvents = !stripUsesNativeGesturesOnly;
 
     function onUserScroll() {
       if (programmaticStripScrollRef.current) {
@@ -174,9 +173,7 @@ export function TributeGallerySection({
       resumeStripAutoScroll(2000);
     }
 
-    if (shouldTrackScrollEvents) {
-      strip.addEventListener("scroll", onUserScroll, { passive: true });
-    }
+    strip.addEventListener("scroll", onUserScroll, { passive: true });
 
     let frameId = 0;
     let previousTimestamp = 0;
@@ -216,9 +213,7 @@ export function TributeGallerySection({
     frameId = window.requestAnimationFrame(step);
 
     return () => {
-      if (shouldTrackScrollEvents) {
-        strip.removeEventListener("scroll", onUserScroll);
-      }
+      strip.removeEventListener("scroll", onUserScroll);
       window.cancelAnimationFrame(frameId);
       if (programmaticStripScrollResetFrameRef.current !== null) {
         window.cancelAnimationFrame(programmaticStripScrollResetFrameRef.current);
@@ -226,7 +221,7 @@ export function TributeGallerySection({
       }
       programmaticStripScrollRef.current = false;
     };
-  }, [galleryImages.length, activeIndex, stripUsesNativeGesturesOnly]);
+  }, [galleryImages.length, activeIndex]);
 
   function showPreviousImage() {
     setActiveIndex((current) => {
@@ -445,7 +440,12 @@ export function TributeGallerySection({
   }
 
   const stripSyntheticHandlers = stripUsesNativeGesturesOnly
-    ? {}
+    ? {
+        /** Pause RAF immediately so WKWebKit can scroll the strip instead of fighting scrollLeft each frame. */
+        onTouchStart: pauseStripAutoScrollNow,
+        onTouchEnd: () => resumeStripAutoScroll(1700),
+        onTouchCancel: () => resumeStripAutoScroll(1700),
+      }
     : {
         onPointerDown: handleStripPointerDown,
         onPointerMove: handleStripPointerMove,

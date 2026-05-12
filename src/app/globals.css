@@ -874,6 +874,7 @@ textarea {
 
 .tribute-gallery-strip-button {
   flex: 0 0 auto;
+  touch-action: pan-x;
 }
 
 .tribute-gallery-strip-item {
