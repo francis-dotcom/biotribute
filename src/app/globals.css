@@ -2842,6 +2842,39 @@ textarea {
   justify-content: flex-start;
 }
 
+.moderation-inline-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.moderation-edit-toggle {
+  width: fit-content;
+}
+
+.moderation-edit-form {
+  display: grid;
+  gap: 12px;
+}
+
+.moderation-edit-label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted-2);
+  font: 600 0.92rem/1.4 var(--font-sans);
+}
+
+.moderation-edit-label textarea {
+  min-height: 132px;
+  resize: vertical;
+}
+
+.moderation-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 @keyframes notice-toast-in {
   from {
     opacity: 0;

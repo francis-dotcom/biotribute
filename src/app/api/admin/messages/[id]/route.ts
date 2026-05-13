@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { isAdminAuthenticated } from "@/lib/admin";
-import { deleteMessage, updateMessageStatus } from "@/lib/messages";
+import { deleteMessage, updateMessageContent, updateMessageStatus } from "@/lib/messages";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
 
@@ -40,6 +40,7 @@ export async function POST(
   const formData = await request.formData();
   const status = String(formData.get("status") ?? "");
   const action = String(formData.get("action") ?? "");
+  const message = String(formData.get("message") ?? "");
   const redirectTo = String(formData.get("redirectTo") ?? "");
   const { id } = await params;
 
@@ -64,6 +65,28 @@ export async function POST(
       buildRedirectUrl(
         redirectTo || "/admin/messages",
         "Message deleted.",
+        "success"
+      )
+    );
+  }
+
+  if (action === "edit") {
+    try {
+      await updateMessageContent(id, message);
+    } catch (error) {
+      redirect(
+        buildRedirectUrl(
+          redirectTo || "/admin/messages",
+          error instanceof Error ? error.message : "Unable to update message content.",
+          "error"
+        )
+      );
+    }
+
+    redirect(
+      buildRedirectUrl(
+        redirectTo || "/admin/messages",
+        "Message text updated.",
         "success"
       )
     );

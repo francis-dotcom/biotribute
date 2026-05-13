@@ -28,6 +28,8 @@ export function ModerationQueue({
   redirectTo,
 }: ModerationQueueProps) {
   const [activeGroup, setActiveGroup] = useState<GroupedModerationRow | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editingDraft, setEditingDraft] = useState("");
 
   const rows = useMemo(
     () => {
@@ -70,6 +72,21 @@ export function ModerationQueue({
   const pendingRows = rows.filter((group) => group.latest.status.startsWith("pending"));
   const approvedRows = rows.filter((group) => group.latest.status === "approved");
   const rejectedRows = rows.filter((group) => group.latest.status === "rejected");
+
+  function startEditing(message: StoredMessageRow) {
+    setEditingMessageId(message.id);
+    setEditingDraft(message.message);
+  }
+
+  function stopEditing() {
+    setEditingMessageId(null);
+    setEditingDraft("");
+  }
+
+  function closeActiveGroup() {
+    stopEditing();
+    setActiveGroup(null);
+  }
 
   function renderActions(message: StoredMessageRow) {
     const isPending = message.status.startsWith("pending");
@@ -168,7 +185,10 @@ export function ModerationQueue({
                   <button
                     className="moderation-row-open"
                     type="button"
-                    onClick={() => setActiveGroup(group)}
+                    onClick={() => {
+                      stopEditing();
+                      setActiveGroup(group);
+                    }}
                   >
                     <span className="moderation-row-summary">
                       <span className="moderation-row-author">{group.latest.author}</span>
@@ -231,7 +251,7 @@ export function ModerationQueue({
           role="dialog"
           aria-modal="true"
           aria-labelledby="moderation-message-title"
-          onClick={() => setActiveGroup(null)}
+          onClick={closeActiveGroup}
         >
           <div className="message-modal-card moderation-message-modal" onClick={(event) => event.stopPropagation()}>
             <div className="message-modal-head">
@@ -248,7 +268,7 @@ export function ModerationQueue({
                 className="message-modal-close"
                 type="button"
                 aria-label="Close message"
-                onClick={() => setActiveGroup(null)}
+                onClick={closeActiveGroup}
               >
                 ×
               </button>
@@ -271,7 +291,47 @@ export function ModerationQueue({
                         {new Date(message.created_at).toLocaleString("en-US")}
                       </span>
                     </div>
-                    <p className="message-modal-copy">{message.message}</p>
+                    {editingMessageId === message.id ? (
+                      <form
+                        action={`/api/admin/messages/${message.id}`}
+                        method="post"
+                        className="moderation-edit-form"
+                      >
+                        {redirectTo ? <input type="hidden" name="redirectTo" value={redirectTo} /> : null}
+                        <input type="hidden" name="action" value="edit" />
+                        <label className="moderation-edit-label">
+                          <span>Edit message</span>
+                          <textarea
+                            name="message"
+                            value={editingDraft}
+                            onChange={(event) => setEditingDraft(event.target.value)}
+                            rows={5}
+                            required
+                          />
+                        </label>
+                        <div className="moderation-edit-actions">
+                          <button className="button-primary" type="submit">
+                            Save Text
+                          </button>
+                          <button className="button-secondary" type="button" onClick={stopEditing}>
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    ) : (
+                      <>
+                        <p className="message-modal-copy">{message.message}</p>
+                        <div className="moderation-inline-tools">
+                          <button
+                            className="button-secondary moderation-edit-toggle"
+                            type="button"
+                            onClick={() => startEditing(message)}
+                          >
+                            Edit Text
+                          </button>
+                        </div>
+                      </>
+                    )}
                     <div className="moderation-history-actions">
                       {renderActions(message)}
                     </div>

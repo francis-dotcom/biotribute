@@ -360,6 +360,30 @@ export async function updateMessageStatus(id: string, status: StoredMessageStatu
   }
 }
 
+export async function updateMessageContent(id: string, message: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    throw new Error("Message storage is not configured.");
+  }
+
+  const normalizedMessage = message.trim();
+  if (!normalizedMessage) {
+    throw new Error("Message cannot be empty.");
+  }
+
+  const { error } = await supabase
+    .from("tribute_messages")
+    .update({
+      message: normalizedMessage,
+      excerpt: toExcerpt(normalizedMessage),
+    })
+    .eq("id", id);
+
+  if (error) {
+    throw new Error("Unable to update message content.");
+  }
+}
+
 export async function deleteMessage(id: string) {
   const supabase = getSupabaseAdmin();
   if (!supabase) {
