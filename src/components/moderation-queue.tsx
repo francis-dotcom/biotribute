@@ -320,7 +320,9 @@ export function ModerationQueue({
                       </form>
                     ) : (
                       <>
-                        <p className="message-modal-copy">{message.message}</p>
+                        <p className="message-modal-copy moderation-message-body">
+                          {message.message}
+                        </p>
                         <div className="moderation-inline-tools">
                           <button
                             className="button-secondary moderation-edit-toggle"

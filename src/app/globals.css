@@ -2842,6 +2842,17 @@ textarea {
   justify-content: flex-start;
 }
 
+.moderation-message-body {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, var(--line) 80%, white);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.72);
+  white-space: pre-wrap;
+  tab-size: 4;
+  overflow-wrap: anywhere;
+}
+
 .moderation-inline-tools {
   display: flex;
   align-items: center;

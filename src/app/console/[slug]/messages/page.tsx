@@ -133,7 +133,7 @@ export default async function ConsoleMessagesPage({
                   </div>
                   <p className="message-author">{message.sender_name}</p>
                   <p className="subtle-note">{message.sender_email}</p>
-                  <p className="message-modal-copy">{message.message}</p>
+                  <p className="message-modal-copy moderation-message-body">{message.message}</p>
                 </div>
               </article>
             ))}
