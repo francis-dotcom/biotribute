@@ -325,16 +325,16 @@ export function TributeCardModal({
               >
                 <div className="message-modal-head condolence-popup-head">
                   <div className="condolence-popup-title-wrap">
+                    <button
+                      className="message-modal-close condolence-inline-close"
+                      type="button"
+                      aria-label="Close tribute card form"
+                      onClick={closeModal}
+                    >
+                      ×
+                    </button>
                     <p className="condolence-popup-title">Send Your Condolences</p>
                   </div>
-                  <button
-                    className="message-modal-close"
-                    type="button"
-                    aria-label="Close tribute card form"
-                    onClick={closeModal}
-                  >
-                    ×
-                  </button>
                 </div>
 
                 <div className="condolence-card-preview">
