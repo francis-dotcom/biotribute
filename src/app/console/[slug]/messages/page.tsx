@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { AdminSessionGuard } from "@/components/admin-session-guard";
 import { NoticeToast } from "@/components/notice-toast";
 import { ModerationQueue } from "@/components/moderation-queue";
+import { PrivateSubmissionsManager } from "@/components/private-submissions-manager";
 import { getTributeThemePreset } from "@/data/tributes";
 import { requireAdminSession } from "@/lib/admin";
 import { getFamilyPrivateMessagesForAdmin } from "@/lib/family-private-messages";
@@ -102,42 +103,13 @@ export default async function ConsoleMessagesPage({
           )
         ) : null}
 
-        <article className="form-card dashboard-section-header">
-          <p className="card-label">Private Inbox</p>
-          <h2>Private cards and direct messages for {tribute.name}</h2>
-          <p className="subtle-note">
-            These are private submissions sent through Card and Message actions.
-          </p>
-        </article>
-
         {privateMessagesError ? (
           <article className="form-card">
             <h3>Private inbox not ready</h3>
             <p>{privateMessagesError}</p>
           </article>
-        ) : privateMessages.length === 0 ? (
-          <article className="form-card">
-            <h3>No private messages yet</h3>
-            <p>Private card and message submissions will appear here.</p>
-          </article>
         ) : (
-          <section className="admin-grid">
-            {privateMessages.map((message) => (
-              <article className="moderation-row private-inbox-row" key={message.id}>
-                <div className="moderation-row-main">
-                  <div className="moderation-row-meta">
-                    <p className="card-label">Private submission</p>
-                    <p className="subtle-note">
-                      {new Date(message.created_at).toLocaleString("en-US")}
-                    </p>
-                  </div>
-                  <p className="message-author">{message.sender_name}</p>
-                  <p className="subtle-note">{message.sender_email}</p>
-                  <p className="message-modal-copy moderation-message-body">{message.message}</p>
-                </div>
-              </article>
-            ))}
-          </section>
+          <PrivateSubmissionsManager messages={privateMessages} redirectTo={redirectTo} />
         )}
       </section>
     </main>

@@ -30,6 +30,9 @@ export function ModerationQueue({
   const [activeGroup, setActiveGroup] = useState<GroupedModerationRow | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editingDraft, setEditingDraft] = useState("");
+  const [activeTab, setActiveTab] = useState<"pending" | "approved" | "rejected" | "deleted">(
+    "pending",
+  );
 
   const rows = useMemo(
     () => {
@@ -72,6 +75,7 @@ export function ModerationQueue({
   const pendingRows = rows.filter((group) => group.latest.status.startsWith("pending"));
   const approvedRows = rows.filter((group) => group.latest.status === "approved");
   const rejectedRows = rows.filter((group) => group.latest.status === "rejected");
+  const deletedRows = rows.filter((group) => group.latest.status === "deleted");
 
   function startEditing(message: StoredMessageRow) {
     setEditingMessageId(message.id);
@@ -91,8 +95,9 @@ export function ModerationQueue({
   function renderActions(message: StoredMessageRow) {
     const isPending = message.status.startsWith("pending");
     const showVerify = message.status === "pending_unverified";
-    const showApprove = isPending || message.status === "rejected";
-    const showReject = isPending || message.status === "approved";
+    const showApprove = isPending || message.status === "rejected" || message.status === "deleted";
+    const showReject = isPending || message.status === "approved" || message.status === "deleted";
+    const showDelete = message.status !== "deleted";
 
     return (
       <form
@@ -140,17 +145,19 @@ export function ModerationQueue({
             <span className="sr-only">Reject message</span>
           </button>
         ) : null}
-        <button
-          className="moderation-icon-button is-delete"
-          type="submit"
-          name="action"
-          value="delete"
-          aria-label="Delete message"
-          title="Delete message"
-        >
-          <span aria-hidden="true">🗑</span>
-          <span className="sr-only">Delete message</span>
-        </button>
+        {showDelete ? (
+          <button
+            className="moderation-icon-button is-delete"
+            type="submit"
+            name="action"
+            value="delete"
+            aria-label="Delete message"
+            title="Delete message"
+          >
+            <span aria-hidden="true">🗑</span>
+            <span className="sr-only">Delete message</span>
+          </button>
+        ) : null}
       </form>
     );
   }
@@ -181,6 +188,14 @@ export function ModerationQueue({
                     <p className="subtle-note">
                       {new Date(group.latest.created_at).toLocaleString("en-US")}
                     </p>
+                    {group.latest.deleted_at ? (
+                      <p className="subtle-note">
+                        Deletes permanently after{" "}
+                        {new Date(
+                          new Date(group.latest.deleted_at).getTime() + 10 * 24 * 60 * 60 * 1000,
+                        ).toLocaleString("en-US")}
+                      </p>
+                    ) : null}
                   </div>
                   <button
                     className="moderation-row-open"
@@ -226,24 +241,73 @@ export function ModerationQueue({
 
   return (
     <>
-      {renderRows(
-        pendingRows,
-        "Pending Messages",
-        "Unverified and verified pending items waiting for a final moderation decision.",
-        "No pending messages right now."
-      )}
-      {renderRows(
-        approvedRows,
-        "Approved Messages",
-        "Items already approved for public display. You can still reject or delete if needed.",
-        "No approved messages yet."
-      )}
-      {renderRows(
-        rejectedRows,
-        "Rejected Messages",
-        "Items kept private. You can approve any rejected message to restore it.",
-        "No rejected messages."
-      )}
+      <section className="moderation-tabs" aria-label="Message moderation tabs">
+        <button
+          className={`moderation-tab-button${activeTab === "pending" ? " is-active" : ""}`}
+          type="button"
+          onClick={() => setActiveTab("pending")}
+        >
+          Pending
+          <span>{pendingRows.length}</span>
+        </button>
+        <button
+          className={`moderation-tab-button${activeTab === "approved" ? " is-active" : ""}`}
+          type="button"
+          onClick={() => setActiveTab("approved")}
+        >
+          Approved
+          <span>{approvedRows.length}</span>
+        </button>
+        <button
+          className={`moderation-tab-button${activeTab === "rejected" ? " is-active" : ""}`}
+          type="button"
+          onClick={() => setActiveTab("rejected")}
+        >
+          Rejected
+          <span>{rejectedRows.length}</span>
+        </button>
+        <button
+          className={`moderation-tab-button${activeTab === "deleted" ? " is-active" : ""}`}
+          type="button"
+          onClick={() => setActiveTab("deleted")}
+        >
+          Deleted
+          <span>{deletedRows.length}</span>
+        </button>
+      </section>
+
+      {activeTab === "pending"
+        ? renderRows(
+            pendingRows,
+            "Pending Messages",
+            "Unverified and verified pending items waiting for a final moderation decision.",
+            "No pending messages right now.",
+          )
+        : null}
+      {activeTab === "approved"
+        ? renderRows(
+            approvedRows,
+            "Approved Messages",
+            "Items already approved for public display. You can still reject or delete if needed.",
+            "No approved messages yet.",
+          )
+        : null}
+      {activeTab === "rejected"
+        ? renderRows(
+            rejectedRows,
+            "Rejected Messages",
+            "Items kept private. You can approve any rejected message to restore it.",
+            "No rejected messages.",
+          )
+        : null}
+      {activeTab === "deleted"
+        ? renderRows(
+            deletedRows,
+            "Deleted Messages",
+            "Deleted items stay here for 10 days before they are permanently removed. You can still restore them by approving or rejecting them.",
+            "No deleted messages.",
+          )
+        : null}
 
       {activeGroup ? (
         <div

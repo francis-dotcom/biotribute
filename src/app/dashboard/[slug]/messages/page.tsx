@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { NoticeToast } from "@/components/notice-toast";
+import { PrivateSubmissionsManager } from "@/components/private-submissions-manager";
 import { requireAdminSession } from "@/lib/admin";
+import { getFamilyPrivateMessagesForAdmin } from "@/lib/family-private-messages";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord } from "@/lib/tributes-store";
 
@@ -24,6 +26,14 @@ export default async function TributeMessagesPage({
   }
 
   const messages = await getMessagesForAdmin(slug);
+  let privateMessagesError: string | null = null;
+  let privateMessages = [] as Awaited<ReturnType<typeof getFamilyPrivateMessagesForAdmin>>;
+  try {
+    privateMessages = await getFamilyPrivateMessagesForAdmin(slug);
+  } catch (error) {
+    privateMessagesError =
+      error instanceof Error ? error.message : "Unable to load private family messages.";
+  }
   const redirectTo = `/dashboard/${slug}/messages`;
 
   return (
@@ -46,6 +56,15 @@ export default async function TributeMessagesPage({
           </article>
         ) : (
           <ModerationQueue messages={messages} redirectTo={redirectTo} />
+        )}
+
+        {privateMessagesError ? (
+          <article className="form-card">
+            <h3>Private inbox not ready</h3>
+            <p>{privateMessagesError}</p>
+          </article>
+        ) : (
+          <PrivateSubmissionsManager messages={privateMessages} redirectTo={redirectTo} />
         )}
       </section>
     </>

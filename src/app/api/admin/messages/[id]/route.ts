@@ -64,7 +64,7 @@ export async function POST(
     redirect(
       buildRedirectUrl(
         redirectTo || "/admin/messages",
-        "Message deleted.",
+        "Message moved to deleted.",
         "success"
       )
     );
@@ -95,7 +95,8 @@ export async function POST(
   if (
     status !== "pending_verified" &&
     status !== "approved" &&
-    status !== "rejected"
+    status !== "rejected" &&
+    status !== "deleted"
   ) {
     redirect(
       buildRedirectUrl(
@@ -123,7 +124,9 @@ export async function POST(
       ? "Message marked as email-verified."
       : status === "approved"
         ? "Message approved."
-        : "Message rejected.";
+        : status === "rejected"
+          ? "Message rejected."
+          : "Message moved to deleted.";
 
   redirect(
     buildRedirectUrl(

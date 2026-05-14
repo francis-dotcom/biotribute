@@ -57,9 +57,10 @@ export default async function ConsolePage({
     visitStatsError =
       error instanceof Error ? error.message : "Visitor tracking is unavailable right now.";
   }
-  const approved = messages.filter((message) => message.status === "approved").length;
+  const visibleModerationMessages = messages.filter((message) => message.status !== "deleted");
+  const approved = visibleModerationMessages.filter((message) => message.status === "approved").length;
   const latestByEmail = new Map<typeof messages[number]["email"], typeof messages[number]>();
-  for (const message of messages) {
+  for (const message of visibleModerationMessages) {
     const email = message.email.trim().toLowerCase();
     const existing = latestByEmail.get(email);
     if (!existing) {
@@ -143,7 +144,7 @@ export default async function ConsolePage({
         <article className="dashboard-row">
           <div className="dashboard-row-main">
             <p className="card-label">Moderation</p>
-            <h2>{messages.length}</h2>
+            <h2>{visibleModerationMessages.length}</h2>
             <p>
               {pending} pending and {approved} approved. Keep the public page clean before
               launch.

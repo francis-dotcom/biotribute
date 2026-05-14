@@ -7,7 +7,8 @@ export type StoredMessageStatus =
   | "pending_unverified"
   | "pending_verified"
   | "approved"
-  | "rejected";
+  | "rejected"
+  | "deleted";
 
 export type StoredMessageRow = {
   id: string;
@@ -21,6 +22,7 @@ export type StoredMessageRow = {
   email_verified: boolean;
   verification_token?: string | null;
   verified_at?: string | null;
+  deleted_at?: string | null;
   created_at: string;
 };
 
@@ -182,6 +184,25 @@ async function syncVerifiedPendingMessages(
   await query;
 }
 
+async function purgeExpiredDeletedMessages(
+  supabase: NonNullable<ReturnType<typeof getSupabaseAdmin>>,
+  tributeSlug?: string
+) {
+  const cutoff = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString();
+
+  let query = supabase
+    .from("tribute_messages")
+    .delete()
+    .eq("status", "deleted")
+    .lt("deleted_at", cutoff);
+
+  if (tributeSlug) {
+    query = query.eq("tribute_slug", tributeSlug);
+  }
+
+  await query;
+}
+
 export function isMessageStoreConfigured() {
   return Boolean(getSupabaseAdmin());
 }
@@ -302,6 +323,7 @@ export async function getMessagesForAdmin(tributeSlug?: string) {
     return [] as StoredMessageRow[];
   }
 
+  await purgeExpiredDeletedMessages(supabase, tributeSlug);
   await syncVerifiedPendingMessages(supabase, tributeSlug);
 
   let query = supabase
@@ -344,7 +366,10 @@ export async function updateMessageStatus(id: string, status: StoredMessageStatu
     throw new Error("Message storage is not configured.");
   }
 
-  const updates: Partial<StoredMessageRow> = { status };
+  const updates: Partial<StoredMessageRow> = {
+    status,
+    deleted_at: status === "deleted" ? new Date().toISOString() : null,
+  };
   if (status === "pending_verified") {
     updates.email_verified = true;
     updates.verified_at = new Date().toISOString();
@@ -385,19 +410,7 @@ export async function updateMessageContent(id: string, message: string) {
 }
 
 export async function deleteMessage(id: string) {
-  const supabase = getSupabaseAdmin();
-  if (!supabase) {
-    throw new Error("Message storage is not configured.");
-  }
-
-  const { error } = await supabase
-    .from("tribute_messages")
-    .delete()
-    .eq("id", id);
-
-  if (error) {
-    throw new Error("Unable to delete message.");
-  }
+  await updateMessageStatus(id, "deleted");
 }
 
 export async function confirmMessageVerification(token: string): Promise<VerificationResult> {

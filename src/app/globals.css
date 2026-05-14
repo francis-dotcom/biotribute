@@ -2915,9 +2915,76 @@ body.condolence-popup-open .tribute-page-shell {
   gap: 16px;
 }
 
+.moderation-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.moderation-tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line) 72%);
+  border-radius: 999px;
+  background: rgba(255, 251, 243, 0.86);
+  color: var(--muted-2);
+  font: 700 0.95rem/1 var(--font-sans);
+  cursor: pointer;
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease,
+    color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.moderation-tab-button span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--muted-3);
+  font: 700 0.84rem/1 var(--font-sans);
+}
+
+.moderation-tab-button:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.94);
+}
+
+.moderation-tab-button.is-active {
+  border-color: color-mix(in srgb, var(--gold-deep) 38%, var(--gold) 62%);
+  background: linear-gradient(180deg, rgba(255, 250, 239, 0.98), rgba(250, 240, 216, 0.96));
+  color: var(--gold-deep);
+  box-shadow: 0 16px 30px rgba(62, 47, 18, 0.1);
+}
+
+.moderation-tab-button.is-active span {
+  background: color-mix(in srgb, var(--gold-soft) 52%, white 48%);
+  color: var(--gold-deep);
+}
+
 .moderation-group-header {
   display: grid;
   gap: 6px;
+}
+
+.private-submissions-header {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  align-items: end;
+  gap: 16px;
+}
+
+.private-submissions-search {
+  width: 100%;
+}
+
+.private-submission-detail-grid {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 14px;
 }
 
 .moderation-row {
@@ -3434,6 +3501,20 @@ body.condolence-popup-open .tribute-page-shell {
   .moderation-row {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .moderation-tabs {
+    gap: 10px;
+  }
+
+  .moderation-tab-button {
+    flex: 1 1 calc(50% - 10px);
+    justify-content: space-between;
+  }
+
+  .private-submissions-header {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 
   .moderation-row-summary {

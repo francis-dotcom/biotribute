@@ -81,6 +81,28 @@ export async function getFamilyPrivateMessagesForAdmin(tributeSlug: string) {
   return data as StoredFamilyPrivateMessageRow[];
 }
 
+export async function deleteFamilyPrivateMessage(id: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    throw new Error("Private family message storage is not configured.");
+  }
+
+  const { error } = await supabase
+    .from("family_private_messages")
+    .delete()
+    .eq("id", id);
+
+  if (error) {
+    if (isMissingTableError(error)) {
+      throw new Error(
+        "Private family message table is missing. Run the family_private_messages migration.",
+      );
+    }
+
+    throw new Error("Unable to delete private family message.");
+  }
+}
+
 function getVerificationSecret() {
   return getFamilyMessageVerificationSecret();
 }

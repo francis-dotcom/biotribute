@@ -18,8 +18,9 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   }
 
   const messages = await getMessagesForAdmin(slug);
-  const approved = messages.filter((message) => message.status === "approved").length;
-  const pending = messages.filter((message) => message.status.startsWith("pending")).length;
+  const visibleModerationMessages = messages.filter((message) => message.status !== "deleted");
+  const approved = visibleModerationMessages.filter((message) => message.status === "approved").length;
+  const pending = visibleModerationMessages.filter((message) => message.status.startsWith("pending")).length;
 
   return (
     <section className="dashboard-grid">
@@ -50,7 +51,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
       <article className="dashboard-card">
         <p className="card-label">Messages</p>
-        <h2>{messages.length}</h2>
+        <h2>{visibleModerationMessages.length}</h2>
         <p>
           {pending} pending and {approved} approved. Moderate guest submissions before
           they appear publicly.
