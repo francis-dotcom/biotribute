@@ -18,25 +18,10 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   }
 
   const messages = await getMessagesForAdmin(slug);
-  const latestByEmail = new Map<typeof messages[number]["email"], typeof messages[number]>();
-  for (const message of messages) {
-    const email = message.email.trim().toLowerCase();
-    const existing = latestByEmail.get(email);
-    if (!existing) {
-      latestByEmail.set(email, message);
-      continue;
-    }
-
-    if (new Date(message.created_at).getTime() > new Date(existing.created_at).getTime()) {
-      latestByEmail.set(email, message);
-    }
-  }
-
-  const latestModerationMessages = Array.from(latestByEmail.values());
-  const pending = latestModerationMessages.filter((message) => message.status.startsWith("pending")).length;
-  const approved = latestModerationMessages.filter((message) => message.status === "approved").length;
-  const rejected = latestModerationMessages.filter((message) => message.status === "rejected").length;
-  const deleted = latestModerationMessages.filter((message) => message.status === "deleted").length;
+  const pending = messages.filter((message) => message.status.startsWith("pending")).length;
+  const approved = messages.filter((message) => message.status === "approved").length;
+  const rejected = messages.filter((message) => message.status === "rejected").length;
+  const deleted = messages.filter((message) => message.status === "deleted").length;
 
   return (
     <section className="dashboard-grid">
@@ -67,7 +52,7 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
 
       <article className="dashboard-card">
         <p className="card-label">Messages</p>
-        <h2>{latestModerationMessages.length}</h2>
+        <h2>{messages.length}</h2>
         <p>
           {pending} pending, {approved} approved, {rejected} rejected, and {deleted} deleted.
           Moderate guest submissions before they appear publicly.

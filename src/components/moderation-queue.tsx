@@ -76,6 +76,10 @@ export function ModerationQueue({
   const approvedRows = rows.filter((group) => group.latest.status === "approved");
   const rejectedRows = rows.filter((group) => group.latest.status === "rejected");
   const deletedRows = rows.filter((group) => group.latest.status === "deleted");
+  const pendingCount = messages.filter((message) => message.status.startsWith("pending")).length;
+  const approvedCount = messages.filter((message) => message.status === "approved").length;
+  const rejectedCount = messages.filter((message) => message.status === "rejected").length;
+  const deletedCount = messages.filter((message) => message.status === "deleted").length;
 
   function startEditing(message: StoredMessageRow) {
     setEditingMessageId(message.id);
@@ -248,7 +252,7 @@ export function ModerationQueue({
           onClick={() => setActiveTab("pending")}
         >
           Pending
-          <span>{pendingRows.length}</span>
+          <span>{pendingCount}</span>
         </button>
         <button
           className={`moderation-tab-button${activeTab === "approved" ? " is-active" : ""}`}
@@ -256,7 +260,7 @@ export function ModerationQueue({
           onClick={() => setActiveTab("approved")}
         >
           Approved
-          <span>{approvedRows.length}</span>
+          <span>{approvedCount}</span>
         </button>
         <button
           className={`moderation-tab-button${activeTab === "rejected" ? " is-active" : ""}`}
@@ -264,7 +268,7 @@ export function ModerationQueue({
           onClick={() => setActiveTab("rejected")}
         >
           Rejected
-          <span>{rejectedRows.length}</span>
+          <span>{rejectedCount}</span>
         </button>
         <button
           className={`moderation-tab-button${activeTab === "deleted" ? " is-active" : ""}`}
@@ -272,7 +276,7 @@ export function ModerationQueue({
           onClick={() => setActiveTab("deleted")}
         >
           Deleted
-          <span>{deletedRows.length}</span>
+          <span>{deletedCount}</span>
         </button>
       </section>
 
