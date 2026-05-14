@@ -96,9 +96,6 @@ export function MessagePromptToast({ tributeSlug }: MessagePromptToastProps) {
       </button>
       <p className="message-prompt-kicker">A Gentle Invitation</p>
       <h3>Would you like to leave a message for the family?</h3>
-      <p>
-        If you would like to share a condolence, memory, or short note of support, you can do that here.
-      </p>
       <div className="message-prompt-actions">
         <button className="button-primary" type="button" onClick={openMessageForm}>
           Leave a Message

@@ -3229,7 +3229,7 @@ body.condolence-popup-open .tribute-page-shell {
   box-shadow: 0 18px 44px rgba(28, 28, 30, 0.16);
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 10px 14px;
+  gap: 12px 14px;
   align-items: center;
 }
 
@@ -3242,17 +3242,12 @@ body.condolence-popup-open .tribute-page-shell {
 }
 
 .message-prompt-toast h3 {
-  margin: 0 0 4px;
-  font-size: clamp(0.98rem, 1.55vw, 1.15rem);
-  line-height: 1.2;
-}
-
-.message-prompt-toast > p:last-of-type {
-  margin-bottom: 0;
-  margin-top: 0;
-  max-width: 32ch;
-  font-size: 0.92rem;
-  line-height: 1.45;
+  margin: 8px 0 0;
+  color: var(--gold-deep);
+  font: 700 0.9rem/1.2 var(--font-sans);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  max-width: 34ch;
 }
 
 .message-prompt-actions {
