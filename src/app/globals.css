@@ -3255,8 +3255,38 @@ body.condolence-popup-open .tribute-page-shell {
   flex-wrap: nowrap;
   gap: 8px;
   margin-top: 0;
-  justify-content: flex-end;
-  padding-right: 38px;
+  justify-content: center;
+  justify-self: center;
+  padding-right: 0;
+  width: 100%;
+}
+
+.message-prompt-actions .button-primary,
+.message-prompt-actions .button-secondary {
+  min-height: 42px;
+  padding: 0 22px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.message-prompt-actions .button-primary {
+  background: color-mix(in srgb, var(--gold) 88%, white 12%);
+  border-color: color-mix(in srgb, var(--gold-deep) 45%, var(--gold) 55%);
+  color: var(--panel-solid);
+  box-shadow: 0 10px 18px rgba(28, 28, 30, 0.08);
+}
+
+.message-prompt-actions .button-primary:hover {
+  background: color-mix(in srgb, var(--gold) 78%, white 22%);
+}
+
+.message-prompt-actions .button-secondary {
+  border-color: color-mix(in srgb, var(--line) 82%, var(--gold) 18%);
+  background: rgba(255, 255, 255, 0.88);
+  color: var(--muted-2);
+  box-shadow: none;
 }
 
 .message-prompt-close {
