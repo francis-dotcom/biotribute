@@ -1811,24 +1811,26 @@ body.condolence-popup-open .tribute-page-shell {
 
 .message-modal-close {
   position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 28px;
-  height: 28px;
-  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line) 72%);
+  top: 6px;
+  right: 6px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--line) 66%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--panel-solid) 88%, white 12%);
-  color: var(--text);
-  font-size: 1rem;
-  font-weight: 700;
+  background: color-mix(in srgb, var(--panel-solid) 80%, white 20%);
+  color: color-mix(in srgb, var(--text) 88%, black 12%);
+  font-size: 1.1rem;
+  font-weight: 800;
   line-height: 1;
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(24, 28, 36, 0.14);
+  box-shadow:
+    0 10px 18px rgba(24, 28, 36, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.58);
 }
 
 .message-modal-close:hover {
-  background: color-mix(in srgb, var(--gold-soft) 46%, var(--panel-solid) 54%);
-  border-color: var(--gold);
+  background: color-mix(in srgb, var(--gold-soft) 38%, var(--panel-solid) 62%);
+  border-color: color-mix(in srgb, var(--gold) 54%, var(--line) 46%);
 }
 
 .message-modal-copy {
