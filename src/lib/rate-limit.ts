@@ -1,5 +1,5 @@
 import { createHmac } from "node:crypto";
-import { getRateLimitHashSecret } from "@/lib/env";
+import { getRateLimitHashSecret, getTrustedProxyIpHeaders } from "@/lib/env";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
 
 type RateLimitBucket = {
@@ -19,13 +19,35 @@ function hashKey(key: string) {
   return createHmac("sha256", getRateLimitHashSecret()).update(key).digest("hex");
 }
 
-export function getClientIp(request: Request) {
-  const forwardedFor = request.headers.get("x-forwarded-for");
-  if (forwardedFor) {
-    return forwardedFor.split(",")[0]?.trim() || "unknown";
+function isValidIp(value: string) {
+  return /^[a-fA-F0-9:.]+$/.test(value);
+}
+
+function toTrustedClientIp(request: Request) {
+  for (const headerName of getTrustedProxyIpHeaders()) {
+    const candidate = request.headers.get(headerName);
+    if (!candidate) {
+      continue;
+    }
+
+    const ip = candidate.split(",")[0]?.trim();
+    if (ip && isValidIp(ip)) {
+      return ip;
+    }
   }
 
-  return request.headers.get("x-real-ip")?.trim() || "unknown";
+  return null;
+}
+
+function getClientFingerprint(request: Request) {
+  const userAgent = request.headers.get("user-agent")?.trim() || "unknown-ua";
+  const acceptLanguage = request.headers.get("accept-language")?.trim() || "unknown-lang";
+
+  return `fp:${hashKey(`${userAgent}|${acceptLanguage}`).slice(0, 24)}`;
+}
+
+export function getClientIp(request: Request) {
+  return toTrustedClientIp(request) ?? getClientFingerprint(request);
 }
 
 function consumeMemoryRateLimit(input: {

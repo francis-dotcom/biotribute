@@ -4,13 +4,10 @@ import {
   ADMIN_SESSION_COOKIE,
   ADMIN_SESSION_MAX_AGE_SECONDS,
   getAdminSessionValue,
+  isValidAdminSecret,
 } from "@/lib/admin";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
-
-function getAdminSecret() {
-  return process.env.BIOTRIBUTE_ADMIN_PASSWORD ?? process.env.BIOTRIBUTE_ADMIN_TOKEN ?? "";
-}
 
 export async function POST(request: Request) {
   if (!isSameOriginRequest(request)) {
@@ -29,7 +26,6 @@ export async function POST(request: Request) {
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/console/SirFemiOgini");
   const nextPath = next.startsWith("/") ? next : "/console/SirFemiOgini";
-  const expected = getAdminSecret();
 
   if (!rateLimit.allowed) {
     redirect(
@@ -37,7 +33,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!expected || password !== expected) {
+  if (!isValidAdminSecret(password)) {
     redirect(
       `/console-login?error=${encodeURIComponent("Invalid password.")}&next=${encodeURIComponent(nextPath)}`,
     );

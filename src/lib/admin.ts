@@ -29,6 +29,15 @@ function safeEqual(left: string, right: string) {
   return timingSafeEqual(leftBuffer, rightBuffer);
 }
 
+export function isValidAdminSecret(providedToken: string) {
+  const expected = getAdminSecret();
+  if (!expected) {
+    return false;
+  }
+
+  return safeEqual(providedToken, expected);
+}
+
 export async function isAdminAuthenticated(providedToken?: string) {
   const expected = getAdminSecret();
   if (!expected) {
@@ -39,7 +48,7 @@ export async function isAdminAuthenticated(providedToken?: string) {
   const session = cookieStore.get(ADMIN_SESSION_COOKIE)?.value;
   const expectedSession = getAdminSessionValue();
 
-  return providedToken === expected || (session ? safeEqual(session, expectedSession) : false);
+  return (providedToken ? isValidAdminSecret(providedToken) : false) || (session ? safeEqual(session, expectedSession) : false);
 }
 
 export async function requireAdminSession(nextPath = "/") {
