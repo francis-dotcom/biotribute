@@ -15,6 +15,7 @@ const ALLOWED_KINDS = new Set([
   "livestream-thumb",
   "video-thumb",
   "service-poster",
+  "condolence-card",
 ]);
 const ALLOWED_DELETE_KINDS = new Set(["hero", "background", "gallery"]);
 const ALLOWED_MIME_TYPES = new Set([
@@ -192,7 +193,8 @@ export async function POST(
         kind === "background" ||
         kind === "livestream-thumb" ||
         kind === "video-thumb" ||
-        kind === "service-poster") &&
+        kind === "service-poster" ||
+        kind === "condolence-card") &&
       files.length !== 1
     ) {
       return NextResponse.json({ error: "Upload exactly one image for this field." }, { status: 400 });

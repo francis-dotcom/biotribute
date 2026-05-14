@@ -95,6 +95,10 @@ export type TributeRecord = {
   donationAccountNumber?: string;
   donationBankName?: string;
   donationPhone?: string;
+  showCondolencePopup?: boolean;
+  condolenceCardImageUrl?: string;
+  heroCountdownTargetDate?: string;
+  heroCountdownUnit?: string;
   supportNote?: string;
   /** When true, public page cycles through `themeRotationThemeIds` on an interval. Stored in support-note metadata. */
   themeRotationEnabled?: boolean;
@@ -221,6 +225,10 @@ export const tributes: TributeRecord[] = [
     donationAccountNumber: "11111111111111111111",
     donationBankName: "ECO BANK",
     donationPhone: "0803 835 5005",
+    showCondolencePopup: true,
+    condolenceCardImageUrl: "/condolence-exact.png",
+    heroCountdownTargetDate: "2026-06-11",
+    heroCountdownUnit: "Days",
     supportNote:
       "Choose a paid tribute card tier and include a personal sympathy message for the family."
   }

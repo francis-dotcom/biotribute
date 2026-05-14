@@ -25,6 +25,7 @@ type DraftPersistOverrides = {
   videoThumbnailUrls?: string[];
   activeVideoIndex?: number;
   servicePosterImageUrl?: string;
+  condolenceCardImageUrl?: string;
   livestreamDisplayMode?: "video" | "image-url" | "uploaded-image";
   livestreamThumbnailMode?: "url" | "upload";
   livestreamThumbnailUrlInput?: string;
@@ -78,6 +79,12 @@ export function TributeBuilderForm({
   const [showServicePosterSection, setShowServicePosterSection] = useState(
     tribute.showServicePosterSection
   );
+  const [showCondolencePopup, setShowCondolencePopup] = useState(
+    tribute.showCondolencePopup ?? true
+  );
+  const [showHeroCountdown, setShowHeroCountdown] = useState(
+    Boolean(tribute.heroCountdownTargetDate?.trim())
+  );
   const [showVideoSection, setShowVideoSection] = useState(tribute.showVideoSection);
   const [showLivestreamSection, setShowLivestreamSection] = useState(
     tribute.showLivestreamSection
@@ -91,8 +98,13 @@ export function TributeBuilderForm({
     tribute.servicePosterTitle ?? "Service Poster"
   );
   const [servicePosterNote, setServicePosterNote] = useState(tribute.servicePosterNote ?? "");
+  const [condolenceCardImageUrl, setCondolenceCardImageUrl] = useState(
+    tribute.condolenceCardImageUrl ?? "/condolence-exact.png"
+  );
+  const [uploadingCondolenceCard, setUploadingCondolenceCard] = useState(false);
   const [uploadingServicePoster, setUploadingServicePoster] = useState(false);
   const servicePosterInputRef = useRef<HTMLInputElement | null>(null);
+  const condolenceCardInputRef = useRef<HTMLInputElement | null>(null);
   const [videoUrls, setVideoUrls] = useState([
     tribute.videoUrls[0] ?? "",
     tribute.videoUrls[1] ?? "",
@@ -270,6 +282,8 @@ export function TributeBuilderForm({
     const nextVideoThumbnailUrls = overrides?.videoThumbnailUrls ?? videoThumbnailUrls;
     const nextActiveVideoIndex = overrides?.activeVideoIndex ?? activeVideoIndex;
     const nextServicePosterImageUrl = overrides?.servicePosterImageUrl ?? servicePosterImageUrl;
+    const nextCondolenceCardImageUrl =
+      overrides?.condolenceCardImageUrl ?? condolenceCardImageUrl;
     const nextLivestreamDisplayMode = overrides?.livestreamDisplayMode ?? livestreamDisplayMode;
     const nextLivestreamThumbnailMode = overrides?.livestreamThumbnailMode ?? livestreamThumbnailMode;
     const nextLivestreamThumbnailUrlInput =
@@ -306,6 +320,12 @@ export function TributeBuilderForm({
       donationAccountNumber: String(formData.get("donationAccountNumber") ?? ""),
       donationBankName: String(formData.get("donationBankName") ?? ""),
       donationPhone: String(formData.get("donationPhone") ?? ""),
+      showCondolencePopup,
+      condolenceCardImageUrl: nextCondolenceCardImageUrl.trim(),
+      heroCountdownTargetDate: showHeroCountdown
+        ? String(formData.get("heroCountdownTargetDate") ?? "")
+        : "",
+      heroCountdownUnit: "Days",
       videoUrls: videoUrls.map((value) => value.trim()).filter(Boolean),
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
       videoThumbnailUrls: nextVideoThumbnailUrls.map((value) => value.trim()),
@@ -432,6 +452,58 @@ export function TributeBuilderForm({
 
     setStatus(data.message ?? "Service poster uploaded and saved.");
     setUploadingServicePoster(false);
+  }
+
+  async function uploadCondolenceCard(files: FileList | null) {
+    if (!files || files.length === 0) {
+      return;
+    }
+
+    setUploadingCondolenceCard(true);
+    setStatus(null);
+
+    const formData = new FormData();
+    formData.append("kind", "condolence-card");
+    formData.append("files", files[0]);
+
+    const response = await fetch(`/api/tributes/${tribute.slug}/images`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+      uploads?: { imageUrl: string }[];
+    };
+
+    if (!response.ok) {
+      setStatus(data.error ?? "Unable to upload condolence card image.");
+      setUploadingCondolenceCard(false);
+      return;
+    }
+
+    const uploadedUrl = data.uploads?.[0]?.imageUrl ?? "";
+    if (uploadedUrl) {
+      setCondolenceCardImageUrl(uploadedUrl);
+
+      if (formRef.current && storeConfigured) {
+        const { response: persistResponse, data: persistData } = await persistDraft(
+          new FormData(formRef.current),
+          {
+            condolenceCardImageUrl: uploadedUrl,
+          },
+        );
+        if (!persistResponse.ok) {
+          setStatus(persistData.error ?? "Condolence image uploaded, but auto-save failed.");
+          setUploadingCondolenceCard(false);
+          return;
+        }
+      }
+    }
+
+    setStatus(data.message ?? "Condolence card image uploaded and saved.");
+    setUploadingCondolenceCard(false);
   }
 
   async function uploadLivestreamThumbnail(files: FileList | null) {
@@ -687,6 +759,76 @@ export function TributeBuilderForm({
               Open Images tab
             </a>
           </div>
+        </article>
+      </div>
+
+      <div className="dashboard-image-grid">
+        <article className="form-card">
+          <p className="card-label">Condolence Popup</p>
+          <h3>Popup and card image</h3>
+          <label className="field-block builder-checkbox">
+            <input
+              name="showCondolencePopup"
+              type="checkbox"
+              checked={showCondolencePopup}
+              onChange={(event) => setShowCondolencePopup(event.currentTarget.checked)}
+            />
+            <span>Show condolence popup on the public page</span>
+          </label>
+          <div className="field-block">
+            <span>Choose condolence card image</span>
+            <input
+              ref={condolenceCardInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/avif"
+              onChange={(event) => {
+                void uploadCondolenceCard(event.currentTarget.files);
+              }}
+            />
+            <p className="subtle-note">
+              {uploadingCondolenceCard
+                ? "Uploading condolence card image..."
+                : condolenceCardImageUrl.trim()
+                  ? "Condolence image loaded. Save Draft keeps popup settings."
+                  : "Upload the image that should appear inside the condolence popup."}
+            </p>
+          </div>
+          {condolenceCardImageUrl.trim() ? (
+            <div className="field-block">
+              <span>Current condolence card preview</span>
+              <img
+                src={condolenceCardImageUrl.trim()}
+                alt="Condolence card preview"
+                className="builder-livestream-preview"
+              />
+            </div>
+          ) : null}
+        </article>
+
+        <article className="form-card">
+          <p className="card-label">Countdown</p>
+          <h3>Turn on and set burial date</h3>
+          <p className="subtle-note">
+            Leave this blank to hide the countdown. When set, the public page counts down in Nigeria time.
+          </p>
+          <label className="field-block builder-checkbox">
+            <input
+              name="showHeroCountdown"
+              type="checkbox"
+              checked={showHeroCountdown}
+              onChange={(event) => setShowHeroCountdown(event.currentTarget.checked)}
+            />
+            <span>Show countdown on the public page</span>
+          </label>
+          <label className="field-block">
+            <span>Burial date</span>
+            <input
+              name="heroCountdownTargetDate"
+              type="date"
+              defaultValue={tribute.heroCountdownTargetDate ?? ""}
+              disabled={!showHeroCountdown}
+            />
+          </label>
         </article>
       </div>
 

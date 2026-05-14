@@ -3,6 +3,7 @@ import { LifeStory } from "@/components/life-story";
 import { notFound, redirect } from "next/navigation";
 import { DonationDetailsModal } from "@/components/donation-details-modal";
 import { FamilyMessageModal } from "@/components/family-message-modal";
+import { HeroCountdown } from "@/components/hero-countdown";
 import { MarkdownInline, MarkdownText } from "@/components/markdown-text";
 import { MessageFeed } from "@/components/message-feed";
 import { MessageForm } from "@/components/message-form";
@@ -109,6 +110,12 @@ export default async function TributePage({ params }: PageProps) {
               className={tribute.heroImageUrl ? "avatar-placeholder has-image" : "avatar-placeholder"}
               aria-hidden="true"
             />
+            {tribute.heroCountdownTargetDate?.trim() ? (
+              <HeroCountdown
+                targetDate={tribute.heroCountdownTargetDate.trim()}
+                unit={tribute.heroCountdownUnit?.trim() || "Days"}
+              />
+            ) : null}
             <DonationDetailsModal
               accountName={tribute.donationAccountName}
               accountNumber={tribute.donationAccountNumber}
@@ -255,12 +262,15 @@ export default async function TributePage({ params }: PageProps) {
           <div className="support-grid">
             <article className="form-card support-actions-card">
               <div className="support-action-list">
-                <TributeCardModal
-                  recipientEmail={familyEmail}
-                  tributeSlug={tribute.slug}
-                  tributeName={tribute.name}
-                  storeConfigured={familyMessageStoreConfigured}
-                />
+                {tribute.showCondolencePopup !== false ? (
+                  <TributeCardModal
+                    recipientEmail={familyEmail}
+                    tributeSlug={tribute.slug}
+                    tributeName={tribute.name}
+                    storeConfigured={familyMessageStoreConfigured}
+                    imageUrl={tribute.condolenceCardImageUrl}
+                  />
+                ) : null}
                 <DonationDetailsModal
                   accountName={tribute.donationAccountName}
                   accountNumber={tribute.donationAccountNumber}

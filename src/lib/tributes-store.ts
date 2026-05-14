@@ -98,6 +98,10 @@ export type TributeBuilderInput = {
   donationAccountNumber?: string;
   donationBankName?: string;
   donationPhone?: string;
+  showCondolencePopup?: boolean;
+  condolenceCardImageUrl?: string;
+  heroCountdownTargetDate?: string;
+  heroCountdownUnit?: string;
   themeRotationEnabled?: boolean;
   themeRotationIntervalMinutes?: number;
   themeRotationThemeIds?: TributeTheme[];
@@ -214,6 +218,10 @@ type SupportNoteMetadata = {
   donationAccountNumber?: string;
   donationBankName?: string;
   donationPhone?: string;
+  showCondolencePopup?: boolean;
+  condolenceCardImageUrl?: string;
+  heroCountdownTargetDate?: string;
+  heroCountdownUnit?: string;
   themeRotationEnabled?: boolean;
   themeRotationIntervalMinutes?: number;
   themeRotationThemeIds?: TributeTheme[];
@@ -329,6 +337,20 @@ function parseSupportNoteMetadata(value: string | null) {
       donationPhone:
         typeof parsed.donationPhone === "string"
           ? parsed.donationPhone.trim() || undefined
+          : undefined,
+      showCondolencePopup:
+        typeof parsed.showCondolencePopup === "boolean" ? parsed.showCondolencePopup : undefined,
+      condolenceCardImageUrl:
+        typeof parsed.condolenceCardImageUrl === "string"
+          ? parsed.condolenceCardImageUrl.trim() || undefined
+          : undefined,
+      heroCountdownTargetDate:
+        typeof parsed.heroCountdownTargetDate === "string"
+          ? parsed.heroCountdownTargetDate.trim() || undefined
+          : undefined,
+      heroCountdownUnit:
+        typeof parsed.heroCountdownUnit === "string"
+          ? parsed.heroCountdownUnit.trim() || undefined
           : undefined,
       themeRotationEnabled:
         typeof parsed.themeRotationEnabled === "boolean" ? parsed.themeRotationEnabled : undefined,
@@ -513,6 +535,14 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
       supportNoteMetadata?.donationBankName ?? fallback?.donationBankName,
     donationPhone:
       supportNoteMetadata?.donationPhone ?? fallback?.donationPhone,
+    showCondolencePopup:
+      supportNoteMetadata?.showCondolencePopup ?? fallback?.showCondolencePopup ?? true,
+    condolenceCardImageUrl:
+      supportNoteMetadata?.condolenceCardImageUrl ?? fallback?.condolenceCardImageUrl,
+    heroCountdownTargetDate:
+      supportNoteMetadata?.heroCountdownTargetDate ?? fallback?.heroCountdownTargetDate,
+    heroCountdownUnit:
+      supportNoteMetadata?.heroCountdownUnit ?? fallback?.heroCountdownUnit,
     themeRotationEnabled: supportNoteMetadata?.themeRotationEnabled ?? false,
     themeRotationIntervalMinutes: supportNoteMetadata?.themeRotationIntervalMinutes ?? 1440,
     themeRotationThemeIds: normalizeRotationThemeIds(supportNoteMetadata?.themeRotationThemeIds),
@@ -581,6 +611,10 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     donationAccountNumber: input.donationAccountNumber?.trim() || undefined,
     donationBankName: input.donationBankName?.trim() || undefined,
     donationPhone: input.donationPhone?.trim() || undefined,
+    showCondolencePopup: input.showCondolencePopup ?? true,
+    condolenceCardImageUrl: input.condolenceCardImageUrl?.trim() || undefined,
+    heroCountdownTargetDate: input.heroCountdownTargetDate?.trim() || undefined,
+    heroCountdownUnit: input.heroCountdownUnit?.trim() || undefined,
     themeRotationEnabled:
       input.themeRotationEnabled ?? existingMeta?.themeRotationEnabled ?? false,
     themeRotationIntervalMinutes:
