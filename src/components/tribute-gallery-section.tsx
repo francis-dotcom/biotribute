@@ -950,7 +950,6 @@ export function TributeGallerySection({
             <div className="message-modal-head">
               <div>
                 <p className="message-modal-kicker">Moments in Memory</p>
-                <h3>{`Image ${activeImageNumber} of ${galleryImages.length}`}</h3>
               </div>
               <button
                 className="message-modal-close"
@@ -970,16 +969,7 @@ export function TributeGallerySection({
                   aria-label="Show previous image"
                   onClick={showPreviousImage}
                 >
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <path
-                      d="M14.75 5.75 8.5 12l6.25 6.25"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2.6"
-                    />
-                  </svg>
+                  <span aria-hidden="true">←</span>
                 </button>
               ) : null}
 
@@ -1007,16 +997,7 @@ export function TributeGallerySection({
                   aria-label="Show next image"
                   onClick={showNextImage}
                 >
-                  <svg aria-hidden="true" viewBox="0 0 24 24">
-                    <path
-                      d="M9.25 5.75 15.5 12l-6.25 6.25"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2.6"
-                    />
-                  </svg>
+                  <span aria-hidden="true">→</span>
                 </button>
               ) : null}
             </div>

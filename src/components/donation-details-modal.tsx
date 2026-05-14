@@ -51,7 +51,6 @@ export function DonationDetailsModal({
             <div className="message-modal-head">
               <div>
                 <p className="message-modal-kicker">Family Support</p>
-                <h3>Donation Details</h3>
               </div>
               <button
                 className="message-modal-close"

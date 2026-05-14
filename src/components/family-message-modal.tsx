@@ -43,6 +43,24 @@ export function FamilyMessageModal({
   }, [toast]);
 
   useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+    document.documentElement.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    document.body.classList.add("family-message-modal-open");
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      document.body.classList.remove("family-message-modal-open");
+    };
+  }, [isOpen]);
+
+  useEffect(() => {
     if (!isOpen || !turnstileSiteKey) {
       return;
     }

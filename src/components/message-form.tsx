@@ -236,11 +236,13 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
       {open ? (
         <div className="message-modal-overlay" onClick={() => setOpen(false)}>
-          <div className="message-modal-card form-modal-card" onClick={(event) => event.stopPropagation()}>
-            <div className="message-modal-head">
+          <div
+            className="message-modal-card form-modal-card guestbook-form-modal-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="message-modal-head guestbook-form-head">
               <div>
                 <p className="message-modal-kicker">Guestbook Submission</p>
-                <h3>Leave a Message</h3>
               </div>
               <button
                 className="message-modal-close"
@@ -254,15 +256,17 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
             <form
               id="tribute-message-form"
-              className="form-modal-body"
+              className="form-modal-body guestbook-form-body"
               action={async (formData) => {
                 await handleSubmit(formData);
               }}
             >
-              <p className="subtle-note">
+              <div className="guestbook-form-intro">
+                <p className="subtle-note">
                 Guests can share condolences, short memories, or a note of support.
                 Messages are reviewed before they appear publicly.
-              </p>
+                </p>
+              </div>
 
               <label className={`field-block ${fieldErrors.author ? "has-error" : ""}`}>
                 <span>Your name</span>
@@ -294,7 +298,7 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
 
               <div className="field-block">
                 <span>Show this memory in</span>
-                <div className="choice-row">
+                <div className="choice-row guestbook-choice-row">
                   <button
                     className={
                       placement === "feed" ? "choice-chip choice-chip-active" : "choice-chip"
@@ -357,22 +361,23 @@ export function MessageForm({ tributeSlug, storeConfigured }: MessageFormProps) 
                 </div>
               ) : null}
 
-              <button
-                className="button-primary"
-                type="submit"
-                disabled={pending || (Boolean(turnstileSiteKey) && !turnstileToken.trim())}
-              >
-                {pending
-                  ? "Submitting..."
-                  : turnstileSiteKey && !turnstileToken.trim()
-                    ? turnstileSubmitWaitingLabel
-                    : "Submit Message"}
-              </button>
+              <div className="guestbook-form-footer">
+                <button
+                  className="button-primary guestbook-submit-button"
+                  type="submit"
+                  disabled={pending || (Boolean(turnstileSiteKey) && !turnstileToken.trim())}
+                >
+                  {pending
+                    ? "Submitting..."
+                    : turnstileSiteKey && !turnstileToken.trim()
+                      ? turnstileSubmitWaitingLabel
+                      : "Submit Message"}
+                </button>
 
-              <p className="subtle-note">
-                Please verify your email after submitting. Your message appears after
-                review.
-              </p>
+                <p className="subtle-note guestbook-form-note">
+                  Please verify your email after submitting. Your message appears after review.
+                </p>
+              </div>
             </form>
           </div>
         </div>
