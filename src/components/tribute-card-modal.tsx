@@ -29,7 +29,7 @@ most importantly lover of Christ.
 May his gentle soul rest in peace.
 
 I will keep you in my thoughts and prayers.`;
-const POPUP_AUTO_CLOSE_MS = 7000;
+const POPUP_AUTO_CLOSE_MS = 20000;
 const SUCCESS_AUTO_CLOSE_MS = 1800;
 const POPUP_RESHOW_DELAY_MS = 1000 * 60 * 60 * 24;
 
