@@ -8,6 +8,7 @@ type DonationDetailsModalProps = {
   accountNumber?: string;
   bankName?: string;
   phone?: string;
+  listenForGlobalOpen?: boolean;
   triggerClassName?: string;
   triggerLabel?: string;
 };
@@ -17,6 +18,7 @@ export function DonationDetailsModal({
   accountNumber,
   bankName,
   phone,
+  listenForGlobalOpen = false,
   triggerClassName,
   triggerLabel,
 }: DonationDetailsModalProps) {
@@ -24,13 +26,22 @@ export function DonationDetailsModal({
   const hasDetails = Boolean(accountName || accountNumber || bankName || phone);
 
   useEffect(() => {
+    if (!listenForGlobalOpen) {
+      return;
+    }
+
     function openDonationModal() {
       setOpen(true);
     }
 
     window.addEventListener("biotribute:open-donation-modal", openDonationModal);
     return () => window.removeEventListener("biotribute:open-donation-modal", openDonationModal);
-  }, []);
+  }, [listenForGlobalOpen]);
+
+  useEffect(() => {
+    document.body.classList.toggle("donation-modal-open", open);
+    return () => document.body.classList.remove("donation-modal-open");
+  }, [open]);
 
   return (
     <>
@@ -93,7 +104,7 @@ export function DonationDetailsModal({
                     {phone ? (
                       <div className="donation-detail-row">
                         <span className="donation-contact-note">
-                          Text donation details to this number and it will be acknowledged.
+                          Kindly text donation details to this number and it will be acknowledged.
                         </span>
                         <strong>
                           <MarkdownInline content={phone} />

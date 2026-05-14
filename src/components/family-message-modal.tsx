@@ -43,21 +43,8 @@ export function FamilyMessageModal({
   }, [toast]);
 
   useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const previousHtmlOverflow = document.documentElement.style.overflow;
-    const previousBodyOverflow = document.body.style.overflow;
-    document.documentElement.style.overflow = "hidden";
-    document.body.style.overflow = "hidden";
-    document.body.classList.add("family-message-modal-open");
-
-    return () => {
-      document.documentElement.style.overflow = previousHtmlOverflow;
-      document.body.style.overflow = previousBodyOverflow;
-      document.body.classList.remove("family-message-modal-open");
-    };
+    document.body.classList.toggle("family-message-modal-open", isOpen);
+    return () => document.body.classList.remove("family-message-modal-open");
   }, [isOpen]);
 
   useEffect(() => {
@@ -212,7 +199,6 @@ export function FamilyMessageModal({
             <div className="message-modal-head">
               <div>
                 <p className="message-modal-kicker">Private Family Message</p>
-                <h3>Send a Message</h3>
               </div>
               <button
                 className="message-modal-close"

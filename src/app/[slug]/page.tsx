@@ -276,6 +276,7 @@ export default async function TributePage({ params }: PageProps) {
                   accountNumber={tribute.donationAccountNumber}
                   bankName={tribute.donationBankName}
                   phone={tribute.donationPhone}
+                  listenForGlobalOpen
                   triggerClassName="support-action-pill support-action-pill-solid-yellow"
                 />
                 <FamilyMessageModal
@@ -291,7 +292,7 @@ export default async function TributePage({ params }: PageProps) {
                 to the family representative.
               </p>
             </article>
-            <article className="form-card">
+            <article className="form-card support-note-card">
               <h3>Note from the Family</h3>
               <MarkdownText
                 content={

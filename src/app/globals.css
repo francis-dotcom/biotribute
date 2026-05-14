@@ -863,6 +863,13 @@ body.condolence-popup-open .tribute-page-shell {
   }
 }
 
+body.donation-modal-open .support-note-card,
+body.family-message-modal-open .support-note-card {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 .messages-section-stack {
   display: grid;
   gap: 22px;
