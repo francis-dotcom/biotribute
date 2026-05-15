@@ -139,6 +139,7 @@ function renderMedia(embed: MediaEmbed, title: string) {
   if (embed.type === "video") {
     return (
       <video
+        key={embed.src}
         className="tribute-media-frame"
         src={embed.src}
         controls
@@ -146,9 +147,7 @@ function renderMedia(embed: MediaEmbed, title: string) {
         preload="metadata"
         controlsList="nodownload"
         title={title}
-      >
-        <source src={embed.src} type="video/mp4" />
-      </video>
+      />
     );
   }
 
@@ -226,27 +225,52 @@ export function TributeMediaSection({
       <span className="section-accent" />
 
       {activeVideoEmbed ? (
-        <button
-          className="tribute-media-thumb tribute-media-thumb-single"
-          type="button"
-          onClick={() => setActiveEmbed(activeVideoEmbed)}
-        >
-          <div
-            className={`tribute-media-thumb-image${activeVideoEmbed.thumbnail ? " has-image" : ""}`}
-            style={
-              activeVideoEmbed.thumbnail
-                ? { backgroundImage: `url("${activeVideoEmbed.thumbnail}")` }
-                : undefined
-            }
+        activeVideoEmbed.type === "video" ? (
+          <a
+            className="tribute-media-thumb tribute-media-thumb-single"
+            href={activeVideoEmbed.src}
+            target="_blank"
+            rel="noreferrer"
           >
-            <span className="tribute-media-play">Play</span>
-          </div>
-          <div className="tribute-media-thumb-copy">
-            <MarkdownText
-              content={activeVideoEmbed.description ?? "Tap to watch this tribute memory."}
-            />
-          </div>
-        </button>
+            <div
+              className={`tribute-media-thumb-image${activeVideoEmbed.thumbnail ? " has-image" : ""}`}
+              style={
+                activeVideoEmbed.thumbnail
+                  ? { backgroundImage: `url("${activeVideoEmbed.thumbnail}")` }
+                  : undefined
+              }
+            >
+              <span className="tribute-media-play">Open Video</span>
+            </div>
+            <div className="tribute-media-thumb-copy">
+              <MarkdownText
+                content={activeVideoEmbed.description ?? "Tap to open this tribute memory."}
+              />
+            </div>
+          </a>
+        ) : (
+          <button
+            className="tribute-media-thumb tribute-media-thumb-single"
+            type="button"
+            onClick={() => setActiveEmbed(activeVideoEmbed)}
+          >
+            <div
+              className={`tribute-media-thumb-image${activeVideoEmbed.thumbnail ? " has-image" : ""}`}
+              style={
+                activeVideoEmbed.thumbnail
+                  ? { backgroundImage: `url("${activeVideoEmbed.thumbnail}")` }
+                  : undefined
+              }
+            >
+              <span className="tribute-media-play">Play</span>
+            </div>
+            <div className="tribute-media-thumb-copy">
+              <MarkdownText
+                content={activeVideoEmbed.description ?? "Tap to watch this tribute memory."}
+              />
+            </div>
+          </button>
+        )
       ) : (
         <article className="form-card tribute-media-empty">
           <h3>Video memories coming soon</h3>
@@ -287,6 +311,7 @@ export function TributeMediaSection({
               />
             ) : streamEmbed.type === "video" ? (
               <video
+                key={streamEmbed.src}
                 className="tribute-stream-frame"
                 src={streamEmbed.src}
                 controls
@@ -294,9 +319,7 @@ export function TributeMediaSection({
                 preload="metadata"
                 controlsList="nodownload"
                 title="Memorial livestream"
-              >
-                <source src={streamEmbed.src} type="video/mp4" />
-              </video>
+              />
             ) : (
               <a className="button-primary tribute-media-link" href={streamEmbed.src} target="_blank" rel="noreferrer">
                 Open livestream
@@ -348,6 +371,14 @@ export function TributeMediaSection({
               </button>
             </div>
             {renderMedia(activeEmbed, activeEmbed.label)}
+            <a
+              className="button-secondary tribute-media-direct-link"
+              href={activeEmbed.src}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Open Video Directly
+            </a>
           </div>
         </div>
       ) : null}

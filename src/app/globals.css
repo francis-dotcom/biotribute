@@ -4117,6 +4117,11 @@ body.family-message-modal-open .support-note-card {
   width: min(100%, 880px);
 }
 
+.tribute-media-direct-link {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
 .console-visit-list {
   display: grid;
   gap: 12px;
