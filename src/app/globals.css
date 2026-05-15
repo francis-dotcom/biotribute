@@ -2700,6 +2700,12 @@ body.family-message-modal-open .support-note-card {
   object-fit: cover;
 }
 
+.builder-video-url-preview {
+  margin-top: 10px;
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+
 .builder-visibility-chips {
   margin: 8px 0 14px;
 }

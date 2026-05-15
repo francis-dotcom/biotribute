@@ -178,6 +178,33 @@ function parseMultilineValues(value: string | null) {
     .filter(Boolean);
 }
 
+function isImageAssetUrl(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return false;
+  }
+
+  if (/\/video-thumb\//i.test(trimmed)) {
+    return true;
+  }
+
+  return /\.(png|jpe?g|webp|avif|gif|svg)(?:[?#].*)?$/i.test(trimmed);
+}
+
+function sanitizeVideoUrls(values: string[] | undefined, thumbnailUrls?: string[]) {
+  if (!Array.isArray(values)) {
+    return [];
+  }
+
+  const thumbnailSet = new Set(
+    (thumbnailUrls ?? []).map((value) => value.trim()).filter(Boolean),
+  );
+
+  return values
+    .map((value) => value.trim())
+    .filter((value) => Boolean(value) && !isImageAssetUrl(value) && !thumbnailSet.has(value));
+}
+
 
 
 function extractUrlsFromText(value: string | null) {
@@ -264,6 +291,9 @@ function parseSupportNoteMetadata(value: string | null) {
 
   try {
     const parsed = JSON.parse(payload) as SupportNoteMetadata;
+    const parsedThumbnailUrls = Array.isArray(parsed.videoThumbnailUrls)
+      ? parsed.videoThumbnailUrls.filter((value): value is string => typeof value === "string")
+      : undefined;
     return {
       honorificTitle:
         typeof parsed.honorificTitle === "string"
@@ -294,14 +324,15 @@ function parseSupportNoteMetadata(value: string | null) {
       showVideoSection: parsed.showVideoSection,
       showLivestreamSection: parsed.showLivestreamSection,
       videoUrls: Array.isArray(parsed.videoUrls)
-        ? parsed.videoUrls.filter((value): value is string => typeof value === "string")
+        ? sanitizeVideoUrls(
+            parsed.videoUrls.filter((value): value is string => typeof value === "string"),
+            parsedThumbnailUrls,
+          )
         : undefined,
       videoDescriptions: Array.isArray(parsed.videoDescriptions)
         ? parsed.videoDescriptions.filter((value): value is string => typeof value === "string")
         : undefined,
-      videoThumbnailUrls: Array.isArray(parsed.videoThumbnailUrls)
-        ? parsed.videoThumbnailUrls.filter((value): value is string => typeof value === "string")
-        : undefined,
+      videoThumbnailUrls: parsedThumbnailUrls,
       activeVideoIndex:
         typeof parsed.activeVideoIndex === "number" && Number.isInteger(parsed.activeVideoIndex)
           ? parsed.activeVideoIndex
@@ -424,6 +455,14 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
   const fallback = fallbackTribute(slug);
   const supportNoteMetadata = parseSupportNoteMetadata(tributeRow.support_note);
   const supportNoteUrls = extractUrlsFromText(tributeRow.support_note);
+  const sanitizedSupportNoteVideoUrls = sanitizeVideoUrls(
+    supportNoteMetadata?.videoUrls,
+    supportNoteMetadata?.videoThumbnailUrls,
+  );
+  const sanitizedStoredVideoUrls = sanitizeVideoUrls(
+    parseMultilineValues(tributeRow.video_urls),
+    supportNoteMetadata?.videoThumbnailUrls,
+  );
   const supportNoteEmailMatch = stripVisibilityMarker(tributeRow.support_note)?.match(
     /[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i,
   );
@@ -479,13 +518,14 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
       supportNoteMetadata?.showServicePosterSection ??
       fallback?.showServicePosterSection ??
       true,
-    videoUrls: parseMultilineValues(
-      tributeRow.video_urls ||
-        supportNoteMetadata?.videoUrls?.join("\n") ||
-        supportNoteUrls.join("\n") ||
-        fallback?.videoUrls?.join("\n") ||
-        null
-    ),
+    videoUrls:
+      sanitizedStoredVideoUrls.length > 0
+        ? sanitizedStoredVideoUrls
+        : sanitizedSupportNoteVideoUrls.length > 0
+          ? sanitizedSupportNoteVideoUrls
+          : sanitizeVideoUrls(supportNoteUrls, supportNoteMetadata?.videoThumbnailUrls).length > 0
+            ? sanitizeVideoUrls(supportNoteUrls, supportNoteMetadata?.videoThumbnailUrls)
+            : fallback?.videoUrls ?? [],
     videoDescriptions: supportNoteMetadata?.videoDescriptions ?? fallback?.videoDescriptions ?? [],
     videoThumbnailUrls:
       supportNoteMetadata?.videoThumbnailUrls ?? fallback?.videoThumbnailUrls ?? [],
@@ -597,7 +637,7 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     showServicePosterSection: input.showServicePosterSection ?? true,
     showVideoSection: input.showVideoSection ?? true,
     showLivestreamSection: input.showLivestreamSection ?? true,
-    videoUrls: (input.videoUrls ?? []).map((item) => item.trim()).filter(Boolean),
+    videoUrls: sanitizeVideoUrls(input.videoUrls, input.videoThumbnailUrls),
     videoDescriptions: (input.videoDescriptions ?? []).map((item) => item.trim()),
     videoThumbnailUrls: (input.videoThumbnailUrls ?? []).map((item) => item.trim()),
     activeVideoIndex: input.activeVideoIndex,
@@ -640,7 +680,7 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     gallery_note: input.galleryNote,
     life_story: input.lifeStory,
     support_note: supportNoteWithVisibility,
-    video_urls: (input.videoUrls ?? []).map((item) => item.trim()).filter(Boolean).join("\n"),
+    video_urls: sanitizeVideoUrls(input.videoUrls, input.videoThumbnailUrls).join("\n"),
     video_note: input.videoNote?.trim() || null,
     livestream_url: input.livestreamUrl?.trim() || null,
     livestream_note: input.livestreamNote?.trim() || null,

@@ -22,6 +22,7 @@ type ContributorDraft = {
 };
 
 type DraftPersistOverrides = {
+  videoUrls?: string[];
   videoThumbnailUrls?: string[];
   activeVideoIndex?: number;
   servicePosterImageUrl?: string;
@@ -137,7 +138,11 @@ export function TributeBuilderForm({
   );
   const [activeVideoIndex, setActiveVideoIndex] = useState(tribute.activeVideoIndex ?? 0);
   const [videoNote, setVideoNote] = useState(tribute.videoNote ?? "");
+  const [uploadingVideoIndex, setUploadingVideoIndex] = useState<number | null>(null);
+  const [selectedVideoFileNames, setSelectedVideoFileNames] = useState(["", "", ""]);
+  const [videoUploadStatuses, setVideoUploadStatuses] = useState(["", "", ""]);
   const [uploadingVideoThumbIndex, setUploadingVideoThumbIndex] = useState<number | null>(null);
+  const videoInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const videoThumbInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const [livestreamUrl, setLivestreamUrl] = useState(tribute.livestreamUrl ?? "");
   const [livestreamDisplayMode, setLivestreamDisplayMode] = useState<
@@ -279,6 +284,7 @@ export function TributeBuilderForm({
   }
 
   async function persistDraft(formData: FormData, overrides?: DraftPersistOverrides) {
+    const nextVideoUrls = overrides?.videoUrls ?? videoUrls;
     const nextVideoThumbnailUrls = overrides?.videoThumbnailUrls ?? videoThumbnailUrls;
     const nextActiveVideoIndex = overrides?.activeVideoIndex ?? activeVideoIndex;
     const nextServicePosterImageUrl = overrides?.servicePosterImageUrl ?? servicePosterImageUrl;
@@ -326,7 +332,7 @@ export function TributeBuilderForm({
         ? String(formData.get("heroCountdownTargetDate") ?? "")
         : "",
       heroCountdownUnit: "Days",
-      videoUrls: videoUrls.map((value) => value.trim()).filter(Boolean),
+      videoUrls: nextVideoUrls.map((value) => value.trim()).filter(Boolean),
       videoDescriptions: videoDescriptions.map((value) => value.trim()),
       videoThumbnailUrls: nextVideoThumbnailUrls.map((value) => value.trim()),
       activeVideoIndex: nextActiveVideoIndex,
@@ -617,6 +623,90 @@ export function TributeBuilderForm({
 
     setStatus(data.message ?? "Video placeholder uploaded and saved.");
     setUploadingVideoThumbIndex(null);
+  }
+
+  async function uploadVideoFile(index: number, files: FileList | null) {
+    if (!files || files.length === 0) {
+      setVideoUploadStatuses((current) =>
+        current.map((value, currentIndex) =>
+          currentIndex === index ? "Choose a video file first." : value
+        )
+      );
+      return;
+    }
+
+    setUploadingVideoIndex(index);
+    setStatus(null);
+    setVideoUploadStatuses((current) =>
+      current.map((value, currentIndex) =>
+        currentIndex === index ? "Uploading video file..." : value
+      )
+    );
+
+    const formData = new FormData();
+    formData.append("file", files[0]);
+
+    const response = await fetch(`/api/tributes/${tribute.slug}/videos`, {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = (await response.json()) as {
+      error?: string;
+      message?: string;
+      upload?: { videoUrl?: string };
+    };
+
+    if (!response.ok) {
+      setStatus(data.error ?? "Unable to upload video file.");
+      setVideoUploadStatuses((current) =>
+        current.map((value, currentIndex) =>
+          currentIndex === index ? data.error ?? "Unable to upload video file." : value
+        )
+      );
+      setUploadingVideoIndex(null);
+      return;
+    }
+
+    const uploadedUrl = data.upload?.videoUrl?.trim() ?? "";
+    if (uploadedUrl) {
+      const nextVideoUrls = videoUrls.map((value, currentIndex) =>
+        currentIndex === index ? uploadedUrl : value
+      );
+      setVideoUrls(nextVideoUrls);
+      setActiveVideoIndex(index);
+      setVisibleVideoCount((current) => Math.max(current, index + 1));
+
+      if (formRef.current && storeConfigured) {
+        const { response: persistResponse, data: persistData } = await persistDraft(
+          new FormData(formRef.current),
+          {
+            videoUrls: nextVideoUrls,
+            activeVideoIndex: index,
+          },
+        );
+        if (!persistResponse.ok) {
+          setStatus(persistData.error ?? "Video uploaded, but auto-save failed.");
+          setVideoUploadStatuses((current) =>
+            current.map((value, currentIndex) =>
+              currentIndex === index
+                ? persistData.error ?? "Video uploaded, but auto-save failed."
+                : value
+            )
+          );
+          setUploadingVideoIndex(null);
+          return;
+        }
+      }
+    }
+
+    setStatus(data.message ?? "Video uploaded and saved.");
+    setVideoUploadStatuses((current) =>
+      current.map((value, currentIndex) =>
+        currentIndex === index ? data.message ?? "Video uploaded and saved." : value
+      )
+    );
+    setUploadingVideoIndex(null);
   }
 
   return (
@@ -1091,11 +1181,58 @@ export function TributeBuilderForm({
       <article className="form-card" id="media">
         <p className="card-label">Videos</p>
         <h3>Video uploads and playback</h3>
-        <p className="subtle-note">Add up to 3 video links for Video Memories.</p>
+        <p className="subtle-note">Add up to 3 direct videos or hosted video links for Video Memories.</p>
+        <p className="subtle-note">Uploads are stored in Supabase Storage. MP4 with H.264/AAC is the safest mobile format.</p>
         <p className="subtle-note">After deleting a video link, click Save Draft to publish the removal.</p>
         <div className="builder-repeat-grid">
           {[0, 1, 2].slice(0, visibleVideoCount).map((index) => (
             <div className="builder-repeat-card" key={`video-memory-${index}`}>
+              <div className="field-block">
+                <span>{`Upload Video ${index + 1}`}</span>
+                <input
+                  ref={(node) => {
+                    videoInputRefs.current[index] = node;
+                  }}
+                  type="file"
+                  accept="video/mp4,video/webm,video/ogg,video/quicktime"
+                  onChange={(event) => {
+                    const fileName = event.currentTarget.files?.[0]?.name ?? "";
+                    setSelectedVideoFileNames((current) =>
+                      current.map((value, currentIndex) =>
+                        currentIndex === index ? fileName : value
+                      )
+                    );
+                  }}
+                />
+                <p className="subtle-note">
+                  {uploadingVideoIndex === index
+                    ? "Uploading video file..."
+                    : selectedVideoFileNames[index]
+                      ? `Selected file: ${selectedVideoFileNames[index]}`
+                      : (videoUrls[index] ?? "").trim()
+                        ? `Video ${index + 1} source saved. You can replace it by uploading again or pasting another URL.`
+                        : `Choose a direct video file for Video ${index + 1}, then click Upload Video.`
+                  }
+                </p>
+                <div className="builder-inline-actions">
+                  <button
+                    className="button-secondary"
+                    type="button"
+                    disabled={
+                      uploadingVideoIndex === index ||
+                      !selectedVideoFileNames[index]
+                    }
+                    onClick={() => {
+                      void uploadVideoFile(index, videoInputRefs.current[index]?.files ?? null);
+                    }}
+                  >
+                    {uploadingVideoIndex === index ? "Uploading..." : `Upload Video ${index + 1}`}
+                  </button>
+                </div>
+                {videoUploadStatuses[index] ? (
+                  <p className="subtle-note">{videoUploadStatuses[index]}</p>
+                ) : null}
+              </div>
               <label className="field-block">
                 <span>{`Video ${index + 1} URL`}</span>
                 <input
@@ -1110,9 +1247,15 @@ export function TributeBuilderForm({
                       return next;
                     });
                   }}
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder="https://www.youtube.com/watch?v=... or Supabase video URL"
                 />
               </label>
+              {(videoUrls[index] ?? "").trim() ? (
+                <div className="field-block">
+                  <span>{`Saved Video ${index + 1} source`}</span>
+                  <p className="subtle-note builder-video-url-preview">{(videoUrls[index] ?? "").trim()}</p>
+                </div>
+              ) : null}
               <label className="field-block">
                 <span>{`Video ${index + 1} Description`}</span>
                 <input
@@ -1190,6 +1333,15 @@ export function TributeBuilderForm({
                     if (videoThumbInputRefs.current[index]) {
                       videoThumbInputRefs.current[index].value = "";
                     }
+                    if (videoInputRefs.current[index]) {
+                      videoInputRefs.current[index].value = "";
+                    }
+                    setSelectedVideoFileNames((current) =>
+                      current.map((value, currentIndex) => (currentIndex === index ? "" : value))
+                    );
+                    setVideoUploadStatuses((current) =>
+                      current.map((value, currentIndex) => (currentIndex === index ? "" : value))
+                    );
                     const remainingConfiguredCount = countConfiguredVideos(
                       videoUrls.map((value, currentIndex) => (currentIndex === index ? "" : value)),
                       videoDescriptions.map((value, currentIndex) =>

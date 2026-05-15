@@ -140,12 +140,14 @@ function renderMedia(embed: MediaEmbed, title: string) {
     return (
       <video
         className="tribute-media-frame"
+        src={embed.src}
         controls
         playsInline
         preload="metadata"
         controlsList="nodownload"
+        title={title}
       >
-        <source src={embed.src} />
+        <source src={embed.src} type="video/mp4" />
       </video>
     );
   }
@@ -286,12 +288,14 @@ export function TributeMediaSection({
             ) : streamEmbed.type === "video" ? (
               <video
                 className="tribute-stream-frame"
+                src={streamEmbed.src}
                 controls
                 playsInline
                 preload="metadata"
                 controlsList="nodownload"
+                title="Memorial livestream"
               >
-                <source src={streamEmbed.src} />
+                <source src={streamEmbed.src} type="video/mp4" />
               </video>
             ) : (
               <a className="button-primary tribute-media-link" href={streamEmbed.src} target="_blank" rel="noreferrer">
