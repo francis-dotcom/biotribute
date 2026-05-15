@@ -41,10 +41,26 @@ function isMissingTableError(error: { code?: string; message?: string } | null) 
     return false;
   }
 
+  const message = error.message?.toLowerCase() ?? "";
+
   return (
     error.code === "PGRST205" ||
     error.code === "42P01" ||
-    error.message?.toLowerCase().includes("family_private_messages") === true
+    message.includes("relation") && message.includes("family_private_messages") && message.includes("does not exist")
+  );
+}
+
+function isPermissionError(error: { code?: string; message?: string } | null) {
+  if (!error) {
+    return false;
+  }
+
+  const message = error.message?.toLowerCase() ?? "";
+
+  return (
+    error.code === "42501" ||
+    message.includes("permission denied") ||
+    message.includes("row-level security")
   );
 }
 
@@ -68,6 +84,12 @@ export async function getFamilyPrivateMessagesForAdmin(tributeSlug: string) {
     if (isMissingTableError(error)) {
       throw new Error(
         "Private family message table is missing. Run the family_private_messages migration.",
+      );
+    }
+
+    if (isPermissionError(error)) {
+      throw new Error(
+        "Private family message permissions are missing. Grant service_role access to family_private_messages.",
       );
     }
 
@@ -96,6 +118,12 @@ export async function deleteFamilyPrivateMessage(id: string) {
     if (isMissingTableError(error)) {
       throw new Error(
         "Private family message table is missing. Run the family_private_messages migration.",
+      );
+    }
+
+    if (isPermissionError(error)) {
+      throw new Error(
+        "Private family message permissions are missing. Grant service_role access to family_private_messages.",
       );
     }
 
@@ -305,6 +333,12 @@ async function insertFamilyPrivateMessage(input: CreateFamilyPrivateMessageInput
     if (isMissingTableError(error)) {
       throw new Error(
         "Private family message table is missing. Run the family_private_messages migration.",
+      );
+    }
+
+    if (isPermissionError(error)) {
+      throw new Error(
+        "Private family message permissions are missing. Grant service_role access to family_private_messages.",
       );
     }
 

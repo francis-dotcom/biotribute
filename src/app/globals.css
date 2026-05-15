@@ -1872,6 +1872,11 @@ body.family-message-modal-open .support-note-card {
   gap: 16px;
 }
 
+.message-modal-head > div {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
 .message-modal-kicker {
   margin: 0 0 8px;
   color: var(--muted-3);
@@ -1887,7 +1892,11 @@ body.family-message-modal-open .support-note-card {
 
 .message-modal-close {
   width: 44px;
+  min-width: 44px;
   height: 44px;
+  flex: 0 0 44px;
+  align-self: flex-start;
+  padding: 0;
   border: 1px solid color-mix(in srgb, var(--gold) 34%, var(--line) 66%);
   border-radius: 999px;
   background: color-mix(in srgb, var(--panel-solid) 80%, white 20%);
@@ -4216,6 +4225,23 @@ body.family-message-modal-open .support-note-card {
 
   .tribute-stream-thumbnail {
     min-height: 148px;
+  }
+
+  .tribute-media-modal-card .message-modal-head {
+    gap: 12px;
+  }
+
+  .tribute-media-modal-card .message-modal-head h3 {
+    font-size: 1.1rem;
+    line-height: 1.25;
+  }
+
+  .tribute-media-modal-card .message-modal-close {
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+    font-size: 1.1rem;
   }
 
   .console-visit-list {

@@ -87,7 +87,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
       if (videoId) {
         return {
           type: "iframe",
-          src: `https://www.youtube.com/embed/${videoId}`,
+          src: `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1`,
           thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
           label: `Video Memory ${index + 1}`,
         };
@@ -100,7 +100,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
       if (maybeId) {
         return {
           type: "iframe",
-          src: `https://player.vimeo.com/video/${maybeId}`,
+          src: `https://player.vimeo.com/video/${maybeId}?playsinline=1&title=0&byline=0&portrait=0`,
           thumbnail: null,
           label: `Video Memory ${index + 1}`,
         };
@@ -138,7 +138,13 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
 function renderMedia(embed: MediaEmbed, title: string) {
   if (embed.type === "video") {
     return (
-      <video className="tribute-media-frame" controls preload="metadata">
+      <video
+        className="tribute-media-frame"
+        controls
+        playsInline
+        preload="metadata"
+        controlsList="nodownload"
+      >
         <source src={embed.src} />
       </video>
     );
@@ -151,7 +157,7 @@ function renderMedia(embed: MediaEmbed, title: string) {
         src={embed.src}
         title={title}
         loading="lazy"
-        allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
         allowFullScreen
       />
     );
@@ -278,7 +284,13 @@ export function TributeMediaSection({
                 allowFullScreen
               />
             ) : streamEmbed.type === "video" ? (
-              <video className="tribute-stream-frame" controls preload="metadata">
+              <video
+                className="tribute-stream-frame"
+                controls
+                playsInline
+                preload="metadata"
+                controlsList="nodownload"
+              >
                 <source src={streamEmbed.src} />
               </video>
             ) : (
@@ -322,8 +334,13 @@ export function TributeMediaSection({
                 <p className="message-modal-kicker">Video Memory</p>
                 <h3 id="video-memory-modal-title">{activeEmbed.label}</h3>
               </div>
-              <button className="message-modal-close" type="button" onClick={() => setActiveEmbed(null)}>
-                Close
+              <button
+                className="message-modal-close"
+                type="button"
+                aria-label="Close video memory"
+                onClick={() => setActiveEmbed(null)}
+              >
+                ×
               </button>
             </div>
             {renderMedia(activeEmbed, activeEmbed.label)}
