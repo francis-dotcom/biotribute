@@ -5,6 +5,7 @@ import { MarkdownText } from "@/components/markdown-text";
 import type { TributeRecord } from "@/data/tributes";
 
 type TributeMediaSectionProps = {
+  tributeSlug: string;
   videoUrls: TributeRecord["videoUrls"];
   videoDescriptions: TributeRecord["videoDescriptions"];
   videoThumbnailUrls: TributeRecord["videoThumbnailUrls"];
@@ -19,9 +20,9 @@ type TributeMediaSectionProps = {
 };
 
 type MediaEmbed =
-  | { type: "video"; src: string; thumbnail?: string | null; label: string; description?: string }
-  | { type: "iframe"; src: string; thumbnail?: string | null; label: string; description?: string }
-  | { type: "link"; src: string; thumbnail?: string | null; label: string; description?: string };
+  | { type: "video"; src: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number }
+  | { type: "iframe"; src: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number }
+  | { type: "link"; src: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number };
 
 function shouldPrioritizeLivestream(date: Date) {
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -90,6 +91,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
           src: `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1`,
           thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
           label: `Video Memory ${index + 1}`,
+          sourceIndex: index,
         };
       }
     }
@@ -103,6 +105,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
           src: `https://player.vimeo.com/video/${maybeId}?playsinline=1&title=0&byline=0&portrait=0`,
           thumbnail: null,
           label: `Video Memory ${index + 1}`,
+          sourceIndex: index,
         };
       }
     }
@@ -113,6 +116,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
         src: normalized,
         thumbnail: null,
         label: `Video Memory ${index + 1}`,
+        sourceIndex: index,
       };
     }
 
@@ -121,6 +125,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
       src: normalized,
       thumbnail: null,
       label: `Video Memory ${index + 1}`,
+      sourceIndex: index,
     };
   } catch {
     if (/^https?:\/\//i.test(normalized)) {
@@ -129,6 +134,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
         src: normalized,
         thumbnail: null,
         label: `Video Memory ${index + 1}`,
+        sourceIndex: index,
       };
     }
     return null;
@@ -172,6 +178,7 @@ function renderMedia(embed: MediaEmbed, title: string) {
 }
 
 export function TributeMediaSection({
+  tributeSlug,
   videoUrls,
   videoDescriptions,
   videoThumbnailUrls,
@@ -186,6 +193,32 @@ export function TributeMediaSection({
 }: TributeMediaSectionProps) {
   const [activeEmbed, setActiveEmbed] = useState<MediaEmbed | null>(null);
   const livestreamNoteText = livestreamNote?.trim();
+
+  function getVisitSessionId() {
+    const sessionStorageKey = `biotribute-visit-session:${tributeSlug}`;
+    const existing = window.sessionStorage.getItem(sessionStorageKey);
+    const sessionId = existing ?? `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+    window.sessionStorage.setItem(sessionStorageKey, sessionId);
+    return sessionId;
+  }
+
+  function trackVideoOpen(videoIndex: number) {
+    const payload = JSON.stringify({
+      tributeSlug,
+      sessionId: getVisitSessionId(),
+      videoIndex,
+      path: window.location.pathname,
+    });
+
+    void fetch("/api/video-opens", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: payload,
+      keepalive: true,
+    });
+  }
 
   const mediaEmbeds = useMemo(
     () =>
@@ -231,6 +264,7 @@ export function TributeMediaSection({
             href={activeVideoEmbed.src}
             target="_blank"
             rel="noreferrer"
+            onClick={() => trackVideoOpen(activeVideoEmbed.sourceIndex)}
           >
             <div
               className={`tribute-media-thumb-image${activeVideoEmbed.thumbnail ? " has-image" : ""}`}
@@ -252,7 +286,10 @@ export function TributeMediaSection({
           <button
             className="tribute-media-thumb tribute-media-thumb-single"
             type="button"
-            onClick={() => setActiveEmbed(activeVideoEmbed)}
+            onClick={() => {
+              trackVideoOpen(activeVideoEmbed.sourceIndex);
+              setActiveEmbed(activeVideoEmbed);
+            }}
           >
             <div
               className={`tribute-media-thumb-image${activeVideoEmbed.thumbnail ? " has-image" : ""}`}

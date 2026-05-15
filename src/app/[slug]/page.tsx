@@ -209,6 +209,7 @@ export default async function TributePage({ params }: PageProps) {
         ) : null}
 
         <TributeMediaSection
+          tributeSlug={tribute.slug}
           videoUrls={tribute.videoUrls}
           videoDescriptions={tribute.videoDescriptions}
           videoThumbnailUrls={tribute.videoThumbnailUrls}
