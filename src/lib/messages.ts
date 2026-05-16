@@ -71,6 +71,29 @@ function isPermissionError(error: { code?: string; message?: string } | null) {
   );
 }
 
+function toMessageStoreError(
+  error: { code?: string; message?: string } | null,
+  fallback: string,
+) {
+  if (isMissingMessageTableError(error)) {
+    return new Error(
+      "Message storage table is missing. Run migration 20260503044007_initial_tribute_messages.sql.",
+    );
+  }
+
+  if (isPermissionError(error)) {
+    return new Error(
+      "Message storage permission is missing. Grant SELECT, INSERT, UPDATE on public.tribute_messages to service_role.",
+    );
+  }
+
+  if (error?.message) {
+    return new Error(error.message);
+  }
+
+  return new Error(fallback);
+}
+
 function getSupabaseAdmin() {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -279,19 +302,7 @@ export async function createPendingMessage(input: CreateMessageInput) {
   });
 
   if (error) {
-    if (isMissingMessageTableError(error)) {
-      throw new Error(
-        "Message storage table is missing. Run migration 20260503044007_initial_tribute_messages.sql.",
-      );
-    }
-
-    if (isPermissionError(error)) {
-      throw new Error(
-        "Message storage permission is missing. Grant SELECT, INSERT, UPDATE on public.tribute_messages to service_role.",
-      );
-    }
-
-    throw new Error("Unable to save message.");
+    throw toMessageStoreError(error, "Unable to save message.");
   }
 
   if (!hasVerifiedHistory) {
@@ -338,19 +349,7 @@ export async function getMessagesForAdmin(tributeSlug?: string) {
   const { data, error } = await query;
 
   if (error) {
-    if (isMissingMessageTableError(error)) {
-      throw new Error(
-        "Message storage table is missing. Run migration 20260503044007_initial_tribute_messages.sql.",
-      );
-    }
-
-    if (isPermissionError(error)) {
-      throw new Error(
-        "Message storage permission is missing. Grant SELECT, INSERT, UPDATE on public.tribute_messages to service_role.",
-      );
-    }
-
-    throw new Error("Unable to load messages.");
+    throw toMessageStoreError(error, "Unable to load messages.");
   }
 
   if (!data) {
@@ -381,7 +380,7 @@ export async function updateMessageStatus(id: string, status: StoredMessageStatu
     .eq("id", id);
 
   if (error) {
-    throw new Error("Unable to update message.");
+    throw toMessageStoreError(error, "Unable to update message.");
   }
 }
 

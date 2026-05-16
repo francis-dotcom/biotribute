@@ -109,11 +109,11 @@ export async function POST(
 
   try {
     await updateMessageStatus(id, status);
-  } catch {
+  } catch (error) {
     redirect(
       buildRedirectUrl(
         redirectTo || "/admin/messages",
-        "Unable to update message status.",
+        error instanceof Error ? error.message : "Unable to update message status.",
         "error"
       )
     );

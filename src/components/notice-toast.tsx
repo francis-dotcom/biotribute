@@ -10,31 +10,45 @@ type NoticeToastProps = {
   tone?: "success" | "error";
 };
 
-export function NoticeToast({ message, tone = "success" }: NoticeToastProps) {
-  const [dismissedMessage, setDismissedMessage] = useState<string | null>(null);
-  const isOpen = Boolean(message) && message !== dismissedMessage;
+function normalizeToastMessage(message?: string) {
+  const value = message?.trim();
+  if (!value) {
+    return "";
+  }
 
-  useEffect(() => {
-    if (!message) {
-      setDismissedMessage(null);
+  if (value.length % 2 === 0) {
+    const midpoint = value.length / 2;
+    const left = value.slice(0, midpoint).trim();
+    const right = value.slice(midpoint).trim();
+
+    if (left && left === right) {
+      return left;
     }
-  }, [message]);
+  }
+
+  return value;
+}
+
+export function NoticeToast({ message, tone = "success" }: NoticeToastProps) {
+  const normalizedMessage = normalizeToastMessage(message);
+  const [dismissedMessage, setDismissedMessage] = useState<string | null>(null);
+  const isOpen = Boolean(normalizedMessage) && normalizedMessage !== dismissedMessage;
 
   useEffect(() => {
-    if (!message || !isOpen) {
+    if (!normalizedMessage || !isOpen) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
-      setDismissedMessage(message);
+      setDismissedMessage(normalizedMessage);
     }, NOTICE_TOAST_AUTO_DISMISS_MS);
 
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [isOpen, message]);
+  }, [isOpen, normalizedMessage]);
 
-  if (!message || !isOpen) {
+  if (!normalizedMessage || !isOpen) {
     return null;
   }
 
@@ -44,11 +58,11 @@ export function NoticeToast({ message, tone = "success" }: NoticeToastProps) {
       role="status"
       aria-live="polite"
     >
-      <p>{message}</p>
+      <p>{normalizedMessage}</p>
       <button
         className="notice-toast-close"
         type="button"
-        onClick={() => setDismissedMessage(message)}
+        onClick={() => setDismissedMessage(normalizedMessage)}
         aria-label="Dismiss notification"
       >
         ×
