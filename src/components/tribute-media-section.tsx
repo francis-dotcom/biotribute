@@ -20,9 +20,9 @@ type TributeMediaSectionProps = {
 };
 
 type MediaEmbed =
-  | { type: "video"; src: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number }
-  | { type: "iframe"; src: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number }
-  | { type: "link"; src: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number };
+  | { type: "video"; src: string; openUrl: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number }
+  | { type: "iframe"; src: string; openUrl: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number }
+  | { type: "link"; src: string; openUrl: string; thumbnail?: string | null; label: string; description?: string; sourceIndex: number };
 
 function shouldPrioritizeLivestream(date: Date) {
   const formatter = new Intl.DateTimeFormat("en-US", {
@@ -89,6 +89,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
         return {
           type: "iframe",
           src: `https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&rel=0&modestbranding=1`,
+          openUrl: normalized,
           thumbnail: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
           label: `Video Memory ${index + 1}`,
           sourceIndex: index,
@@ -103,6 +104,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
         return {
           type: "iframe",
           src: `https://player.vimeo.com/video/${maybeId}?playsinline=1&title=0&byline=0&portrait=0`,
+          openUrl: normalized,
           thumbnail: null,
           label: `Video Memory ${index + 1}`,
           sourceIndex: index,
@@ -114,6 +116,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
       return {
         type: "video",
         src: normalized,
+        openUrl: normalized,
         thumbnail: null,
         label: `Video Memory ${index + 1}`,
         sourceIndex: index,
@@ -123,6 +126,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
     return {
       type: "link",
       src: normalized,
+      openUrl: normalized,
       thumbnail: null,
       label: `Video Memory ${index + 1}`,
       sourceIndex: index,
@@ -132,6 +136,7 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
       return {
         type: "link",
         src: normalized,
+        openUrl: normalized,
         thumbnail: null,
         label: `Video Memory ${index + 1}`,
         sourceIndex: index,
@@ -235,7 +240,7 @@ export function TributeMediaSection({
               <a
                 key={`${embed.sourceIndex}-${embed.src}`}
                 className="tribute-media-thumb tribute-media-selector"
-                href={embed.src}
+                href={embed.openUrl}
                 target="_blank"
                 rel="noreferrer"
                 onClick={() => trackVideoOpen(embed.sourceIndex)}
