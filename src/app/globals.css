@@ -4154,6 +4154,12 @@ body.family-message-modal-open .support-note-card {
   color: var(--muted-2);
 }
 
+.tribute-media-thumb-copy,
+.tribute-media-thumb-copy p,
+.tribute-media-thumb-copy a {
+  text-decoration: none;
+}
+
 .tribute-stream-card {
   display: grid;
   gap: 10px;
