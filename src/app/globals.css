@@ -4073,6 +4073,8 @@ body.family-message-modal-open .support-note-card {
   background: rgba(255, 255, 255, 0.94);
   text-align: left;
   cursor: pointer;
+  color: inherit;
+  text-decoration: none;
   transition:
     transform 140ms ease,
     box-shadow 140ms ease,
