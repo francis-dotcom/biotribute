@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { MarkdownText } from "@/components/markdown-text";
 import type { TributeRecord } from "@/data/tributes";
 
@@ -141,42 +141,6 @@ function toEmbedUrl(url: string, index: number): MediaEmbed | null {
   }
 }
 
-function renderMedia(embed: MediaEmbed, title: string) {
-  if (embed.type === "video") {
-    return (
-      <video
-        key={embed.src}
-        className="tribute-media-frame"
-        src={embed.src}
-        controls
-        playsInline
-        preload="metadata"
-        controlsList="nodownload"
-        title={title}
-      />
-    );
-  }
-
-  if (embed.type === "iframe") {
-    return (
-      <iframe
-        className="tribute-media-frame"
-        src={embed.src}
-        title={title}
-        loading="lazy"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-        allowFullScreen
-      />
-    );
-  }
-
-  return (
-    <a className="button-primary" href={embed.src} target="_blank" rel="noreferrer">
-      Open Video Link
-    </a>
-  );
-}
-
 function createVisitSessionId() {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID();
@@ -198,7 +162,6 @@ export function TributeMediaSection({
   showVideoSection,
   showLivestreamSection,
 }: TributeMediaSectionProps) {
-  const [activeEmbed, setActiveEmbed] = useState<MediaEmbed | null>(null);
   const livestreamNoteText = livestreamNote?.trim();
 
   function getVisitSessionId() {
@@ -268,53 +231,25 @@ export function TributeMediaSection({
                 ? "Tap to open this tribute memory."
                 : "Tap to watch this tribute memory.");
 
-            if (embed.type === "link") {
-              return (
-                <a
-                  key={`${embed.sourceIndex}-${embed.src}`}
-                  className="tribute-media-thumb tribute-media-selector"
-                  href={embed.src}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => trackVideoOpen(embed.sourceIndex)}
-                >
-                  <div
-                    className={`tribute-media-thumb-image${embed.thumbnail ? " has-image" : ""}`}
-                    style={
-                      embed.thumbnail
-                        ? { backgroundImage: `url("${embed.thumbnail}")` }
-                        : undefined
-                    }
-                  >
-                    <span className="tribute-media-play">Open Video</span>
-                  </div>
-                  <div className="tribute-media-thumb-copy">
-                    <MarkdownText content={tileCopy} />
-                  </div>
-                </a>
-              );
-            }
-
             return (
-              <button
+              <a
                 key={`${embed.sourceIndex}-${embed.src}`}
                 className="tribute-media-thumb tribute-media-selector"
-                type="button"
-                onClick={() => {
-                  trackVideoOpen(embed.sourceIndex);
-                  setActiveEmbed(embed);
-                }}
+                href={embed.src}
+                target="_blank"
+                rel="noreferrer"
+                onClick={() => trackVideoOpen(embed.sourceIndex)}
               >
                 <div
                   className={`tribute-media-thumb-image${embed.thumbnail ? " has-image" : ""}`}
                   style={embed.thumbnail ? { backgroundImage: `url("${embed.thumbnail}")` } : undefined}
                 >
-                  <span className="tribute-media-play">Play</span>
+                  <span className="tribute-media-play">Open Video</span>
                 </div>
                 <div className="tribute-media-thumb-copy">
                   <MarkdownText content={tileCopy} />
                 </div>
-              </button>
+              </a>
             );
           })}
         </div>
@@ -393,42 +328,6 @@ export function TributeMediaSection({
     <>
       {showLivestreamFirst ? livestreamSection : videoSection}
       {showLivestreamFirst ? videoSection : livestreamSection}
-
-      {activeEmbed ? (
-        <div
-          className="message-modal-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="video-memory-modal-title"
-          onClick={() => setActiveEmbed(null)}
-        >
-          <div className="message-modal-card tribute-media-modal-card" onClick={(event) => event.stopPropagation()}>
-            <div className="message-modal-head">
-              <div>
-                <p className="message-modal-kicker">Video Memory</p>
-                <h3 id="video-memory-modal-title">{activeEmbed.label}</h3>
-              </div>
-              <button
-                className="message-modal-close"
-                type="button"
-                aria-label="Close video memory"
-                onClick={() => setActiveEmbed(null)}
-              >
-                ×
-              </button>
-            </div>
-            {renderMedia(activeEmbed, activeEmbed.label)}
-            <a
-              className="button-secondary tribute-media-direct-link"
-              href={activeEmbed.src}
-              target="_blank"
-              rel="noreferrer"
-            >
-              Open Video Directly
-            </a>
-          </div>
-        </div>
-      ) : null}
     </>
   );
 }
