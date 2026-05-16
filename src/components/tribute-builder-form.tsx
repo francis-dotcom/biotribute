@@ -635,26 +635,31 @@ export function TributeBuilderForm({
       return;
     }
 
+    const file = files[0];
     setUploadingVideoIndex(index);
     setStatus(null);
     setVideoUploadStatuses((current) =>
       current.map((value, currentIndex) =>
-        currentIndex === index ? "Uploading video file..." : value
+        currentIndex === index ? "Preparing upload..." : value
       )
     );
 
-    const formData = new FormData();
-    formData.append("file", files[0]);
-
     const response = await fetch(`/api/tributes/${tribute.slug}/videos`, {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        fileName: file.name,
+        fileType: file.type,
+        fileSize: file.size,
+      }),
     });
 
     const data = (await response.json()) as {
       error?: string;
       message?: string;
-      upload?: { videoUrl?: string };
+      upload?: { signedUrl?: string; videoUrl?: string };
     };
 
     if (!response.ok) {
@@ -662,6 +667,62 @@ export function TributeBuilderForm({
       setVideoUploadStatuses((current) =>
         current.map((value, currentIndex) =>
           currentIndex === index ? data.error ?? "Unable to upload video file." : value
+        )
+      );
+      setUploadingVideoIndex(null);
+      return;
+    }
+
+    const signedUrl = data.upload?.signedUrl?.trim() ?? "";
+    if (!signedUrl) {
+      setStatus("Unable to prepare video upload.");
+      setVideoUploadStatuses((current) =>
+        current.map((value, currentIndex) =>
+          currentIndex === index ? "Unable to prepare video upload." : value
+        )
+      );
+      setUploadingVideoIndex(null);
+      return;
+    }
+
+    const uploadBody = new FormData();
+    uploadBody.append("cacheControl", "3600");
+    uploadBody.append("", file);
+
+    const uploadResult = await new Promise<{ ok: boolean; error?: string }>((resolve) => {
+      const request = new XMLHttpRequest();
+      request.open("PUT", signedUrl);
+      request.upload.addEventListener("progress", (event) => {
+        if (!event.lengthComputable) {
+          return;
+        }
+
+        const percent = Math.max(1, Math.min(100, Math.round((event.loaded / event.total) * 100)));
+        setVideoUploadStatuses((current) =>
+          current.map((value, currentIndex) =>
+            currentIndex === index ? `Uploading video file... ${percent}%` : value
+          )
+        );
+      });
+      request.addEventListener("load", () => {
+        if (request.status >= 200 && request.status < 300) {
+          resolve({ ok: true });
+          return;
+        }
+
+        resolve({ ok: false, error: "Unable to upload video file." });
+      });
+      request.addEventListener("error", () => {
+        resolve({ ok: false, error: "Unable to upload video file." });
+      });
+      request.send(uploadBody);
+    });
+
+    if (!uploadResult.ok) {
+      setStatus(uploadResult.error ?? "Unable to upload video file.");
+      setVideoUploadStatuses((current) =>
+        current.map((value, currentIndex) =>
+          currentIndex === index ? uploadResult.error ?? "Unable to upload video file." : value
         )
       );
       setUploadingVideoIndex(null);

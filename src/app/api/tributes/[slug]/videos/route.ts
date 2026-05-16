@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { getTributeBySlug } from "@/data/tributes";
 import { isAdminAuthenticated } from "@/lib/admin";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
@@ -15,6 +16,11 @@ const ALLOWED_MIME_TYPES = new Set([
   "video/quicktime",
 ]);
 const MAX_FILE_SIZE_BYTES = 50 * 1024 * 1024;
+const uploadPreparationSchema = z.object({
+  fileName: z.string().trim().min(1),
+  fileType: z.string().trim().min(1),
+  fileSize: z.number().int().positive(),
+});
 
 function sanitizeFileName(name: string) {
   return name.toLowerCase().replace(/[^a-z0-9.-]+/g, "-");
@@ -142,6 +148,57 @@ export async function POST(
 
   try {
     const { slug } = await context.params;
+    const contentType = request.headers.get("content-type") ?? "";
+
+    if (contentType.includes("application/json")) {
+      const payloadResult = uploadPreparationSchema.safeParse(await request.json());
+      if (!payloadResult.success) {
+        return NextResponse.json({ error: "Choose one video file to upload." }, { status: 400 });
+      }
+
+      const { fileName, fileType, fileSize } = payloadResult.data;
+
+      if (!ALLOWED_MIME_TYPES.has(fileType)) {
+        return NextResponse.json(
+          { error: "Only MP4, WEBM, OGG, and MOV videos are allowed." },
+          { status: 400 },
+        );
+      }
+
+      if (fileSize > MAX_FILE_SIZE_BYTES) {
+        return NextResponse.json(
+          { error: "Each video must be 50MB or smaller." },
+          { status: 400 },
+        );
+      }
+
+      const supabase = await ensureBucket();
+      await ensureTributeRow(slug);
+
+      const extension = inferExtension(new File([], fileName, { type: fileType }));
+      const safeBaseName = sanitizeFileName(fileName.replace(/\.[^.]+$/, "")) || "video";
+      const filePath = `${slug}/video/${Date.now()}-${randomUUID()}-${safeBaseName}.${extension}`;
+      const { data: signedUploadData, error: signedUploadError } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUploadUrl(filePath);
+
+      if (signedUploadError || !signedUploadData?.signedUrl) {
+        throw new Error("Unable to prepare video upload.");
+      }
+
+      const { data: publicData } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
+
+      return NextResponse.json({
+        message: "Video upload prepared.",
+        upload: {
+          filePath,
+          signedUrl: signedUploadData.signedUrl,
+          token: signedUploadData.token,
+          videoUrl: publicData.publicUrl,
+        },
+      });
+    }
+
     const formData = await request.formData();
     const file = formData.get("file");
 
