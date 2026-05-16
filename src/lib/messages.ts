@@ -55,8 +55,7 @@ function isMissingMessageTableError(error: { code?: string; message?: string } |
 
   return (
     error.code === "PGRST205" ||
-    error.code === "42P01" ||
-    error.message?.toLowerCase().includes("tribute_messages") === true
+    error.code === "42P01"
   );
 }
 
@@ -69,6 +68,15 @@ function isPermissionError(error: { code?: string; message?: string } | null) {
     error.code === "42501" ||
     error.message?.toLowerCase().includes("permission denied") === true
   );
+}
+
+function isMissingDeletedAtColumnError(error: { code?: string; message?: string } | null) {
+  if (!error) {
+    return false;
+  }
+
+  const message = error.message?.toLowerCase() ?? "";
+  return error.code === "42703" && message.includes("deleted_at");
 }
 
 function toMessageStoreError(
@@ -84,6 +92,12 @@ function toMessageStoreError(
   if (isPermissionError(error)) {
     return new Error(
       "Message storage permission is missing. Grant SELECT, INSERT, UPDATE on public.tribute_messages to service_role.",
+    );
+  }
+
+  if (isMissingDeletedAtColumnError(error)) {
+    return new Error(
+      "Message storage schema is outdated. Run migration 20260514102000_add_soft_delete_to_tribute_messages.sql.",
     );
   }
 
