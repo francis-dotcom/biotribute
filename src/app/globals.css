@@ -3207,6 +3207,7 @@ body.family-message-modal-open .support-note-card {
 .moderation-row-open {
   display: grid;
   gap: 6px;
+  width: 100%;
   min-width: 0;
   padding: 0;
   border: 0;
@@ -3230,6 +3231,8 @@ body.family-message-modal-open .support-note-card {
 .moderation-row-author {
   color: var(--gold-deep);
   font: 700 1rem/1.25 var(--font-display);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .moderation-row-content h3 {
@@ -3239,6 +3242,8 @@ body.family-message-modal-open .support-note-card {
 .moderation-row-email {
   margin: 0;
   color: #6f9fcf;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .moderation-row-history-count {
@@ -3251,6 +3256,7 @@ body.family-message-modal-open .support-note-card {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  overflow-wrap: anywhere;
   color: #111;
   font: 500 0.98rem/1.4 var(--font-sans);
 }
@@ -3688,6 +3694,12 @@ body.family-message-modal-open .support-note-card {
     gap: 4px;
   }
 
+  .moderation-row-preview {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
   .admin-actions-inline {
     justify-content: flex-start;
   }
@@ -4079,6 +4091,17 @@ body.family-message-modal-open .support-note-card {
     transform 140ms ease,
     box-shadow 140ms ease,
     border-color 140ms ease;
+}
+
+.tribute-media-thumb,
+.tribute-media-thumb:link,
+.tribute-media-thumb:visited,
+.tribute-media-thumb:hover,
+.tribute-media-thumb:active,
+.tribute-media-thumb *,
+.tribute-media-thumb p,
+.tribute-media-thumb a {
+  text-decoration: none !important;
 }
 
 .tribute-media-selector {
