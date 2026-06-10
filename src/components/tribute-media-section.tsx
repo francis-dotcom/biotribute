@@ -154,6 +154,21 @@ function createVisitSessionId() {
   return `visit-session-${new Date().getTime()}`;
 }
 
+const MAX_VIDEO_SLOTS = 3;
+
+function getVideoSlotIndices(videoUrls: string[]) {
+  const indices: number[] = [];
+
+  for (let index = 0; index < MAX_VIDEO_SLOTS; index += 1) {
+    if ((videoUrls[index] ?? "").trim()) {
+      indices.push(index);
+    }
+  }
+
+  // Newest slot (Video 3) first, then Video 2, then Video 1.
+  return indices.sort((left, right) => right - left);
+}
+
 export function TributeMediaSection({
   tributeSlug,
   videoUrls,
@@ -197,8 +212,9 @@ export function TributeMediaSection({
 
   const mediaEmbeds = useMemo(
     () =>
-      videoUrls
-        .map((url, index) => {
+      getVideoSlotIndices(videoUrls)
+        .map((index) => {
+          const url = (videoUrls[index] ?? "").trim();
           const embed = toEmbedUrl(url, index);
           if (!embed) return null;
           return {
