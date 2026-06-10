@@ -173,7 +173,7 @@ export const tributes: TributeRecord[] = [
     videoNote:
       "Add video memories from family and friends. Use direct MP4 links or YouTube/Vimeo links for playback.",
     showVideoSection: true,
-    livestreamUrl: "",
+    livestreamUrl: "https://www.youtube.com/live/_HgtGwjKX_k?si=Dp_qLufASpNwcPBr",
     livestreamThumbnailUrl: "",
     livestreamDisplayMode: "video",
     livestreamNote:
