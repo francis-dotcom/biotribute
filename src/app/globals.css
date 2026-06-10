@@ -4148,8 +4148,9 @@ body.family-message-modal-open .support-note-card {
 .tribute-media-play {
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  bottom: 16px;
+  top: auto;
+  transform: translateX(-50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
