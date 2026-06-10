@@ -281,10 +281,22 @@ export function TributeMediaSection({
       {(activeLivestreamDisplayMode === "video" ? streamEmbed : livestreamThumbnailUrl?.trim()) ? (
         <div className="tribute-stream-card">
           {activeLivestreamDisplayMode !== "video" && livestreamThumbnailUrl?.trim() ? (
-            <div
-              className="tribute-stream-thumbnail"
-              style={{ backgroundImage: `url("${livestreamThumbnailUrl}")` }}
-            />
+            streamEmbed?.openUrl ? (
+              <a
+                className="tribute-stream-thumbnail tribute-stream-thumbnail-link"
+                href={streamEmbed.openUrl}
+                target="_blank"
+                rel="noreferrer"
+                style={{ backgroundImage: `url("${livestreamThumbnailUrl}")` }}
+              >
+                <span className="tribute-media-play">Watch Live on YouTube</span>
+              </a>
+            ) : (
+              <div
+                className="tribute-stream-thumbnail"
+                style={{ backgroundImage: `url("${livestreamThumbnailUrl}")` }}
+              />
+            )
           ) : null}
           {activeLivestreamDisplayMode === "video" && streamEmbed ? (
             streamEmbed.type === "iframe" ? (

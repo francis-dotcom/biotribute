@@ -4191,6 +4191,8 @@ body.family-message-modal-open .support-note-card {
 }
 
 .tribute-stream-thumbnail {
+  position: relative;
+  display: block;
   min-height: 220px;
   aspect-ratio: 16 / 9;
   border: 1px solid rgba(229, 229, 234, 0.9);
@@ -4200,6 +4202,15 @@ body.family-message-modal-open .support-note-card {
   background-size: contain;
   background-color: rgba(244, 235, 218, 0.35);
   box-shadow: var(--shadow-xs);
+}
+
+.tribute-stream-thumbnail-link {
+  overflow: hidden;
+  text-decoration: none;
+}
+
+.tribute-stream-thumbnail-link:hover .tribute-media-play {
+  background: rgba(196, 34, 28, 0.92);
 }
 
 .tribute-stream-frame {
