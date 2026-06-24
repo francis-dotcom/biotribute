@@ -24,14 +24,14 @@ export default function HomePage() {
           product surface.
         </p>
         <div className="landing-actions">
-          <Link className="button-primary" href={`/${featuredTribute.slug}`}>
-            View Product Demo
+          <Link className="button-primary" href="/signup">
+            Create Your Tribute
           </Link>
-          <Link
-            className="button-secondary"
-            href="/console-login?next=%2Fconsole%2FSirFemiOgini&force=1"
-          >
-            Open Console
+          <Link className="button-secondary" href="/login">
+            Sign In
+          </Link>
+          <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
+            View Product Demo
           </Link>
         </div>
         <div className="product-proof-grid">
@@ -132,14 +132,14 @@ export default function HomePage() {
           clear launch checkpoints.
         </p>
         <div className="landing-actions">
-          <Link className="button-primary" href={`/${featuredTribute.slug}`}>
+          <Link className="button-primary" href="/signup">
+            Create Your Tribute
+          </Link>
+          <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
             Open Tribute Demo
           </Link>
-          <Link
-            className="button-secondary"
-            href="/console-login?next=%2Fconsole%2FSirFemiOgini&force=1"
-          >
-            Go to Console
+          <Link className="button-secondary" href="/console-login?next=%2Fconsole&force=1">
+            Admin Console
           </Link>
         </div>
       </section>

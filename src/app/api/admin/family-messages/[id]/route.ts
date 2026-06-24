@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
-import { isAdminAuthenticated } from "@/lib/admin";
-import { deleteFamilyPrivateMessage } from "@/lib/family-private-messages";
+import { canManageTribute } from "@/lib/user-auth";
+import {
+  deleteFamilyPrivateMessage,
+  getFamilyPrivateMessageTributeSlug,
+} from "@/lib/family-private-messages";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
 
@@ -42,8 +45,9 @@ export async function POST(
   const redirectTo = String(formData.get("redirectTo") ?? "");
   const { id } = await params;
 
-  if (!(await isAdminAuthenticated())) {
-    redirect("/console-login");
+  const messageSlug = await getFamilyPrivateMessageTributeSlug(id);
+  if (!messageSlug || !(await canManageTribute(messageSlug))) {
+    redirect("/login");
   }
 
   if (action !== "delete") {

@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { getTributeBySlug } from "@/data/tributes";
-import { isAdminAuthenticated } from "@/lib/admin";
+import { canManageTribute } from "@/lib/user-auth";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
 import { getSupabaseAdmin } from "@/lib/supabase-admin";
@@ -150,7 +150,8 @@ export async function POST(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  const { slug: authSlug } = await context.params;
+  if (!(await canManageTribute(authSlug))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
   if (!isSameOriginRequest(request)) {
@@ -306,7 +307,8 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  const { slug: authSlug } = await context.params;
+  if (!(await canManageTribute(authSlug))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
   if (!isSameOriginRequest(request)) {
@@ -381,7 +383,8 @@ export async function DELETE(
   request: Request,
   context: { params: Promise<{ slug: string }> }
 ) {
-  if (!(await isAdminAuthenticated())) {
+  const { slug: authSlug } = await context.params;
+  if (!(await canManageTribute(authSlug))) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
   if (!isSameOriginRequest(request)) {

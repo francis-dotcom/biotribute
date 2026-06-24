@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { GalleryDashboardManager } from "@/components/gallery-dashboard-manager";
 import { ThemeConsoleForm } from "@/components/theme-console-form";
 import { TributeBuilderForm } from "@/components/tribute-builder-form";
 import { AdminSessionGuard } from "@/components/admin-session-guard";
+import { UserSignOutButton } from "@/components/user-sign-out-button";
 import { VisitorDetailsPanel } from "@/components/visitor-details-panel";
-import { requireAdminSession } from "@/lib/admin";
+import { isAdminAuthenticated } from "@/lib/admin";
+import { canManageTribute } from "@/lib/user-auth";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord, isTributeStoreConfigured } from "@/lib/tributes-store";
 import {
@@ -31,7 +33,10 @@ export default async function ConsolePage({
   params,
 }: ConsolePageProps) {
   const { slug } = await params;
-  await requireAdminSession(`/console/${slug}`);
+  if (!(await canManageTribute(slug))) {
+    redirect(`/login?next=${encodeURIComponent(`/console/${slug}`)}`);
+  }
+  const isAdmin = await isAdminAuthenticated();
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {
@@ -125,11 +130,15 @@ export default async function ConsolePage({
           <a href="#media-opens">Video Opens</a>
           <a href="#visitors">Visitors</a>
           <Link href={`/${tribute.slug}`}>View Public Page</Link>
-          <form action="/api/admin/logout" method="post">
-            <button className="button-secondary" type="submit">
-              Sign out
-            </button>
-          </form>
+          {isAdmin ? (
+            <form action="/api/admin/logout" method="post">
+              <button className="button-secondary" type="submit">
+                Sign out
+              </button>
+            </form>
+          ) : (
+            <UserSignOutButton />
+          )}
         </div>
       </section>
 

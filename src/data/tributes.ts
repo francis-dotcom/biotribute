@@ -57,6 +57,7 @@ export type TributeThemePreset = {
 
 export type TributeRecord = {
   slug: string;
+  ownerUserId?: string | null;
   name: string;
   honorificTitle?: string;
   positionTitle?: string;

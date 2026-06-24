@@ -1,12 +1,14 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { AdminSessionGuard } from "@/components/admin-session-guard";
 import { NoticeToast } from "@/components/notice-toast";
 import { ModerationQueue } from "@/components/moderation-queue";
 import { PrivateSubmissionsManager } from "@/components/private-submissions-manager";
+import { UserSignOutButton } from "@/components/user-sign-out-button";
 import { getTributeThemePreset } from "@/data/tributes";
-import { requireAdminSession } from "@/lib/admin";
+import { isAdminAuthenticated } from "@/lib/admin";
+import { canManageTribute } from "@/lib/user-auth";
 import { getFamilyPrivateMessagesForAdmin } from "@/lib/family-private-messages";
 import { getMessagesForAdmin } from "@/lib/messages";
 import { getTributeRecord } from "@/lib/tributes-store";
@@ -22,7 +24,10 @@ export default async function ConsoleMessagesPage({
 }: ConsoleMessagesPageProps) {
   const { slug } = await params;
   const { notice, tone } = await searchParams;
-  await requireAdminSession(`/console/${slug}/messages`);
+  if (!(await canManageTribute(slug))) {
+    redirect(`/login?next=${encodeURIComponent(`/console/${slug}/messages`)}`);
+  }
+  const isAdmin = await isAdminAuthenticated();
 
   const tribute = await getTributeRecord(slug);
   if (!tribute) {
@@ -64,11 +69,15 @@ export default async function ConsoleMessagesPage({
         <div className="console-quick-links">
           <Link href={`/console/${slug}`}>Back to Console</Link>
           <Link href={`/${slug}`}>View Public Page</Link>
-          <form action="/api/admin/logout" method="post">
-            <button className="button-secondary" type="submit">
-              Sign out
-            </button>
-          </form>
+          {isAdmin ? (
+            <form action="/api/admin/logout" method="post">
+              <button className="button-secondary" type="submit">
+                Sign out
+              </button>
+            </form>
+          ) : (
+            <UserSignOutButton />
+          )}
         </div>
       </section>
 

@@ -8,7 +8,7 @@ type ConsoleLoginPageProps = {
 
 export default async function ConsoleLoginPage({ searchParams }: ConsoleLoginPageProps) {
   const { error, next, force } = await searchParams;
-  const nextPath = next && next.startsWith("/") ? next : "/console/SirFemiOgini";
+  const nextPath = next && next.startsWith("/") ? next : "/console";
   const forcePrompt = force === "1";
 
   if (!forcePrompt && (await isAdminAuthenticated())) {

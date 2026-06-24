@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
-import { isAdminAuthenticated } from "@/lib/admin";
-import { deleteMessage, updateMessageContent, updateMessageStatus } from "@/lib/messages";
+import { canManageTribute } from "@/lib/user-auth";
+import {
+  deleteMessage,
+  getMessageTributeSlug,
+  updateMessageContent,
+  updateMessageStatus,
+} from "@/lib/messages";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
 
@@ -44,8 +49,9 @@ export async function POST(
   const redirectTo = String(formData.get("redirectTo") ?? "");
   const { id } = await params;
 
-  if (!(await isAdminAuthenticated())) {
-    redirect("/console-login");
+  const messageSlug = await getMessageTributeSlug(id);
+  if (!messageSlug || !(await canManageTribute(messageSlug))) {
+    redirect("/login");
   }
 
   if (action === "delete") {

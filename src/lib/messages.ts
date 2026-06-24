@@ -373,6 +373,21 @@ export async function getMessagesForAdmin(tributeSlug?: string) {
   return data as StoredMessageRow[];
 }
 
+export async function getMessageTributeSlug(id: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("tribute_messages")
+    .select("tribute_slug")
+    .eq("id", id)
+    .maybeSingle();
+
+  return data?.tribute_slug ? String(data.tribute_slug) : null;
+}
+
 export async function updateMessageStatus(id: string, status: StoredMessageStatus) {
   const supabase = getSupabaseAdmin();
   if (!supabase) {

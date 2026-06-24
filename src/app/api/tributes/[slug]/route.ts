@@ -2,10 +2,17 @@ import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isAdminAuthenticated } from "@/lib/admin";
+import { getCurrentUser } from "@/lib/user-auth";
 import { consumeRateLimit, getClientIp } from "@/lib/rate-limit";
 import { isSameOriginRequest } from "@/lib/request-security";
 import { TRIBUTE_THEME_IDS } from "@/data/tributes";
-import { saveTributeRecord, updateTributeTheme, updateTributeThemeConsole } from "@/lib/tributes-store";
+import {
+  getTributeOwnedByUser,
+  getTributeRecord,
+  saveTributeRecord,
+  updateTributeTheme,
+  updateTributeThemeConsole,
+} from "@/lib/tributes-store";
 
 const timelineSchema = z.object({
   year: z.string().trim(),
@@ -26,6 +33,7 @@ const supportAmountSchema = z.object({
 
 const fullTributeSchema = z.object({
   slug: z.string().trim().min(1),
+  ownerUserId: z.string().trim().min(1).optional(),
   name: z.string().trim().min(1),
   honorificTitle: z.string().trim().optional(),
   positionTitle: z.string().trim().optional(),
@@ -92,9 +100,6 @@ const themeOnlySchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!(await isAdminAuthenticated())) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
   if (!isSameOriginRequest(request)) {
     return NextResponse.json({ error: "Invalid request origin." }, { status: 403 });
   }
@@ -118,6 +123,38 @@ export async function POST(request: Request) {
 
   try {
     const json = await request.json();
+    const slug = typeof json?.slug === "string" ? json.slug.trim() : "";
+    if (!slug) {
+      return NextResponse.json({ error: "Missing tribute slug." }, { status: 400 });
+    }
+
+    const isAdmin = await isAdminAuthenticated();
+    if (!isAdmin) {
+      const user = await getCurrentUser();
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+      }
+
+      const existingTribute = await getTributeRecord(slug);
+      if (existingTribute) {
+        if (existingTribute.ownerUserId !== user.id) {
+          return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
+        }
+      } else {
+        const requestedOwnerId = typeof json?.ownerUserId === "string" ? json.ownerUserId : null;
+        if (requestedOwnerId !== user.id) {
+          return NextResponse.json({ error: "Unauthorized." }, { status: 403 });
+        }
+        const ownedTribute = await getTributeOwnedByUser(user.id);
+        if (ownedTribute) {
+          return NextResponse.json(
+            { error: "You already have a tribute. Each account can manage one tribute." },
+            { status: 409 },
+          );
+        }
+      }
+    }
+
     const fullPayloadResult = fullTributeSchema.safeParse(json);
 
     if (fullPayloadResult.success) {

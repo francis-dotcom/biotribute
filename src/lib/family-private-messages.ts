@@ -103,6 +103,21 @@ export async function getFamilyPrivateMessagesForAdmin(tributeSlug: string) {
   return data as StoredFamilyPrivateMessageRow[];
 }
 
+export async function getFamilyPrivateMessageTributeSlug(id: string) {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data } = await supabase
+    .from("family_private_messages")
+    .select("tribute_slug")
+    .eq("id", id)
+    .maybeSingle();
+
+  return data?.tribute_slug ? String(data.tribute_slug) : null;
+}
+
 export async function deleteFamilyPrivateMessage(id: string) {
   const supabase = getSupabaseAdmin();
   if (!supabase) {

@@ -1,4 +1,5 @@
 import {
+  tributes,
   getTributeBySlug,
   getTributeBySlugInsensitive,
   type TributeContributor,
@@ -61,6 +62,7 @@ type GalleryItemRow = {
 
 export type TributeBuilderInput = {
   slug: string;
+  ownerUserId?: string;
   name: string;
   honorificTitle?: string;
   positionTitle?: string;
@@ -109,6 +111,41 @@ export type TributeBuilderInput = {
 
 export function isTributeStoreConfigured() {
   return isSupabaseConfigured();
+}
+
+export type TributeSummary = {
+  slug: string;
+  name: string;
+  years: string;
+  updatedAt: string | null;
+};
+
+export async function listAllTributes(): Promise<TributeSummary[]> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return tributes.map((tribute) => ({
+      slug: tribute.slug,
+      name: tribute.name,
+      years: tribute.years,
+      updatedAt: null,
+    }));
+  }
+
+  const { data, error } = await supabase
+    .from("tributes")
+    .select("slug, name, years, updated_at")
+    .order("updated_at", { ascending: false });
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data.map((row) => ({
+    slug: String(row.slug),
+    name: String(row.name),
+    years: String(row.years ?? ""),
+    updatedAt: row.updated_at ? String(row.updated_at) : null,
+  }));
 }
 
 function normalizeTributeName(value: string) {
@@ -407,6 +444,30 @@ function withVisibilityInSupportNote(note: string | undefined, metadata: Support
 ${VISIBILITY_MARKER}${encoded}${VISIBILITY_SUFFIX}`;
 }
 
+export async function getTributeOwnedByUser(userId: string): Promise<TributeSummary | null> {
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from("tributes")
+    .select("slug, name, years, updated_at")
+    .eq("owner_user_id", userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return null;
+  }
+
+  return {
+    slug: String(data.slug),
+    name: String(data.name),
+    years: String(data.years ?? ""),
+    updatedAt: data.updated_at ? String(data.updated_at) : null,
+  };
+}
+
 export async function getTributeRecord(slug: string): Promise<TributeRecord | null> {
   const supabase = getSupabaseAdmin();
 
@@ -469,6 +530,7 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
 
   return {
     slug: tributeRow.slug,
+    ownerUserId: tributeRow.owner_user_id ?? null,
     name: tributeRow.name,
     honorificTitle: supportNoteMetadata?.honorificTitle ?? fallback?.honorificTitle,
     positionTitle: supportNoteMetadata?.positionTitle ?? fallback?.positionTitle,
@@ -668,7 +730,7 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
 
   const supportNoteWithVisibility = withVisibilityInSupportNote(input.supportNote, supportNoteMetadata);
 
-  const modernPayload = {
+  const modernPayload: Record<string, unknown> = {
     slug: input.slug,
     name: input.name,
     years: input.years,
@@ -689,6 +751,10 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     show_livestream_section: supportNoteMetadata.showLivestreamSection ?? true,
     updated_at: new Date().toISOString(),
   };
+
+  if (input.ownerUserId && !existingTribute) {
+    modernPayload.owner_user_id = input.ownerUserId;
+  }
 
   const { error: tributeError } = await supabase.from("tributes").upsert(modernPayload);
 
