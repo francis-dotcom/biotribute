@@ -1,155 +1,324 @@
+import Image from "next/image";
 import Link from "next/link";
-import { tributes } from "@/data/tributes";
 
-const featuredTribute = tributes[0];
+const features = [
+  ["♡", "Memorial tribute page", "A dedicated page to celebrate and remember a loved one."],
+  ["▦", "Biography", "Tell their life story with chapters, dates, and milestones."],
+  ["▣", "Photo gallery", "Collect and share treasured photos from across the family."],
+  ["◐", "Video memories", "Preserve voices and moments with uploaded video clips."],
+  ["✉", "Guestbook", "Invite friends to leave condolences, notes, and memories."],
+  ["♧", "Family tree", "Map relationships and connect generations together."],
+  ["⛓", "Donation link", "Direct loved ones to a charity or memorial fund."],
+  ["⌘", "QR code", "Link printed funeral programs straight to the tribute page."],
+];
+
+const familyMembers = [
+  ["M", "Maria Okafor", "Daughter"],
+  ["T", "Tunde Okafor", "Son"],
+  ["A", "Ada Okafor", "Granddaughter"],
+  ["J", "James Okafor", "Brother"],
+];
+
+const posts = [
+  [
+    "M",
+    "Maria Okafor",
+    "2 days ago",
+    "Found this photo of Dad at the lake house, summer 1998. He loved it there.",
+    "24",
+    "James Okafor: I remember that day so well.",
+  ],
+  [
+    "T",
+    "Tunde Okafor",
+    "5 days ago",
+    "Lit a candle for Mum this morning. Thinking of all of you today.",
+    "18",
+    "Ada: Sending love to everyone.",
+  ],
+];
+
+function Navbar() {
+  return (
+    <header className="bt-nav">
+      <Link className="bt-brand" href="/">
+        <span className="bt-mark" aria-hidden="true">
+          ✽
+        </span>
+        <span>BioTribute</span>
+      </Link>
+      <nav className="bt-links" aria-label="Landing page">
+        <a href="#how-it-works">How it works</a>
+        <a href="#examples">Examples</a>
+        <a href="#pricing">Pricing</a>
+        <Link href="/login">Sign in</Link>
+      </nav>
+      <Link className="bt-btn bt-btn-primary" href="/signup">
+        Create Free Account
+      </Link>
+    </header>
+  );
+}
+
+function Hero() {
+  return (
+    <section className="bt-hero" id="how-it-works">
+      <div className="bt-badge">A place to remember, together</div>
+      <h1>Create a Living Memorial Page for Someone You Love</h1>
+      <p>
+        BioTribute helps families preserve stories, photos, videos, prayers, and memories in one
+        beautiful place - private or public.
+      </p>
+      <div className="bt-actions">
+        <Link className="bt-btn bt-btn-primary" href="/signup">
+          Create Account
+        </Link>
+        <Link className="bt-btn bt-btn-outline" href="/login">
+          Sign In
+        </Link>
+      </div>
+      <small>Start free. No credit card required.</small>
+      <div className="bt-hero-photo">
+        <Image
+          src="/biotribute-reference-hero.png"
+          alt="Memorial candles and keepsakes"
+          fill
+          priority
+          sizes="(max-width: 960px) 82vw, 790px"
+        />
+      </div>
+    </section>
+  );
+}
+
+function TributePreview() {
+  return (
+    <div className="bt-preview-card" id="examples">
+      <div className="bt-cover" />
+      <div className="bt-preview-body">
+        <div className="bt-preview-head">
+          <div className="bt-portrait" />
+          <div>
+            <p className="bt-memory-label">In loving memory</p>
+            <h3>Margaret Eleanor Hayes</h3>
+            <p className="bt-muted">1942 - 2024 | Beloved mother and grandmother</p>
+          </div>
+        </div>
+        <div className="bt-tabs" aria-label="Example tribute sections">
+          <span>Story</span>
+          <span>Gallery</span>
+          <span>Guestbook</span>
+          <span>Timeline</span>
+          <span>Family</span>
+        </div>
+        <div className="bt-gallery-strip" aria-hidden="true">
+          <span />
+          <span />
+          <span />
+          <span />
+        </div>
+        <div className="bt-guestbook">
+          <div className="bt-avatar">DA</div>
+          <div>
+            <strong>David A. | Son</strong>
+            <p>Mom, your kitchen always smelled of cinnamon. We miss you every single day.</p>
+          </div>
+        </div>
+        <div className="bt-timeline">
+          <p>
+            <b>1965</b> Married James in Savannah
+          </p>
+          <p>
+            <b>1971</b> Welcomed her first child
+          </p>
+        </div>
+        <div className="bt-family-row">
+          <span>JH</span>
+          <span>DA</span>
+          <span>SM</span>
+          <em>12 family members contributing</em>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SignupCard() {
+  return (
+    <form className="bt-signup-card">
+      <h2>Create your BioTribute account</h2>
+      <p className="bt-muted">It&apos;s free to start. No credit card required.</p>
+      <label>
+        Full name
+        <input placeholder="Jane Doe" />
+      </label>
+      <label>
+        Email
+        <input type="email" placeholder="jane@email.com" />
+      </label>
+      <label>
+        Password
+        <input type="password" placeholder="Password" />
+      </label>
+      <label>
+        Confirm password
+        <input type="password" placeholder="Password" />
+      </label>
+      <Link className="bt-btn bt-btn-primary bt-full" href="/signup">
+        Create Account
+      </Link>
+      <p className="bt-signin">
+        Already have an account? <Link href="/login">Sign in</Link>
+      </p>
+    </form>
+  );
+}
+
+function StartSection() {
+  return (
+    <section className="bt-start-section">
+      <p className="bt-overline">Get started</p>
+      <h2>Start preserving memories today</h2>
+      <p className="bt-section-subtitle">
+        Build a private or public tribute page in minutes. Keep exactly what you love in one
+        graceful place.
+      </p>
+      <div className="bt-start-grid">
+        <TributePreview />
+        <SignupCard />
+      </div>
+    </section>
+  );
+}
+
+function Features() {
+  return (
+    <section className="bt-section">
+      <h2>What you can create</h2>
+      <p className="bt-section-subtitle">
+        Everything a family needs to honor a life - gathered together in one beautiful, lasting
+        place.
+      </p>
+      <div className="bt-feature-grid">
+        {features.map(([icon, title, description]) => (
+          <article className="bt-feature" key={title}>
+            <div className="bt-feature-icon">{icon}</div>
+            <h3>{title}</h3>
+            <p>{description}</p>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function MemoryFeed() {
+  return (
+    <section className="bt-memory-section">
+      <div className="bt-memory-copy">
+        <h2>A private family memory space</h2>
+        <p>
+          After you sign up, your family gets a shared, invite-only space - a gentle social feed to
+          post memories, leave comments, and gather around the people you love.
+        </p>
+      </div>
+      <div className="bt-feed-layout">
+        <div className="bt-feed-card">
+          <div className="bt-composer">
+            <div className="bt-avatar">You</div>
+            <input placeholder="Share a memory with the family..." />
+            <button type="button">Post</button>
+          </div>
+          {posts.map(([initial, name, date, body, likes, comment]) => (
+            <div className="bt-post" key={name}>
+              <div className="bt-avatar">{initial}</div>
+              <div>
+                <div className="bt-post-head">
+                  <strong>{name}</strong>
+                  <span>{date}</span>
+                </div>
+                <p>{body}</p>
+                <div className="bt-post-stats">{likes} likes</div>
+                <div className="bt-comment">{comment}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <aside className="bt-side-stack">
+          <div className="bt-side-card">
+            <h3>Invited family</h3>
+            {familyMembers.map(([initial, name, relationship]) => (
+              <div className="bt-person" key={name}>
+                <span>{initial}</span>
+                <div>
+                  {name}
+                  <small>{relationship}</small>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="bt-side-card">
+            <h3>Anniversary reminders</h3>
+            <div className="bt-reminder">
+              Dad&apos;s birthday <small>July 12</small>
+            </div>
+            <div className="bt-reminder">
+              One year remembrance <small>Aug 3</small>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
+function FinalCTA() {
+  return (
+    <section className="bt-cta" id="pricing">
+      <h2>Create a Living Memorial Page for Someone You Love</h2>
+      <p>BioTribute helps families preserve stories, photos, videos, prayers, and memories in one beautiful place - private or public.</p>
+      <div className="bt-actions">
+        <Link className="bt-btn bt-btn-primary" href="/signup">
+          Create Free Account
+        </Link>
+        <Link className="bt-btn bt-btn-outline" href="/login">
+          Sign In
+        </Link>
+      </div>
+      <small>Start free. No credit card required.</small>
+    </section>
+  );
+}
+
+function Footer() {
+  return (
+    <footer className="bt-footer">
+      <Link className="bt-brand" href="/">
+        <span>BioTribute</span>
+      </Link>
+      <nav aria-label="Footer links">
+        <a href="#how-it-works">How it works</a>
+        <a href="#examples">Examples</a>
+        <a href="#pricing">Pricing</a>
+        <Link href="/login">Sign in</Link>
+      </nav>
+      <p>© 2026 BioTribute</p>
+    </footer>
+  );
+}
 
 export default function HomePage() {
   return (
-    <main className="home-shell">
-      <section className="product-nav">
-        <p className="landing-kicker">bioTributes</p>
-        <div className="product-nav-links">
-          <a href="#features">Features</a>
-          <a href="#how-it-works">How it works</a>
-          <a href="#example">Example</a>
-          <Link href="/login">Sign In</Link>
-        </div>
-      </section>
-
-      <section className="home-hero">
-        <div className="home-hero-copy">
-          <p className="card-label">A free memorial page</p>
-          <h1>Create a beautiful tribute page for someone you love.</h1>
-          <p className="landing-copy">
-            A calm, private space to share their story, gather memories from family and
-            friends, and keep their life close — ready to share in minutes.
-          </p>
-          <div className="home-hero-actions">
-            <Link className="button-primary" href="/signup">
-              Create a Free Tribute
-            </Link>
-            <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
-              See a Live Example
-            </Link>
-          </div>
-          <ul className="home-reassurance">
-            <li>Free to create</li>
-            <li>You approve every message</li>
-            <li>Private console only you can access</li>
-          </ul>
-        </div>
-
-        <div className="home-preview">
-          <div className="home-preview-card">
-            <p className="home-preview-kicker">Preview</p>
-            <div className="home-preview-portrait" />
-            <h3>In Loving Memory of Eleanor James</h3>
-            <p className="home-preview-years">1948 – 2024</p>
-            <div className="home-preview-quote">
-              &ldquo;She had a way of making every room feel warmer. We carry that with us
-              always.&rdquo;
-              <span>— Shared by family</span>
-            </div>
-          </div>
-          <span className="home-preview-badge">Made with bioTributes</span>
-        </div>
-      </section>
-
-      <section className="home-trust-row">
-        <span>No ads on tribute pages</span>
-        <span>Unlimited photos &amp; videos</span>
-        <span>Moderated guestbook</span>
-        <span>11 page themes to choose from</span>
-      </section>
-
-      <section className="landing-grid" id="features">
-        <div className="home-section-head">
-          <p className="card-label">Why families choose bioTributes</p>
-          <h2>Everything you need, nothing you don&apos;t.</h2>
-        </div>
-        <article className="landing-card">
-          <span className="home-feature-icon" aria-hidden="true">
-            ✍
-          </span>
-          <h3>Tell their story</h3>
-          <p>Add a life story, a timeline of milestones, and the moments that mattered most.</p>
-        </article>
-        <article className="landing-card">
-          <span className="home-feature-icon" aria-hidden="true">
-            ✉
-          </span>
-          <h3>Gather memories together</h3>
-          <p>Friends and family can leave messages — you decide what gets shown publicly.</p>
-        </article>
-        <article className="landing-card">
-          <span className="home-feature-icon" aria-hidden="true">
-            ▣
-          </span>
-          <h3>Photos and videos, together</h3>
-          <p>Build a gallery, share video memories, and link a livestream for the service.</p>
-        </article>
-        <article className="landing-card">
-          <span className="home-feature-icon" aria-hidden="true">
-            ◐
-          </span>
-          <h3>Always private, always yours</h3>
-          <p>A private console only you can access — no shared logins, no public admin panel.</p>
-        </article>
-      </section>
-
-      <section className="landing-solid-cta" id="how-it-works">
-        <div className="home-section-head">
-          <p className="card-label">How it works</p>
-          <h2>From nothing to a finished page in three steps.</h2>
-        </div>
-        <div className="workflow-grid">
-          <article className="soft-card workflow-card">
-            <p className="card-label">Step 1</p>
-            <h3>Create your tribute</h3>
-            <p>Sign up and add a name, dates, and a few words to start the page.</p>
-          </article>
-          <article className="soft-card workflow-card">
-            <p className="card-label">Step 2</p>
-            <h3>Personalize it</h3>
-            <p>Add their story, photos, a theme, and any service or livestream details.</p>
-          </article>
-          <article className="soft-card workflow-card">
-            <p className="card-label">Step 3</p>
-            <h3>Share the link</h3>
-            <p>Send it to family and friends — they can read, watch, and leave a message.</p>
-          </article>
-        </div>
-      </section>
-
-      <section className="landing-solid-cta" id="example">
-        <div className="home-example-card">
-          <div className="home-example-card-copy">
-            <p className="card-label">See it in action</p>
-            <h3>Take a look at a real tribute page.</h3>
-            <p>
-              Walk through a finished page — story, timeline, gallery, and guestbook — before
-              you create your own.
-            </p>
-          </div>
-          <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
-            View Example Tribute
-          </Link>
-        </div>
-      </section>
-
-      <section className="landing-solid-cta">
-        <p className="card-label">Get started</p>
-        <h2>Start a tribute today.</h2>
-        <p>It only takes a few minutes, and you can keep adding to it for as long as you like.</p>
-        <div className="landing-actions">
-          <Link className="button-primary" href="/signup">
-            Create a Free Tribute
-          </Link>
-          <Link className="button-secondary" href="/console-login?next=%2Fconsole&force=1">
-            Admin Console
-          </Link>
-        </div>
-      </section>
-    </main>
+    <div className="bt-landing">
+      <Navbar />
+      <main>
+        <Hero />
+        <StartSection />
+        <Features />
+        <MemoryFeed />
+        <FinalCTA />
+      </main>
+      <Footer />
+    </div>
   );
 }
