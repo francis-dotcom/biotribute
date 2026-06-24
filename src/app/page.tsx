@@ -8,54 +8,77 @@ type HomePageProps = {
   searchParams: Promise<{ auth?: string }>;
 };
 
-const features = [
+const features: Array<{
+  icon: string;
+  title: string;
+  description: string;
+  image: string;
+  alt: string;
+  imagePosition?: string;
+  imageFit?: "cover" | "contain";
+}> = [
   {
     icon: "♡",
     title: "Memorial tribute page",
     description: "A dedicated page to celebrate and remember a loved one.",
-    image: "/feature-images/memorial.jpg",
+    image: "/biotribute-reference-preview.png",
+    alt: "Memorial candles and flowers on a BioTribute page",
   },
   {
     icon: "▦",
     title: "Biography",
     description: "Tell their life story with chapters, dates, and milestones.",
-    image: "/feature-images/biography.jpg",
+    image: "/biotribute-landing-memory.png",
+    alt: "Family writing a life story on a BioTribute tribute page",
+    imagePosition: "48% 36%",
   },
   {
     icon: "▣",
     title: "Photo gallery",
     description: "Collect and share treasured photos from across the family.",
     image: "/feature-images/gallery.jpg",
+    alt: "Family photo album gathered for a BioTribute gallery",
+    imagePosition: "center 55%",
   },
   {
     icon: "◐",
     title: "Video memories",
     description: "Preserve voices and moments with uploaded video clips.",
-    image: "/feature-images/video.jpg",
+    image: "/feature-images/video-tribute.svg",
+    alt: "Video memory playback on BioTribute",
+    imageFit: "contain",
   },
   {
     icon: "✉",
     title: "Guestbook",
     description: "Invite friends to leave condolences, notes, and memories.",
-    image: "/feature-images/guestbook.jpg",
+    image: "/condolence-exact.png",
+    alt: "Condolence card shared through BioTribute",
+    imageFit: "contain",
   },
   {
     icon: "♧",
     title: "Family tree",
     description: "Map relationships and connect generations together.",
     image: "/feature-images/family-tree.jpg",
+    alt: "Family tree chart connecting generations on BioTribute",
+    imagePosition: "center 42%",
   },
   {
     icon: "⛓",
     title: "Donation link",
     description: "Direct loved ones to a charity or memorial fund.",
-    image: "/feature-images/donation.jpg",
+    image: "/feature-images/donation-tribute.svg",
+    alt: "Donation support for the family on BioTribute",
+    imageFit: "contain",
   },
   {
     icon: "⌘",
     title: "QR code",
     description: "Link printed funeral programs straight to the tribute page.",
-    image: "/feature-images/qr.jpg",
+    image: "/feature-images/qr-tribute.svg",
+    alt: "QR code on a memorial program linking to BioTribute",
+    imageFit: "contain",
   },
 ];
 
@@ -229,9 +252,23 @@ function Features() {
         {features.map((feature) => (
           <article className="bt-feature" key={feature.title}>
             <div
-              className="bt-feature-image"
-              style={{ "--feature-image": `url("${feature.image}")` } as CSSProperties}
+              className={`bt-feature-image${
+                feature.imageFit === "contain" ? " is-card-image is-illustration" : ""
+              }`}
             >
+              <Image
+                src={feature.image}
+                alt={feature.alt}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                className={`bt-feature-photo${feature.imageFit === "contain" ? " is-contain" : ""}`}
+                style={
+                  feature.imagePosition
+                    ? ({ objectPosition: feature.imagePosition } as CSSProperties)
+                    : undefined
+                }
+              />
+              <div className="bt-feature-image-shade" aria-hidden="true" />
               <div className="bt-feature-icon">{feature.icon}</div>
             </div>
             <div className="bt-feature-copy">

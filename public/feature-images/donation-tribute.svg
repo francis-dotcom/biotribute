@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 360" fill="none" role="img" aria-label="Memorial donation support">
+  <rect width="640" height="360" fill="#F8F2EA"/>
+  <rect x="40" y="40" width="560" height="280" rx="24" fill="#FFFFFF" stroke="#E4D6C2"/>
+  <circle cx="320" cy="128" r="44" fill="#E8F4EE" stroke="#B9D4C8"/>
+  <path d="M320 98 C320 98 292 108 292 128 C292 146 320 158 320 158 C320 158 348 146 348 128 C348 108 320 98 320 98Z" fill="#27866E"/>
+  <rect x="180" y="188" width="280" height="16" rx="8" fill="#D9E8E2"/>
+  <rect x="220" y="214" width="200" height="12" rx="6" fill="#E8F1ED"/>
+  <rect x="250" y="248" width="140" height="42" rx="21" fill="#27866E"/>
+  <text x="320" y="275" text-anchor="middle" fill="#FFFFFF" font-family="Arial, sans-serif" font-size="18" font-weight="700">Donate</text>
+  <text x="320" y="72" text-anchor="middle" fill="#17453F" font-family="Georgia, serif" font-size="26" font-weight="700">Show Love to the Family</text>
+</svg>
