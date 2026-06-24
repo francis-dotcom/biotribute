@@ -5,138 +5,145 @@ const featuredTribute = tributes[0];
 
 export default function HomePage() {
   return (
-    <main className="landing-shell">
+    <main className="home-shell">
       <section className="product-nav">
         <p className="landing-kicker">bioTributes</p>
         <div className="product-nav-links">
           <a href="#features">Features</a>
-          <a href="#workflow">How it works</a>
-          <a href="#launch-plan">Launch plan</a>
+          <a href="#how-it-works">How it works</a>
+          <a href="#example">Example</a>
+          <Link href="/login">Sign In</Link>
         </div>
       </section>
 
-      <section className="landing-hero product-hero">
-        <p className="card-label">Memorial Platform</p>
-        <h1>A real memorial product, not just a tribute mockup.</h1>
-        <p className="landing-copy">
-          bioTributes gives families a calm public tribute page, a private owner
-          console, moderated guest submissions, and launch-ready workflows from one
-          product surface.
-        </p>
-        <div className="landing-actions">
-          <Link className="button-primary" href="/signup">
-            Create Your Tribute
-          </Link>
-          <Link className="button-secondary" href="/login">
-            Sign In
-          </Link>
-          <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
-            View Product Demo
-          </Link>
+      <section className="home-hero">
+        <div className="home-hero-copy">
+          <p className="card-label">A free memorial page</p>
+          <h1>Create a beautiful tribute page for someone you love.</h1>
+          <p className="landing-copy">
+            A calm, private space to share their story, gather memories from family and
+            friends, and keep their life close — ready to share in minutes.
+          </p>
+          <div className="home-hero-actions">
+            <Link className="button-primary" href="/signup">
+              Create a Free Tribute
+            </Link>
+            <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
+              See a Live Example
+            </Link>
+          </div>
+          <ul className="home-reassurance">
+            <li>Free to create</li>
+            <li>You approve every message</li>
+            <li>Private console only you can access</li>
+          </ul>
         </div>
-        <div className="product-proof-grid">
-          <article className="landing-card">
-            <p className="card-label">Public experience</p>
-            <h2>Mobile-first tribute route</h2>
-            <p>Fast, readable, shareable page with story, media, and support actions.</p>
-          </article>
-          <article className="landing-card">
-            <p className="card-label">Owner console</p>
-            <h2>One place to manage everything</h2>
-            <p>Content, images, timeline, card/messages inbox, and launch settings.</p>
-          </article>
+
+        <div className="home-preview">
+          <div className="home-preview-card">
+            <p className="home-preview-kicker">Preview</p>
+            <div className="home-preview-portrait" />
+            <h3>In Loving Memory of Eleanor James</h3>
+            <p className="home-preview-years">1948 – 2024</p>
+            <div className="home-preview-quote">
+              &ldquo;She had a way of making every room feel warmer. We carry that with us
+              always.&rdquo;
+              <span>— Shared by family</span>
+            </div>
+          </div>
+          <span className="home-preview-badge">Made with bioTributes</span>
         </div>
+      </section>
+
+      <section className="home-trust-row">
+        <span>No ads on tribute pages</span>
+        <span>Unlimited photos &amp; videos</span>
+        <span>Moderated guestbook</span>
+        <span>11 page themes to choose from</span>
       </section>
 
       <section className="landing-grid" id="features">
+        <div className="home-section-head">
+          <p className="card-label">Why families choose bioTributes</p>
+          <h2>Everything you need, nothing you don&apos;t.</h2>
+        </div>
         <article className="landing-card">
-          <p className="card-label">Feature</p>
-          <h2>Theme-aware page builder</h2>
-          <p>Update biography, timeline, media, support note, and featured tributes.</p>
+          <span className="home-feature-icon" aria-hidden="true">
+            ✍
+          </span>
+          <h3>Tell their story</h3>
+          <p>Add a life story, a timeline of milestones, and the moments that mattered most.</p>
         </article>
         <article className="landing-card">
-          <p className="card-label">Feature</p>
-          <h2>Moderation queue</h2>
-          <p>Approve or reject public guestbook posts before they appear live.</p>
+          <span className="home-feature-icon" aria-hidden="true">
+            ✉
+          </span>
+          <h3>Gather memories together</h3>
+          <p>Friends and family can leave messages — you decide what gets shown publicly.</p>
         </article>
         <article className="landing-card">
-          <p className="card-label">Feature</p>
-          <h2>Private inbox for family</h2>
-          <p>Card + Message submissions are captured privately in console inbox.</p>
+          <span className="home-feature-icon" aria-hidden="true">
+            ▣
+          </span>
+          <h3>Photos and videos, together</h3>
+          <p>Build a gallery, share video memories, and link a livestream for the service.</p>
         </article>
         <article className="landing-card">
-          <p className="card-label">Feature</p>
-          <h2>Email verification logic</h2>
-          <p>Unverified emails confirm first; verified senders can post immediately.</p>
-        </article>
-        <article className="landing-card">
-          <p className="card-label">Feature</p>
-          <h2>Media persistence</h2>
-          <p>Hero, gallery, video placeholders, and livestream assets stored in Supabase.</p>
-        </article>
-        <article className="landing-card">
-          <p className="card-label">Feature</p>
-          <h2>Launch-ready routing</h2>
-          <p>Canonical route flow with console, dashboard, and public tribute paths.</p>
+          <span className="home-feature-icon" aria-hidden="true">
+            ◐
+          </span>
+          <h3>Always private, always yours</h3>
+          <p>A private console only you can access — no shared logins, no public admin panel.</p>
         </article>
       </section>
 
-      <section className="landing-solid-cta" id="workflow">
-        <p className="card-label">How It Works</p>
-        <h2>From setup to launch in 3 clear steps.</h2>
+      <section className="landing-solid-cta" id="how-it-works">
+        <div className="home-section-head">
+          <p className="card-label">How it works</p>
+          <h2>From nothing to a finished page in three steps.</h2>
+        </div>
         <div className="workflow-grid">
           <article className="soft-card workflow-card">
             <p className="card-label">Step 1</p>
-            <h3>Build the tribute</h3>
-            <p>Use console to add story, timeline, images, videos, and support details.</p>
+            <h3>Create your tribute</h3>
+            <p>Sign up and add a name, dates, and a few words to start the page.</p>
           </article>
           <article className="soft-card workflow-card">
             <p className="card-label">Step 2</p>
-            <h3>Review submissions</h3>
-            <p>Moderate public messages and monitor private cards/messages in inbox.</p>
+            <h3>Personalize it</h3>
+            <p>Add their story, photos, a theme, and any service or livestream details.</p>
           </article>
           <article className="soft-card workflow-card">
             <p className="card-label">Step 3</p>
-            <h3>Launch and share</h3>
-            <p>Publish the route, share link with family/community, continue updating.</p>
+            <h3>Share the link</h3>
+            <p>Send it to family and friends — they can read, watch, and leave a message.</p>
           </article>
         </div>
       </section>
 
-      <section className="landing-grid" id="launch-plan">
-        <article className="landing-card">
-          <p className="card-label">Now</p>
-          <h2>Ship with core workflows</h2>
-          <p>
-            Keep current tribute + console + moderation + private inbox flow as the
-            stable launch slice.
-          </p>
-        </article>
-        <article className="landing-card">
-          <p className="card-label">Next</p>
-          <h2>Add account system + invitations</h2>
-          <p>Move from single owner to role-based access for family and contributors.</p>
-        </article>
-        <article className="landing-card">
-          <p className="card-label">Then</p>
-          <h2>Scale media + payments</h2>
-          <p>Finalize scalable media pipeline and productized support contributions.</p>
-        </article>
+      <section className="landing-solid-cta" id="example">
+        <div className="home-example-card">
+          <div className="home-example-card-copy">
+            <p className="card-label">See it in action</p>
+            <h3>Take a look at a real tribute page.</h3>
+            <p>
+              Walk through a finished page — story, timeline, gallery, and guestbook — before
+              you create your own.
+            </p>
+          </div>
+          <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
+            View Example Tribute
+          </Link>
+        </div>
       </section>
 
       <section className="landing-solid-cta">
-        <p className="card-label">Final CTA</p>
-        <h2>Ready to make this production solid?</h2>
-        <p>
-          Start from the working memorial product experience and harden each slice with
-          clear launch checkpoints.
-        </p>
+        <p className="card-label">Get started</p>
+        <h2>Start a tribute today.</h2>
+        <p>It only takes a few minutes, and you can keep adding to it for as long as you like.</p>
         <div className="landing-actions">
           <Link className="button-primary" href="/signup">
-            Create Your Tribute
-          </Link>
-          <Link className="button-secondary" href={`/${featuredTribute.slug}`}>
-            Open Tribute Demo
+            Create a Free Tribute
           </Link>
           <Link className="button-secondary" href="/console-login?next=%2Fconsole&force=1">
             Admin Console
