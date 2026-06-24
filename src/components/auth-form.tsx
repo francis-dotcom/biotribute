@@ -62,11 +62,11 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
   }
 
   return (
-    <form className="form-card login-card" onSubmit={handleSubmit}>
+    <form className="bt-auth-form" onSubmit={handleSubmit}>
       <h2>{mode === "signup" ? "Create your account" : "Sign in"}</h2>
-      {error ? <p className="form-status">{error}</p> : null}
-      {notice ? <p className="form-status">{notice}</p> : null}
-      <label className="field-block">
+      {error ? <p className="bt-auth-status">{error}</p> : null}
+      {notice ? <p className="bt-auth-status">{notice}</p> : null}
+      <label>
         <span>Email</span>
         <input
           type="email"
@@ -76,7 +76,7 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
           autoFocus
         />
       </label>
-      <label className="field-block">
+      <label>
         <span>Password</span>
         <input
           type="password"
@@ -86,7 +86,7 @@ export function AuthForm({ mode, nextPath }: AuthFormProps) {
           required
         />
       </label>
-      <button className="button-primary" type="submit" disabled={pending}>
+      <button className="bt-auth-submit" type="submit" disabled={pending}>
         {pending ? "Please wait…" : mode === "signup" ? "Sign up" : "Sign in"}
       </button>
     </form>

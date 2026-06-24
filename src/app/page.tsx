@@ -1,15 +1,62 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { CSSProperties } from "react";
+import { LandingAuthCard } from "@/components/landing-auth-card";
+import { isUserAuthConfigured } from "@/lib/supabase-server";
+
+type HomePageProps = {
+  searchParams: Promise<{ auth?: string }>;
+};
 
 const features = [
-  ["♡", "Memorial tribute page", "A dedicated page to celebrate and remember a loved one."],
-  ["▦", "Biography", "Tell their life story with chapters, dates, and milestones."],
-  ["▣", "Photo gallery", "Collect and share treasured photos from across the family."],
-  ["◐", "Video memories", "Preserve voices and moments with uploaded video clips."],
-  ["✉", "Guestbook", "Invite friends to leave condolences, notes, and memories."],
-  ["♧", "Family tree", "Map relationships and connect generations together."],
-  ["⛓", "Donation link", "Direct loved ones to a charity or memorial fund."],
-  ["⌘", "QR code", "Link printed funeral programs straight to the tribute page."],
+  {
+    icon: "♡",
+    title: "Memorial tribute page",
+    description: "A dedicated page to celebrate and remember a loved one.",
+    image: "/feature-images/memorial.jpg",
+  },
+  {
+    icon: "▦",
+    title: "Biography",
+    description: "Tell their life story with chapters, dates, and milestones.",
+    image: "/feature-images/biography.jpg",
+  },
+  {
+    icon: "▣",
+    title: "Photo gallery",
+    description: "Collect and share treasured photos from across the family.",
+    image: "/feature-images/gallery.jpg",
+  },
+  {
+    icon: "◐",
+    title: "Video memories",
+    description: "Preserve voices and moments with uploaded video clips.",
+    image: "/feature-images/video.jpg",
+  },
+  {
+    icon: "✉",
+    title: "Guestbook",
+    description: "Invite friends to leave condolences, notes, and memories.",
+    image: "/feature-images/guestbook.jpg",
+  },
+  {
+    icon: "♧",
+    title: "Family tree",
+    description: "Map relationships and connect generations together.",
+    image: "/feature-images/family-tree.jpg",
+  },
+  {
+    icon: "⛓",
+    title: "Donation link",
+    description: "Direct loved ones to a charity or memorial fund.",
+    image: "/feature-images/donation.jpg",
+  },
+  {
+    icon: "⌘",
+    title: "QR code",
+    description: "Link printed funeral programs straight to the tribute page.",
+    image: "/feature-images/qr.jpg",
+  },
 ];
 
 const familyMembers = [
@@ -51,9 +98,9 @@ function Navbar() {
         <a href="#how-it-works">How it works</a>
         <a href="#examples">Examples</a>
         <a href="#pricing">Pricing</a>
-        <Link href="/login">Sign in</Link>
+        <Link href="/?auth=login#create-account">Sign in</Link>
       </nav>
-      <Link className="bt-btn bt-btn-primary" href="/signup">
+      <Link className="bt-btn bt-btn-primary" href="/?auth=signup#create-account">
         Create Free Account
       </Link>
     </header>
@@ -70,10 +117,10 @@ function Hero() {
         beautiful place - private or public.
       </p>
       <div className="bt-actions">
-        <Link className="bt-btn bt-btn-primary" href="/signup">
+        <Link className="bt-btn bt-btn-primary" href="/?auth=signup#create-account">
           Create Account
         </Link>
-        <Link className="bt-btn bt-btn-outline" href="/login">
+        <Link className="bt-btn bt-btn-outline" href="/?auth=login#create-account">
           Sign In
         </Link>
       </div>
@@ -143,40 +190,15 @@ function TributePreview() {
   );
 }
 
-function SignupCard() {
+function StartSection({
+  initialAuthMode,
+  isAuthConfigured,
+}: {
+  initialAuthMode: "signup" | "login";
+  isAuthConfigured: boolean;
+}) {
   return (
-    <form className="bt-signup-card">
-      <h2>Create your BioTribute account</h2>
-      <p className="bt-muted">It&apos;s free to start. No credit card required.</p>
-      <label>
-        Full name
-        <input placeholder="Jane Doe" />
-      </label>
-      <label>
-        Email
-        <input type="email" placeholder="jane@email.com" />
-      </label>
-      <label>
-        Password
-        <input type="password" placeholder="Password" />
-      </label>
-      <label>
-        Confirm password
-        <input type="password" placeholder="Password" />
-      </label>
-      <Link className="bt-btn bt-btn-primary bt-full" href="/signup">
-        Create Account
-      </Link>
-      <p className="bt-signin">
-        Already have an account? <Link href="/login">Sign in</Link>
-      </p>
-    </form>
-  );
-}
-
-function StartSection() {
-  return (
-    <section className="bt-start-section">
+    <section className="bt-start-section" id="create-account">
       <p className="bt-overline">Get started</p>
       <h2>Start preserving memories today</h2>
       <p className="bt-section-subtitle">
@@ -185,7 +207,11 @@ function StartSection() {
       </p>
       <div className="bt-start-grid">
         <TributePreview />
-        <SignupCard />
+        <LandingAuthCard
+          initialMode={initialAuthMode}
+          isConfigured={isAuthConfigured}
+          key={initialAuthMode}
+        />
       </div>
     </section>
   );
@@ -200,11 +226,18 @@ function Features() {
         place.
       </p>
       <div className="bt-feature-grid">
-        {features.map(([icon, title, description]) => (
-          <article className="bt-feature" key={title}>
-            <div className="bt-feature-icon">{icon}</div>
-            <h3>{title}</h3>
-            <p>{description}</p>
+        {features.map((feature) => (
+          <article className="bt-feature" key={feature.title}>
+            <div
+              className="bt-feature-image"
+              style={{ "--feature-image": `url("${feature.image}")` } as CSSProperties}
+            >
+              <div className="bt-feature-icon">{feature.icon}</div>
+            </div>
+            <div className="bt-feature-copy">
+              <h3>{feature.title}</h3>
+              <p>{feature.description}</p>
+            </div>
           </article>
         ))}
       </div>
@@ -278,10 +311,10 @@ function FinalCTA() {
       <h2>Create a Living Memorial Page for Someone You Love</h2>
       <p>BioTribute helps families preserve stories, photos, videos, prayers, and memories in one beautiful place - private or public.</p>
       <div className="bt-actions">
-        <Link className="bt-btn bt-btn-primary" href="/signup">
+        <Link className="bt-btn bt-btn-primary" href="/?auth=signup#create-account">
           Create Free Account
         </Link>
-        <Link className="bt-btn bt-btn-outline" href="/login">
+        <Link className="bt-btn bt-btn-outline" href="/?auth=login#create-account">
           Sign In
         </Link>
       </div>
@@ -300,20 +333,26 @@ function Footer() {
         <a href="#how-it-works">How it works</a>
         <a href="#examples">Examples</a>
         <a href="#pricing">Pricing</a>
-        <Link href="/login">Sign in</Link>
+        <Link href="/?auth=login#create-account">Sign in</Link>
       </nav>
       <p>© 2026 BioTribute</p>
     </footer>
   );
 }
 
-export default function HomePage() {
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const { auth } = await searchParams;
+  const initialAuthMode = auth === "login" ? "login" : "signup";
+
   return (
     <div className="bt-landing">
       <Navbar />
       <main>
         <Hero />
-        <StartSection />
+        <StartSection
+          initialAuthMode={initialAuthMode}
+          isAuthConfigured={isUserAuthConfigured()}
+        />
         <Features />
         <MemoryFeed />
         <FinalCTA />
