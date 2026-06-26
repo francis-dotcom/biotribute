@@ -53,6 +53,7 @@ export function NewTributeForm({ ownerUserId }: NewTributeFormProps) {
           theme: "ivory",
           galleryNote: "No photos have been added yet.",
           lifeStory: "Add this person's story in the builder after creating the tribute.",
+          isPublic: false,
           timeline: [],
           contributors: [],
           supportAmounts: [],

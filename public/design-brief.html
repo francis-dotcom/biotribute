@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BioTribute — Visual Redesign Brief</title>
+  <style>
+    :root {
+      --bg: #faf6f0;
+      --surface: #ffffff;
+      --text: #2a322d;
+      --muted: #6e6b64;
+      --accent: #5e7c6e;
+      --accent-hover: #4b6557;
+      --accent-soft: #e7efe9;
+      --gold: #c2a15e;
+      --line: #e5e0d6;
+      --serif: Georgia, "Iowan Old Style", "Palatino Linotype", Palatino, serif;
+      --sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      font-size: 1.0625rem;
+      line-height: 1.7;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .page-header {
+      background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
+      color: #fff;
+      padding: 3rem 1.5rem 2.5rem;
+      text-align: center;
+    }
+
+    .page-header .badge {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+
+    .page-header h1 {
+      font-family: var(--serif);
+      font-size: clamp(1.75rem, 4vw, 2.5rem);
+      font-weight: 400;
+      margin: 0 0 0.5rem;
+      line-height: 1.25;
+    }
+
+    .page-header p {
+      margin: 0;
+      opacity: 0.9;
+      font-size: 1.05rem;
+      max-width: 36rem;
+      margin-inline: auto;
+    }
+
+    .container {
+      max-width: 48rem;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem 4rem;
+    }
+
+    article {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 4px 24px rgba(42, 50, 45, 0.06);
+    }
+
+    @media (min-width: 640px) {
+      article { padding: 3rem 3rem; }
+    }
+
+    h1, h2, h3, h4 {
+      font-family: var(--serif);
+      font-weight: 400;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    h2 {
+      font-size: 1.65rem;
+      margin: 2.5rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--accent-soft);
+      color: var(--accent-hover);
+    }
+
+    h2:first-child { margin-top: 0; }
+
+    h3 {
+      font-size: 1.25rem;
+      margin: 2rem 0 0.75rem;
+      color: var(--accent);
+    }
+
+    h4 {
+      font-size: 1.05rem;
+      margin: 1.5rem 0 0.5rem;
+      color: var(--text);
+    }
+
+    p { margin: 0 0 1rem; }
+
+    strong { font-weight: 600; color: var(--text); }
+
+    em { font-style: italic; color: var(--muted); }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 2.5rem 0;
+    }
+
+    ul, ol {
+      margin: 0 0 1rem;
+      padding-left: 1.5rem;
+    }
+
+    li { margin-bottom: 0.4rem; }
+    li::marker { color: var(--accent); }
+
+    a {
+      color: var(--accent);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    a:hover { color: var(--accent-hover); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0 1.5rem;
+      font-size: 0.95rem;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 0.65rem 0.85rem;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    tr:nth-child(even) td { background: #faf9f7; }
+
+    .lead {
+      font-size: 1.125rem;
+      color: var(--muted);
+      border-left: 3px solid var(--accent);
+      padding-left: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .tagline {
+      text-align: center;
+      font-family: var(--serif);
+      font-style: italic;
+      color: var(--muted);
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid var(--line);
+    }
+
+    code {
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: 0.88em;
+      background: var(--accent-soft);
+      color: var(--accent-hover);
+      padding: 0.15em 0.4em;
+      border-radius: 4px;
+    }
+
+  </style>
+</head>
+<body>
+  <header class="page-header">
+    <div class="badge">Design Brief</div>
+    <h1>BioTribute — Visual Redesign Brief</h1>
+    <p>Public Tribute + Owner Console</p>
+  </header>
+
+  <div class="container">
+    <article>
+      <p class="lead">You are a senior product designer. Redesign the visual experience for <strong>BioTribute</strong>, a memorial tribute platform that helps families publish beautiful, shareable pages for loved ones who have passed. The product is <strong>fully functional today</strong> — your job is to propose a <strong>visual and UX redesign</strong> (layout, typography, color, spacing, component styling, information architecture) while <strong>preserving all existing functionality</strong>. Do not remove features or simplify the data model.</p>
+
+      <hr />
+
+      <h2>Product Overview</h2>
+      <p><strong>BioTribute</strong> helps families create living memorial pages where visitors can read a life story, view photos and videos, watch a funeral livestream, leave moderated messages, send condolence cards, and contribute financial support. Each tribute has a unique URL slug (e.g. <code>/SirFemiOgini</code>) and a password-protected <strong>owner console</strong> (e.g. <code>/console/SirFemiOgini</code>) where the family organizer manages all content.</p>
+      <p><strong>Tagline (from marketing):</strong> <em>"A place to remember, together."</em></p>
+      <p><strong>Real example tribute:</strong> <strong>Sir Femi Ogini</strong> (<code>/SirFemiOgini</code>) — a live production page with burial countdown (target date June 11, 2026, Nigeria time), YouTube livestream, video memories, photo gallery, service poster, moderated guestbook, condolence popup, and bank donation details (Eco Bank). Use this as your primary design reference scenario. Life dates: <strong>1947–2026</strong>.</p>
+
+      <hr />
+
+      <h2>Brand &amp; Visual Identity</h2>
+
+      <h3>Core brand feel</h3>
+      <ul>
+        <li><strong>Dignified, warm, memorial-appropriate</strong> — never flashy, never social-media casual</li>
+        <li><strong>Green memorial theme</strong> on marketing/landing: sage/evergreen accents on cream/ivory backgrounds</li>
+        <li><strong>Serif headings</strong> for names, section titles, and emotional weight; <strong>sans-serif</strong> for labels, kickers, metadata, and UI controls</li>
+        <li>Tone: reverent, gentle, family-centered — like a printed funeral program brought to life digitally</li>
+      </ul>
+
+      <h3>Current color systems (two visual worlds exist today — unify or harmonize them)</h3>
+
+      <p><strong>Marketing landing page</strong> (<code>/</code>):</p>
+      <ul>
+        <li>Background: warm cream <code>#faf6f0</code></li>
+        <li>Accent green: <code>#5e7c6e</code> (hover <code>#4b6557</code>)</li>
+        <li>Gold highlight: <code>#c2a15e</code></li>
+        <li>Text: <code>#2a322d</code> / muted <code>#6e6b64</code></li>
+        <li>Typography: Georgia serif headings, Inter/system sans body</li>
+      </ul>
+
+      <p><strong>Public tribute pages</strong> (themeable per tribute):</p>
+      <ul>
+        <li>Default "Ivory Memorial" palette: warm ivory <code>#f9f9fb</code>, gold accent <code>#c8a96a</code>, soft violet <code>#60557c</code></li>
+        <li>11 selectable theme presets: Ivory Memorial, Sage Garden, Quiet Sky, Cool Amethyst, Midnight Remembrance, Warm Candlelight, Rose Remembrance, Coastal Pearl, Evergreen Hymn, Harvest Wheat, Monochrome Charcoal</li>
+        <li>Themes swap CSS variables (<code>--bg</code>, <code>--gold</code>, <code>--violet-deep</code>, etc.) — content stays, colors change</li>
+        <li>Optional <strong>theme rotation</strong>: public page can cycle through 2+ themes on an interval (e.g. every 24 hours)</li>
+        <li>Page shell: rounded card on soft gradient backdrop; hero/background portrait images as CSS variables</li>
+        <li>Typography: Iowan Old Style / Palatino / Baskerville serif; Avenir Next / Helvetica sans for UI labels</li>
+      </ul>
+
+      <p><strong>Owner console</strong> currently inherits tribute theme variables on a dashboard shell — feels like an admin overlay on the memorial aesthetic rather than a distinct product surface.</p>
+
+      <h3>Design direction to explore</h3>
+      <p>Unify the landing green-and-cream identity with the tribute page ivory-and-gold system into one coherent BioTribute design language. Tribute themes should feel like <strong>curated memorial palettes</strong>, not arbitrary color pickers. The console should feel like a <strong>calm, professional workspace</strong> — related to the public page but clearly "backstage."</p>
+
+      <hr />
+
+      <h2>User Personas</h2>
+
+      <h3>1. Family Organizer (primary console user)</h3>
+      <ul>
+        <li>Setting up a tribute under time pressure (often days before a funeral)</li>
+        <li>Needs to upload photos, paste a livestream link, write biography, configure donation details, and moderate guest messages</li>
+        <li>May not be tech-savvy; needs clear section labels and save feedback</li>
+        <li>Checks visitor counts and video engagement before/during the service</li>
+        <li>Wants to preview exactly what the public will see</li>
+      </ul>
+
+      <h3>2. Memorial Visitor (public page user)</h3>
+      <ul>
+        <li>Arrives via shared link, QR code on printed program, or social media</li>
+        <li>May be on mobile at the funeral venue</li>
+        <li>Wants to quickly find: service details, livestream, how to donate, where to leave a message</li>
+        <li>Emotionally vulnerable — UI must be calm, readable, and never pushy</li>
+        <li>May watch livestream, open video memories in new tab, submit a moderated message</li>
+      </ul>
+
+      <h3>3. Platform Admin (secondary)</h3>
+      <ul>
+        <li>Approves messages, reviews private family submissions</li>
+        <li>Uses same console with additional auth layer</li>
+      </ul>
+
+      <hr />
+
+      <h2>Page 1: Public Tribute Display (<code>/{slug}</code>)</h2>
+      <p>A single long-scroll memorial page inside a rounded shell. All sections below exist today and <strong>must remain functional</strong> in your redesign. Sections can be toggled off by the organizer (gallery, poster, videos, livestream).</p>
+
+      <h3>Global behaviors</h3>
+      <ul>
+        <li><strong>Theme system</strong>: page colors come from selected tribute theme; hero and background portrait images overlay the shell</li>
+        <li><strong>Visit tracking</strong>: page view count shown in hero (when available)</li>
+        <li><strong>Share</strong>: native share API or clipboard copy</li>
+        <li><strong>Markdown support</strong>: names, taglines, honorifics, and body copy support inline markdown</li>
+        <li><strong>Mobile-first</strong>: many visitors are on phones at services</li>
+      </ul>
+
+      <hr />
+
+      <h3>Section 1 — Hero</h3>
+      <p><strong>Kicker:</strong> "In Loving Memory"</p>
+      <p><strong>Content (top to bottom):</strong></p>
+      <ul>
+        <li>Page view count badge (optional)</li>
+        <li>Circular hero portrait (uploaded photo or placeholder)</li>
+        <li><strong>Countdown badge</strong> (optional): days remaining until burial date, Nigeria timezone — wraps around portrait</li>
+        <li><strong>Donate badge</strong> on portrait (opens donation details modal)</li>
+        <li><strong>Share icon button</strong> on portrait</li>
+        <li>Decorative divider</li>
+        <li>Honorific title (e.g. "Sir", "Chief", "Dr.")</li>
+        <li><strong>Deceased name</strong> (H1, largest text on page)</li>
+        <li>Position/role title (e.g. "Community Leader")</li>
+        <li>Life years (e.g. "1947 – 2026")</li>
+        <li>Tagline (e.g. "Beloved Father, Mentor, and Friend")</li>
+        <li>Theme color swatch indicator (currently shows 4 theme color dots — consider whether this belongs on a public page)</li>
+      </ul>
+      <p><strong>Design note:</strong> Hero is the emotional anchor. Portrait, countdown, and quick actions (donate, share) compete for attention on the avatar cluster — simplify hierarchy.</p>
+
+      <h3>Section 2 — Sticky Action Bar</h3>
+      <p>Three icon pill buttons (currently icon-only):</p>
+      <ol>
+        <li><strong>Share Tribute</strong> — copies/shares URL</li>
+        <li><strong>Leave a Message</strong> — opens message form modal</li>
+        <li><strong>Support Family</strong> — scrolls to support section</li>
+      </ol>
+      <p>Shows brief share status toast ("Link copied" / error).</p>
+      <p><strong>Design note:</strong> Icon-only buttons may be unclear to older visitors. Consider labeled pills or a bottom mobile action bar.</p>
+
+      <h3>Section 3 — Messages &amp; Memories</h3>
+      <p><strong>Kicker:</strong> "Messages &amp; Memories" | <strong>Heading:</strong> "Share a Memory"</p>
+      <ul>
+        <li><strong>Message feed</strong>: approved guest messages displayed as cards (author, date, excerpt/full)</li>
+        <li><strong>Message form</strong> (modal): author name, email, message body, placement choice (feed vs timeline), spam protection (Turnstile CAPTCHA), submit → pending moderation</li>
+        <li>Messages only appear publicly after organizer approval</li>
+      </ul>
+      <p><strong>Passive prompt:</strong> After 30 seconds on page, a bottom toast asks <em>"Would you like to leave a message for the family?"</em> with "Leave a Message" / "Maybe later" (snoozes 24h). Must feel gentle, not intrusive.</p>
+
+      <h3>Section 4 — Photo Gallery (optional, toggleable)</h3>
+      <p><strong>Kicker:</strong> "Photos" | <strong>Heading:</strong> "Gallery"</p>
+      <ul>
+        <li>Intro text (organizer-written)</li>
+        <li>Horizontal scrolling photo strip with lightbox/modal viewer</li>
+        <li>Drag-to-scroll on desktop; native touch scroll on mobile</li>
+        <li>Auto-marquee animation when idle</li>
+        <li>Empty state with organizer note when no photos uploaded</li>
+      </ul>
+
+      <h3>Section 5 — Memorial Program / Service Poster (optional, toggleable)</h3>
+      <p><strong>Kicker:</strong> "Memorial Program" | <strong>Heading:</strong> customizable (default "Service Poster")</p>
+      <ul>
+        <li>Full-width poster image (funeral program — wake, mass, interment, reception details)</li>
+        <li>Opens full-size in new tab on click</li>
+        <li>Optional note below</li>
+      </ul>
+
+      <h3>Section 6 — Video Memories (optional, toggleable)</h3>
+      <p><strong>Kicker:</strong> "Videos" | <strong>Heading:</strong> "Video Memories"</p>
+      <ul>
+        <li>Up to <strong>3 video slots</strong> displayed as thumbnail tiles with "Open Video" overlay</li>
+        <li>Supports: direct MP4/WebM, YouTube, Vimeo (opens in new tab)</li>
+        <li>Custom thumbnail per video; optional description per video</li>
+        <li>Video open tracking (analytics for organizer)</li>
+        <li>Empty state: "Video memories coming soon"</li>
+        <li>Optional section note</li>
+      </ul>
+      <p><strong>Display order:</strong> On June 10–11 (memorial service dates), <strong>Live Stream section is prioritized above Videos</strong> automatically.</p>
+
+      <h3>Section 7 — Live Stream (optional, toggleable)</h3>
+      <p><strong>Kicker:</strong> "Live Memorial" | <strong>Heading:</strong> "Live Stream"</p>
+      <p>Three display modes (organizer picks one):</p>
+      <ol>
+        <li><strong>Embedded video</strong> — YouTube/Vimeo iframe or direct MP4 player inline</li>
+        <li><strong>Thumbnail linking to stream</strong> — custom image with "Watch Live on YouTube" overlay</li>
+        <li><strong>Static uploaded image</strong> — poster/thumbnail only</li>
+      </ol>
+      <ul>
+        <li>Optional schedule/viewing note</li>
+        <li>Empty state when no stream configured</li>
+      </ul>
+      <p><strong>Critical UX:</strong> During the actual funeral, this is the highest-priority section. Make it impossible to miss.</p>
+
+      <h3>Section 8 — Life Story</h3>
+      <p><strong>Kicker:</strong> "Life Story" | <strong>Heading:</strong> "A Life Well Lived"</p>
+      <ul>
+        <li>Biography paragraphs (markdown)</li>
+        <li>First 2 paragraphs shown inline; <strong>"Read more"</strong> opens full story modal</li>
+      </ul>
+
+      <h3>Section 9 — Timeline</h3>
+      <p><strong>Kicker:</strong> "Timeline" | <strong>Heading:</strong> "A Journey Through Time"</p>
+      <ul>
+        <li>Milestone cards: year, title, story copy</li>
+        <li>Progressive reveal ("Load more" batches: 3 desktop / 2 mobile)</li>
+        <li>Tap card → detail modal on mobile</li>
+        <li>Soft background variant of content section</li>
+      </ul>
+
+      <h3>Section 10 — Family &amp; Associates</h3>
+      <p><strong>Kicker:</strong> "The Family" | <strong>Heading:</strong> "Family &amp; Associates"</p>
+      <ul>
+        <li>Grid of soft cards (up to 8 configured in console)</li>
+        <li>Each card: label (e.g. "Family Representative"), name, tribute message</li>
+        <li>Represents featured messages from family members, not a genealogical tree</li>
+      </ul>
+
+      <h3>Section 11 — Show Love to the Family (Support)</h3>
+      <p><strong>Kicker + Heading:</strong> "Show Love to the Family"<br />Dark/emphasis section variant.</p>
+      <p><strong>Two-column layout:</strong></p>
+      <p><strong>Left — Action card with three CTAs:</strong></p>
+      <ol>
+        <li><strong>Send a Tribute Card</strong> — opens condolence popup modal (see below)</li>
+        <li><strong>Donate</strong> — opens donation details modal (bank name, account name, account number, phone/text line)</li>
+        <li><strong>Private Message to Family</strong> — opens form to email organizer privately (moderated)</li>
+      </ol>
+      <p>Supporting copy: <em>"Send a tribute card, make a donation, or write a direct private message to the family representative."</em></p>
+      <p><strong>Right — Note from the Family:</strong><br />Organizer-written note explaining tribute card tiers, giving instructions, etc.</p>
+
+      <h3>Modals &amp; Popups (must all remain functional)</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Modal</th>
+            <th>Trigger</th>
+            <th>Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Condolence / Tribute Card popup</strong></td>
+            <td>Auto-opens on first visit (if enabled); also manual from support section</td>
+            <td>Shows condolence card image; visitor enters name + email; submits sympathy message. Auto-closes after 20s. Respects 24h reshow delay. Can be disabled by organizer.</td>
+          </tr>
+          <tr>
+            <td><strong>Donation details</strong></td>
+            <td>Hero badge, support section button</td>
+            <td>Bank transfer details for family support</td>
+          </tr>
+          <tr>
+            <td><strong>Message form</strong></td>
+            <td>Action bar, message prompt toast</td>
+            <td>Public guestbook submission (moderated)</td>
+          </tr>
+          <tr>
+            <td><strong>Family private message</strong></td>
+            <td>Support section</td>
+            <td>Direct message to family rep (separate moderation queue)</td>
+          </tr>
+          <tr>
+            <td><strong>Life story "Read more"</strong></td>
+            <td>Life story section</td>
+            <td>Full biography overlay</td>
+          </tr>
+          <tr>
+            <td><strong>Timeline detail</strong></td>
+            <td>Timeline card tap</td>
+            <td>Full milestone story</td>
+          </tr>
+          <tr>
+            <td><strong>Gallery lightbox</strong></td>
+            <td>Gallery photo tap</td>
+            <td>Full-size photo viewer</td>
+          </tr>
+        </tbody>
+      </table>
+      <p><strong>Design challenge:</strong> Condolence auto-popup + 30s message toast + action bar can feel like three competing interruptions. Propose a calmer engagement strategy that preserves all three flows.</p>
+
+      <h3>Footer</h3>
+      <ul>
+        <li>Anchor links: Home, Support, Contact (scroll to sections)</li>
+        <li>Credit line: "For [Family Name]'s Family" + platform credit ("Ogigrid")</li>
+        <li>Currently hardcoded — design should allow per-tribute family name</li>
+      </ul>
+
+      <hr />
+
+      <h2>Page 2: Owner Console (<code>/console/{slug}</code>)</h2>
+      <p>Password-protected admin workspace. Redirects to login if unauthenticated. Applies the tribute's active theme colors to the dashboard shell.</p>
+
+      <h3>Console Header</h3>
+      <ul>
+        <li>Pending message alert badge (links to approval page) — shows count of messages awaiting review</li>
+        <li>Kicker: "bioTributes Console"</li>
+        <li>Tribute name (H1)</li>
+        <li>Subtitle: <em>"One owner console for content, images, theme, moderation, and launch review."</em></li>
+        <li><strong>Quick-link nav bar:</strong> Details · Images · Poster · Theme · Approval Page · Video &amp; Live · Video Opens · Visitors · View Public Page · Sign out</li>
+      </ul>
+
+      <h3>Dashboard Summary Rows</h3>
+      <p>At-a-glance cards (each with CTA button):</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Row</th>
+            <th>Shows</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Public Tribute</strong></td>
+            <td>Slug path <code>/{slug}</code></td>
+            <td>Open Public Page</td>
+          </tr>
+          <tr>
+            <td><strong>Moderation</strong></td>
+            <td>Total messages; pending/approved/rejected/deleted counts</td>
+            <td>Open Approval Page</td>
+          </tr>
+          <tr>
+            <td><strong>Visitors</strong></td>
+            <td>Page views, unique visitors, last visit timestamp</td>
+            <td>Jump to Visitors section</td>
+          </tr>
+          <tr>
+            <td><strong>Theme</strong></td>
+            <td>Active theme name + description</td>
+            <td>Jump to Theme section</td>
+          </tr>
+          <tr>
+            <td><strong>Media</strong></td>
+            <td>Video &amp; live stream summary; total video opens</td>
+            <td>Jump to Media section</td>
+          </tr>
+          <tr>
+            <td><strong>Video Opens</strong></td>
+            <td>Total opens, unique viewer matches</td>
+            <td>Jump to Video Opens stats</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Section: Page Builder / Details (<code>TributeBuilderForm</code>)</h3>
+      <p>Single long form — the core content editor. Grouped into cards:</p>
+
+      <h4>Core Identity</h4>
+      <ul>
+        <li>Name, honorific title, position, years, tagline, organizer name, theme dropdown (11 presets)</li>
+      </ul>
+
+      <h4>Launch State</h4>
+      <ul>
+        <li>Public route display, moderation reminder, Save Draft button, Open Public Page link</li>
+        <li>Note: formal "Publish" workflow is planned but not yet separate from Save Draft</li>
+      </ul>
+
+      <h4>Hero Portrait &amp; Background</h4>
+      <ul>
+        <li>Hero image URL + link to Images upload section</li>
+        <li>Background image URL + link to Images upload section</li>
+      </ul>
+
+      <h4>Condolence Popup</h4>
+      <ul>
+        <li>Toggle show/hide on public page</li>
+        <li>Upload condolence card image (PNG/JPEG/WebP)</li>
+        <li>Preview of current card</li>
+      </ul>
+
+      <h4>Countdown</h4>
+      <ul>
+        <li>Toggle show/hide</li>
+        <li>Burial date picker (Nigeria timezone countdown on public page)</li>
+      </ul>
+
+      <h4>Life Story</h4>
+      <ul>
+        <li>Multi-paragraph biography textarea</li>
+      </ul>
+
+      <h4>Timeline</h4>
+      <ul>
+        <li>Two modes: Simple text (paragraphs separated by blank lines) OR Milestone mode (year + title + story per entry, add/remove)</li>
+      </ul>
+
+      <h4>Public Section Visibility</h4>
+      <ul>
+        <li>Toggle chips + checkboxes: Photos ON/OFF, Poster ON/OFF, Videos ON/OFF, Live Stream ON/OFF</li>
+      </ul>
+
+      <h4>Gallery</h4>
+      <ul>
+        <li>Link to Images upload section</li>
+        <li>Gallery intro text, empty-state note</li>
+      </ul>
+
+      <h4>Service Poster</h4>
+      <ul>
+        <li>Upload poster image, preview, section title, optional note, delete</li>
+      </ul>
+
+      <h4>Videos (up to 3)</h4>
+      <ul>
+        <li>Per slot: file upload (MP4 with progress %), URL paste (YouTube/Vimeo/direct), description, placeholder thumbnail upload, "display this video on public page" checkbox, delete</li>
+        <li>Add/remove video slots (1–3)</li>
+        <li>Video section note</li>
+      </ul>
+
+      <h4>Live Stream</h4>
+      <ul>
+        <li>Stream URL (YouTube/Vimeo)</li>
+        <li>Display mode radio: embed video URL / display thumbnail URL / display uploaded image (mutually exclusive)</li>
+        <li>Thumbnail URL input OR file upload</li>
+        <li>Schedule note, delete stream</li>
+      </ul>
+
+      <h4>Special Tributes (Family cards)</h4>
+      <ul>
+        <li>Up to 8 contributor cards: label, name, message — add/remove</li>
+      </ul>
+
+      <h4>Support Section</h4>
+      <ul>
+        <li>Tribute card tier labels (5 slots, "featured" flag per tier)</li>
+        <li>Family contact email</li>
+        <li>Donation: account name, account number, bank name, phone/text line</li>
+        <li>Support note (shown on public page)</li>
+      </ul>
+
+      <h3>Section: Video Opens Analytics</h3>
+      <p>Per-video stat cards: total opens, unique viewers, last opened timestamp. Empty state when no videos configured.</p>
+
+      <h3>Section: Images (<code>GalleryDashboardManager</code>)</h3>
+      <p>Dedicated image management:</p>
+      <ul>
+        <li>Upload hero portrait</li>
+        <li>Upload background image</li>
+        <li>Upload gallery photos (multiple), reorder via drag, delete individual images</li>
+        <li>Previews of current images</li>
+      </ul>
+
+      <h3>Section: Visitors</h3>
+      <ul>
+        <li>Summary card: page views, unique visitors, last visit</li>
+        <li>Recent visits panel: session details with timing (limited to post-tracking-enablement sessions)</li>
+      </ul>
+
+      <h3>Section: Theme (<code>ThemeConsoleForm</code>)</h3>
+      <ul>
+        <li>Grid of 11 theme preset cards with live color preview</li>
+        <li>Select active theme + Apply button</li>
+        <li><strong>Theme rotation:</strong> enable/disable, interval presets (minutes/hours/24hr), multi-select themes for rotation pool (minimum 2)</li>
+      </ul>
+
+      <h3>Separate Page: Message Approval (<code>/console/{slug}/messages</code>)</h3>
+      <ul>
+        <li>Public message moderation queue: approve, reject, delete</li>
+        <li>Private family message submissions (separate queue)</li>
+        <li>Back to Console link, View Public Page link</li>
+      </ul>
+
+      <hr />
+
+      <h2>Functional Requirements (Do Not Break)</h2>
+      <p>Your redesign must preserve:</p>
+      <ol>
+        <li>All section toggle visibility (gallery, poster, videos, livestream, condolence popup, countdown)</li>
+        <li>Theme system with 11 presets + optional rotation on public page</li>
+        <li>Moderated message flow (submit → pending → approve → public feed)</li>
+        <li>Three support flows: tribute card, bank donation details, private family message</li>
+        <li>Video upload (direct file to cloud storage) AND URL embed (YouTube/Vimeo/MP4)</li>
+        <li>Livestream embed + thumbnail fallback modes</li>
+        <li>Countdown to burial date (Nigeria timezone)</li>
+        <li>Visit analytics and video open analytics in console</li>
+        <li>Image upload for hero, background, gallery, poster, condolence card, video thumbnails, livestream thumbnail</li>
+        <li>Mobile share, scroll-to-section navigation, modal overlays</li>
+        <li>Spam protection on public forms (Turnstile)</li>
+        <li>Auto condolence popup with reshow logic + message prompt toast timing</li>
+        <li>Service-date livestream prioritization (June 10–11)</li>
+        <li>Console auth gate (login required)</li>
+      </ol>
+
+      <hr />
+
+      <h2>Current Pain Points &amp; Design Opportunities</h2>
+      <p>Use these as redesign drivers — not bugs to ignore:</p>
+      <ol>
+        <li><strong>Two visual systems:</strong> Marketing landing (green/cream/Inter) vs tribute pages (ivory/gold/Iowan) vs console (tribute-themed dashboard). Feels like three different products. <strong>Unify into one BioTribute design system.</strong></li>
+        <li><strong>Console is one endless scroll.</strong> Dozens of form cards in a single page with anchor links. Consider tabbed navigation, sidebar IA, or stepped wizard — while keeping all fields accessible.</li>
+        <li><strong>Hero clutter.</strong> Countdown ring + donate badge + share icon + view count + theme swatches all orbit the portrait. Simplify visual hierarchy.</li>
+        <li><strong>Popup fatigue.</strong> Condolence auto-popup (20s), message toast (30s), and action bar compete for attention. Propose a respectful engagement model.</li>
+        <li><strong>Icon-only action bar.</strong> Share / Message / Support pills have no text labels — accessibility and clarity issue for older visitors.</li>
+        <li><strong>Theme swatches on public hero.</strong> Four colored dots expose internal theme tokens to visitors — likely debug UI that should be removed or replaced.</li>
+        <li><strong>Console ≠ consumer-grade.</strong> Form-heavy, developer-adjacent card layout. Family organizers under funeral stress need clearer progress, section completion states, and preview-what-you-edit.</li>
+        <li><strong>Footer hardcoded.</strong> "For Ogini's Family" / "Ogigrid" — should be dynamic per tribute.</li>
+        <li><strong>Publish vs Save Draft ambiguity.</strong> Launch State section mentions publishing as a future step. Design could introduce a clear Published/Draft status indicator.</li>
+        <li><strong>Moderation on separate page.</strong> Works functionally but breaks flow. Consider inline moderation panel or notification-driven review UX.</li>
+        <li><strong>Gallery complexity.</strong> Marquee, drag-scroll, lightbox, mobile native scroll — powerful but visually dense. Simplify the gallery presentation.</li>
+        <li><strong>Video memories open externally.</strong> Thumbnails link out to YouTube/new tab rather than inline player (except livestream). Decide if inline playback improves the experience.</li>
+      </ol>
+
+      <hr />
+
+      <h2>Deliverables Requested</h2>
+      <p>Please provide:</p>
+      <ol>
+        <li><strong>Design system overview</strong> — typography scale, color tokens (including 2–3 recommended default tribute themes), spacing, border radius, shadow language that unifies landing + tribute + console</li>
+        <li><strong>Public tribute page redesign</strong> — full-page mockup or section-by-section specs for <code>/SirFemiOgini</code> with all sections visible, plus mobile layout for funeral-day livestream viewing</li>
+        <li><strong>Owner console redesign</strong> — information architecture proposal (navigation model), dashboard summary, and key editor screens (details, images, media, theme, moderation)</li>
+        <li><strong>Component library highlights</strong> — hero, action bar, message cards, gallery strip, video tiles, livestream player, support section, modals/popups, form cards</li>
+        <li><strong>Engagement UX recommendation</strong> — how to handle condolence popup + message prompt + action bar without overwhelming grieving visitors</li>
+        <li><strong>Accessibility &amp; mobile notes</strong> — readable type sizes, touch targets, contrast on all 11 theme presets, especially Midnight and Evergreen dark-ish variants</li>
+      </ol>
+
+      <hr />
+
+      <h2>Constraints</h2>
+      <ul>
+        <li><strong>Preserve all functionality</strong> listed above — this is a visual/UX redesign, not a feature cut</li>
+        <li><strong>Memorial-appropriate tone</strong> always — no gamification, no bright social UI patterns, no aggressive CTAs</li>
+        <li><strong>Works for Nigerian/African funeral context</strong> — bank transfer donations (not Stripe checkout), Nigeria-time countdown, large extended-family audience, mobile-first at venue</li>
+        <li><strong>Theme presets must remain swappable</strong> — your design system should define how each of the 11 palettes maps to your new tokens</li>
+        <li>Reference tribute: <strong>Sir Femi Ogini, 1947–2026</strong>, with livestream, countdown to June 11 2026 burial, videos, gallery, service poster, and Eco Bank donation details</li>
+      </ul>
+
+      <p class="tagline"><em>BioTribute — helping families preserve stories, photos, videos, prayers, and memories in one beautiful, lasting place.</em></p>
+    </article>
+  </div>
+</body>
+</html>

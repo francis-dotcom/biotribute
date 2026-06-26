@@ -101,6 +101,11 @@ export type TributeRecord = {
   heroCountdownTargetDate?: string;
   heroCountdownUnit?: string;
   supportNote?: string;
+  /**
+   * When true, the tribute appears in site search. When false, only people with the direct link
+   * can open the page. Legacy rows without this field are treated as public.
+   */
+  isPublic?: boolean;
   /** When true, public page cycles through `themeRotationThemeIds` on an interval. Stored in support-note metadata. */
   themeRotationEnabled?: boolean;
   themeRotationIntervalMinutes?: number;
@@ -110,6 +115,7 @@ export type TributeRecord = {
 export const tributes: TributeRecord[] = [
   {
     slug: "SirFemiOgini",
+    isPublic: true,
     name: "Sir FEmi FRancis OGini",
     years: "1965 - 2024",
     tagline: "Beloved Father, Mentor, and Friend",

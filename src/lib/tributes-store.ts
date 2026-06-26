@@ -107,6 +107,7 @@ export type TributeBuilderInput = {
   themeRotationEnabled?: boolean;
   themeRotationIntervalMinutes?: number;
   themeRotationThemeIds?: TributeTheme[];
+  isPublic?: boolean;
 };
 
 export function isTributeStoreConfigured() {
@@ -289,6 +290,7 @@ type SupportNoteMetadata = {
   themeRotationEnabled?: boolean;
   themeRotationIntervalMinutes?: number;
   themeRotationThemeIds?: TributeTheme[];
+  isPublic?: boolean;
 };
 
 const VISIBILITY_MARKER = "<!--biotribute:visibility:";
@@ -430,6 +432,7 @@ function parseSupportNoteMetadata(value: string | null) {
       themeRotationThemeIds: Array.isArray(parsed.themeRotationThemeIds)
         ? normalizeRotationThemeIds(parsed.themeRotationThemeIds as string[])
         : undefined,
+      isPublic: typeof parsed.isPublic === "boolean" ? parsed.isPublic : undefined,
     };
   } catch {
     return null;
@@ -442,6 +445,29 @@ function withVisibilityInSupportNote(note: string | undefined, metadata: Support
   return `${cleanNote}
 
 ${VISIBILITY_MARKER}${encoded}${VISIBILITY_SUFFIX}`;
+}
+
+/** Legacy tributes without metadata default to public so existing pages stay searchable. */
+export function isTributeSearchable(supportNote: string | null | undefined) {
+  const metadata = parseSupportNoteMetadata(supportNote ?? null);
+  if (typeof metadata?.isPublic === "boolean") {
+    return metadata.isPublic;
+  }
+  return true;
+}
+
+function resolveTributeIsPublic(
+  supportNote: string | null | undefined,
+  fallback?: TributeRecord | null,
+) {
+  const metadata = parseSupportNoteMetadata(supportNote ?? null);
+  if (typeof metadata?.isPublic === "boolean") {
+    return metadata.isPublic;
+  }
+  if (typeof fallback?.isPublic === "boolean") {
+    return fallback.isPublic;
+  }
+  return true;
 }
 
 export async function getTributeOwnedByUser(userId: string): Promise<TributeSummary | null> {
@@ -648,6 +674,7 @@ export async function getTributeRecord(slug: string): Promise<TributeRecord | nu
     themeRotationEnabled: supportNoteMetadata?.themeRotationEnabled ?? false,
     themeRotationIntervalMinutes: supportNoteMetadata?.themeRotationIntervalMinutes ?? 1440,
     themeRotationThemeIds: normalizeRotationThemeIds(supportNoteMetadata?.themeRotationThemeIds),
+    isPublic: resolveTributeIsPublic(tributeRow.support_note, fallback),
     supportNote:
       tributeRow.support_note === null
         ? fallback?.supportNote
@@ -726,6 +753,7 @@ export async function saveTributeRecord(input: TributeBuilderInput) {
     themeRotationThemeIds: normalizeRotationThemeIds(
       input.themeRotationThemeIds ?? existingMeta?.themeRotationThemeIds,
     ),
+    isPublic: input.isPublic ?? existingMeta?.isPublic ?? false,
   };
 
   const supportNoteWithVisibility = withVisibilityInSupportNote(input.supportNote, supportNoteMetadata);
@@ -928,4 +956,65 @@ export async function updateTributeTheme(input: { slug: string; theme: TributeTh
   if (!data?.slug) {
     throw new Error("Tribute not found.");
   }
+}
+
+export type TributeSearchResult = {
+  slug: string;
+  name: string;
+  years: string;
+};
+
+function escapeIlikePattern(value: string) {
+  return value.replace(/[%_\\]/g, "\\$&");
+}
+
+export async function searchPublicTributes(query: string): Promise<TributeSearchResult[]> {
+  const trimmed = query.trim();
+  if (trimmed.length < 2) {
+    return [];
+  }
+
+  const normalizedQuery = trimmed.toLowerCase();
+
+  if (!isSupabaseConfigured()) {
+    return tributes
+      .filter((tribute) => tribute.isPublic !== false)
+      .filter(
+        (tribute) =>
+          tribute.name.toLowerCase().includes(normalizedQuery) ||
+          tribute.slug.toLowerCase().includes(normalizedQuery),
+      )
+      .slice(0, 12)
+      .map((tribute) => ({
+        slug: tribute.slug,
+        name: tribute.name,
+        years: tribute.years,
+      }));
+  }
+
+  const supabase = getSupabaseAdmin();
+  if (!supabase) {
+    return [];
+  }
+
+  const pattern = `%${escapeIlikePattern(trimmed)}%`;
+  const { data, error } = await supabase
+    .from("tributes")
+    .select("slug, name, years, support_note")
+    .or(`name.ilike.${pattern},slug.ilike.${pattern}`)
+    .order("name", { ascending: true })
+    .limit(40);
+
+  if (error || !data) {
+    return [];
+  }
+
+  return data
+    .filter((row) => isTributeSearchable(row.support_note as string | null))
+    .slice(0, 12)
+    .map((row) => ({
+      slug: String(row.slug),
+      name: String(row.name),
+      years: String(row.years ?? ""),
+    }));
 }

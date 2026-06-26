@@ -72,6 +72,7 @@ const fullTributeSchema = z.object({
   showGallerySection: z.boolean().optional(),
   showVideoSection: z.boolean().optional(),
   showLivestreamSection: z.boolean().optional(),
+  isPublic: z.boolean().optional(),
   themeRotationEnabled: z.boolean().optional(),
   themeRotationIntervalMinutes: z.number().int().min(1).max(10080).optional(),
   themeRotationThemeIds: z.array(z.enum(TRIBUTE_THEME_IDS)).optional(),

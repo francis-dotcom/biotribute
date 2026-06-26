@@ -90,6 +90,7 @@ export function TributeBuilderForm({
   const [showLivestreamSection, setShowLivestreamSection] = useState(
     tribute.showLivestreamSection
   );
+  const [isPublic, setIsPublic] = useState(tribute.isPublic ?? true);
   const [heroImageUrl, setHeroImageUrl] = useState(tribute.heroImageUrl ?? "");
   const [backgroundImageUrl, setBackgroundImageUrl] = useState(tribute.backgroundImageUrl ?? "");
   const [servicePosterImageUrl, setServicePosterImageUrl] = useState(
@@ -350,6 +351,7 @@ export function TributeBuilderForm({
       showServicePosterSection,
       showVideoSection,
       showLivestreamSection,
+      isPublic,
       timeline:
         timelineMode === "text"
           ? parseTimelineText(timelineText)
@@ -855,6 +857,35 @@ export function TributeBuilderForm({
               Messages remain moderated even after the page is public.
             </div>
           </div>
+          <fieldset className="field-block builder-visibility-fieldset">
+            <legend>Page visibility</legend>
+            <p className="subtle-note">
+              Public tributes appear in site search. Private tributes stay hidden from search but
+              anyone with the link can still open the page.
+            </p>
+            <label className="field-block builder-radio">
+              <input
+                name="isPublic"
+                type="radio"
+                checked={isPublic}
+                onChange={() => setIsPublic(true)}
+              />
+              <span>
+                <strong>Public</strong> — listed in search and open to visitors who find the page.
+              </span>
+            </label>
+            <label className="field-block builder-radio">
+              <input
+                name="isPublic"
+                type="radio"
+                checked={!isPublic}
+                onChange={() => setIsPublic(false)}
+              />
+              <span>
+                <strong>Private</strong> — only people with the link can view; hidden from search.
+              </span>
+            </label>
+          </fieldset>
           <div className="builder-actions">
             <button className="button-primary button-save-draft" type="submit" disabled={pending}>
               {pending ? "Saving..." : "Save Draft"}

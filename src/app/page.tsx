@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { CSSProperties } from "react";
 import { LandingAuthCard } from "@/components/landing-auth-card";
+import { TributeSearch } from "@/components/tribute-search";
 import { isUserAuthConfigured } from "@/lib/supabase-server";
 
 type HomePageProps = {
@@ -117,6 +118,7 @@ function Navbar() {
         </span>
         <span>BioTribute</span>
       </Link>
+      <TributeSearch />
       <nav className="bt-links" aria-label="Landing page">
         <a href="#how-it-works">How it works</a>
         <a href="#examples">Examples</a>
